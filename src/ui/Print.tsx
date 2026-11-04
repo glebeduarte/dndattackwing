@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { PRINT_SLOT_ABBR } from '../engine/engine';
 import { useStore } from '../store';
 
@@ -12,9 +13,9 @@ interface Player {
 const KEY = 'aw:player';
 const readPlayer = (): Player => {
   try {
-    return { name: '', email: '', event: '', ...JSON.parse(localStorage.getItem(KEY) || '{}'), date: new Date().toISOString().slice(0, 10) };
+    return { name: '', email: '', event: '', ...JSON.parse(localStorage.getItem(KEY) || '{}'), date: new Date().toLocaleDateString('sv-SE') };
   } catch {
-    return { name: '', email: '', event: '', date: new Date().toISOString().slice(0, 10) };
+    return { name: '', email: '', event: '', date: new Date().toLocaleDateString('sv-SE') };
   }
 };
 
@@ -74,7 +75,8 @@ export function PrintSheet() {
   }, []);
   const arts = legion.legionArtifacts();
 
-  return (
+  // Vai direto no body: a moldura do app inteira é escondida na impressão.
+  return createPortal(
     <div className="print-sheet" aria-hidden>
       <header>
         <h1>{name}</h1>
@@ -102,7 +104,8 @@ export function PrintSheet() {
           <tr><td /><td colSpan={3}><strong>Total da legião</strong> · {legion.totalCards()} cartas</td><td className="num"><strong>{legion.totalCost()}</strong></td></tr>
         </tfoot>
       </table>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

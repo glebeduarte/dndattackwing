@@ -630,7 +630,8 @@ button.icon-btn-sm { display: inline-grid; place-items: center; }
 .print-sheet { display: none; }
 @media print {
   @page { margin: 14mm; }
-  body { background: #fff; }
+  html, body { height: auto; background: #fff; }
+  #root { display: none !important; }
   .frame, .pane-bar, .toast-zone, dialog { display: none !important; }
   .print-sheet { display: block; font: 11pt/1.4 var(--font); color: #000; }
   .print-sheet h1 { font-size: 18pt; }
