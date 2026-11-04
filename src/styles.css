@@ -1158,3 +1158,34 @@ button.icon-btn-sm { display: inline-grid; place-items: center; }
 .card-lang button.is-on { background: var(--seal); color: #fff; }
 .card-photo-tr { background: var(--raised); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
 .card-photo-tr-title { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+
+/* ---------- trilha da campanha ---------- */
+.trail { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; }
+.trail-stage { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 18px; position: relative; padding-bottom: 32px; }
+.trail-stage::before { content: ""; position: absolute; left: 21px; top: 44px; bottom: 0; width: 2px; background: repeating-linear-gradient(var(--gold, #b9a57b) 0 6px, transparent 6px 12px); }
+.trail-stage:last-child::before { display: none; }
+.trail-marker span { width: 44px; height: 44px; border-radius: 50%; background: var(--seal); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 18px; box-shadow: inset 0 0 0 3px #b5493c; }
+.trail-body { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.trail-wave { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+.trail-head h3 { font-size: 21px; letter-spacing: -0.01em; margin-bottom: 6px; }
+.trail-head > p:last-child { font-size: 15px; line-height: 23px; max-width: 58em; }
+.trail-row { display: flex; gap: 0; overflow-x: auto; padding: 2px 2px 10px; scroll-snap-type: x proximity; }
+.trail-cell { display: flex; align-items: center; flex: 0 0 auto; scroll-snap-align: start; }
+.trail-arrow { color: var(--seal); font-size: 20px; padding: 0 8px; }
+.trail-card { width: 196px; display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; background: var(--surface, #fff); border: 1px solid var(--control); color: inherit; text-decoration: none; transition: transform .18s ease, border-color .18s ease; }
+a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
+.trail-card.is-pending { opacity: .72; border-style: dashed; }
+.trail-art { width: 100%; height: 120px; object-fit: cover; display: block; background: var(--leather, #1d1815); }
+.trail-art-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--frame-muted, #cfc5ba); font-size: 12px; text-align: center; padding: 0 10px; }
+.trail-card-copy { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
+.trail-code { font-size: 12px; font-weight: 600; color: var(--seal); }
+.trail-card-copy strong { font-size: 15px; line-height: 19px; }
+.trail-orig { font-size: 12px; font-style: italic; color: var(--muted); }
+.trail-hook { font-size: 13px; line-height: 18px; margin-top: 4px; }
+.trail-wait { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+@media (max-width: 640px) {
+  .trail-stage { grid-template-columns: 30px minmax(0, 1fr); gap: 12px; }
+  .trail-marker span { width: 30px; height: 30px; font-size: 14px; }
+  .trail-stage::before { left: 14px; top: 30px; }
+  .trail-card { width: 168px; }
+}

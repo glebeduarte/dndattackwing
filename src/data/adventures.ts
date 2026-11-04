@@ -1106,3 +1106,71 @@ export const campaignBySlug = (slug?: string) => CAMPAIGNS.find((c) => c.slug ==
 export const campaignChapters = (slug: string) =>
   ADVENTURES.filter((a) => a.campaign === slug).sort((a, b) => (a.chapter ?? 0) - (b.chapter ?? 0));
 export const standaloneAdventures = () => ADVENTURES.filter((a) => !a.campaign);
+
+/* ---------- trilha da campanha: etapas e como cada capítulo leva ao seguinte ---------- */
+
+export interface Stage {
+  id: string;
+  title: string;
+  wave: string;
+  summary: string;
+  codes: string[];
+}
+
+export const STAGES: Record<string, Stage[]> = {
+  'cemiterio-primordial': [
+    {
+      id: 'inicio', title: 'A rixa dos dragões', wave: 'Caixa básica',
+      summary: 'Tudo começa com uma briga entre vizinhos. Eshaedra e Galadaeros invadem o covil de Balagos, e o vermelho cobra a dívida numa emboscada. No fim, a anciã Quelindritar conta a Galadaeros que servos de Tiamat procuram o Cemitério Primordial e dá a ele a missão de chegar primeiro.',
+      codes: ['1', '2'],
+    },
+    {
+      id: 'onda1', title: 'As pistas de Luminos', wave: 'Onda 1',
+      summary: 'Os dois lados saem atrás de pistas. O Tomo de Nomes leva ao Baronato Inferior, onde Lorde Maximilian lembra que esculpiu um monumento a Luminos V, o Guardião do Cemitério. A avalanche de Hörn revela esse monumento nas Montanhas Nether, a canção dos anões liga Luminos a uma corrente que ancora um reino nas nuvens, e os Zhentarim e Rezmir descobrem que essa corrente, a Agulha da Corrente, fica nas Ilhas Moonshae. No meio disso, Nymmestra se alia a Galadaeros.',
+      codes: ['3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7'],
+    },
+    {
+      id: 'onda2', title: 'As Chaves e a Agulha', wave: 'Onda 2',
+      summary: 'A fortaleza de Luminos tem três portões, e cada um só abre com uma Chave mística. Os dois lados disputam as Chaves: a dos aarakocras no Abismo Uivante, a capa de sombras de Umberlis e a varinha escondida nos olhos da estátua. Pela luneta da estátua, alguém finalmente vê a Agulha da Corrente, sob uma tempestade eterna numa ilha das Moonshae.',
+      codes: ['4.1', '4.2', '4.3'],
+    },
+    {
+      id: 'onda3', title: 'Atravessar a tempestade', wave: 'Onda 3',
+      summary: 'Com as Chaves na mão, ninguém consegue passar pela tempestade que protege o palácio. O livro que Legunt carregava aponta a rainha harpia Sycorax, exilada da Ilha da Tempestade, como a única que conhece o caminho. O ritual dela abre um portal para o olho do temporal.',
+      codes: ['5.1', '5.2', '5.3'],
+    },
+    {
+      id: 'onda4', title: 'Os três portões', wave: 'Onda 4',
+      summary: 'Dentro da tempestade, cada Chave abre um portão da fortaleza externa de Luminos: o Portão Pulsante, o Portão da Ventania e o Portão Sussurrante. Cada capítulo é a batalha por um deles.',
+      codes: ['6.1', '6.2', '6.3'],
+    },
+    {
+      id: 'onda5', title: 'O salão de Luminos', wave: 'Onda 5',
+      summary: 'O fim da campanha: a luta corpo a corpo nos corredores, o Salão de Luminos, o Poderoso, e a batalha final, em que os Talismãs do Mal Supremo e do Bem Puro decidem quem fica com as relíquias do Cemitério Primordial.',
+      codes: ['7.1', '7.2', '7.3'],
+    },
+  ],
+};
+
+/* O que cada capítulo revela ou entrega para o capítulo seguinte. */
+export const CHAPTER_HOOKS: Record<string, string> = {
+  '1': 'Balagos descobre quem invadiu o covil.',
+  '2': 'Galadaeros recebe a missão de achar o Cemitério Primordial.',
+  '3.1': 'O Tomo de Nomes cita o "Baronato Inferior".',
+  '3.2': 'Maximilian revela Luminos V, o Guardião do Cemitério.',
+  '3.3': 'Nymmestra se alia a Galadaeros.',
+  '3.4': 'A avalanche descobre o monumento a Luminos.',
+  '3.5': 'A canção dos anões: a corrente ancora o reino de Luminos.',
+  '3.6': 'A Agulha da Corrente fica nas Ilhas Moonshae.',
+  '3.7': 'Rezmir sabe de tudo, mas não achou a Agulha.',
+  '4.1': 'Primeira Chave: o fragmento dos aarakocras.',
+  '4.2': 'Inky, a capa de Umberlis, também é uma chave.',
+  '4.3': 'A luneta da estátua mostra onde está a Agulha.',
+  '5.1': 'O livro de Legunt aponta a rainha Sycorax.',
+  '5.2': 'Uma moeda abre o portal para o olho da tempestade.',
+};
+
+/* Criatura que representa cada capítulo das expansões (para a imagem da trilha). */
+export const CHAPTER_CREATURE: Record<string, number> = {
+  '5.3': 2101, '6.1': 2301, '6.2': 2401, '6.3': 2501, '7.1': 2701, '7.2': 2801, '7.3': 2901,
+};

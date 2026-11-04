@@ -4,6 +4,7 @@ import { CAMPAIGNS, CAMPAIGN_RULES, adventureBySlug, campaignBySlug, campaignCha
 import { Legion } from '../engine/engine';
 import { catalog, useStore } from '../store';
 import { Shell } from '../ui/Shell';
+import { CampaignTrail } from './CampaignTrail';
 
 const MANUAL = '/manual/attack-wing-livro-de-regras.pdf';
 
@@ -97,41 +98,7 @@ export function AdventuresPage() {
                 <p>{c.summary}</p>
               </div>
             </header>
-            <div className="adv-list">
-              {campaignChapters(c.slug).map((a) => <AdventureItem key={a.slug} a={a} label={`Capítulo ${a.chapter}`} />)}
-            </div>
-            {c.planned && c.planned.length > 0 && (
-              <div className="adv-planned">
-                <div className="adv-planned-head">
-                  <h3>Capítulos das expansões</h3>
-                  {c.pending && <p>{c.pending}</p>}
-                </div>
-                {[...new Set(c.planned.map((p) => p.wave))].map((w) => (
-                  <div key={w} className="adv-wave">
-                    <h4>{w}</h4>
-                    <ol>
-                      {c.planned!.filter((p) => p.wave === w).map((p) => (
-                        <li key={p.code} className="adv-pl">
-                          <span className="adv-pl-code">{p.code}</span>
-                          <div className="adv-pl-body">
-                            <strong>{p.title}</strong>
-                            <span className="adv-pl-exp">Expansão {p.expansion}</span>
-                            {p.premise && <p>{p.premise}</p>}
-                            <span className="adv-pl-art">
-                              Artefato de Campanha:{' '}
-                              {p.artifacts.map((a, i) => (
-                                <span key={a.uid}>{i > 0 ? ' ou ' : ''}<Link to={`/card/upgrade/${a.uid}`}>{a.name}</Link></span>
-                              ))}
-                            </span>
-                          </div>
-                          <span className="adv-pl-status">Aguardando o texto</span>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                ))}
-              </div>
-            )}
+            <CampaignTrail campaign={c} />
           </section>
         ))}
 
