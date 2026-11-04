@@ -40,7 +40,7 @@ export function CampaignTrail({ campaign }: { campaign: Campaign }) {
     if (a) {
       return {
         code, title: a.title, original: a.original, slug: a.slug,
-        creatureUid: a.sides.find((s) => s.creatureUid)?.creatureUid,
+        creatureUid: CHAPTER_CREATURE[code] ?? a.sides.find((s) => s.creatureUid)?.creatureUid,
         hook: CHAPTER_HOOKS[code],
       };
     }

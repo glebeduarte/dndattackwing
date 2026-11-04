@@ -1172,5 +1172,5 @@ export const CHAPTER_HOOKS: Record<string, string> = {
 
 /* Criatura que representa cada capítulo das expansões (para a imagem da trilha). */
 export const CHAPTER_CREATURE: Record<string, number> = {
-  '5.3': 2101, '6.1': 2301, '6.2': 2401, '6.3': 2501, '7.1': 2701, '7.2': 2801, '7.3': 2901,
+  '3.3': 701, '3.6': 501, '3.7': 602, '4.1': 1002, '5.3': 2101, '6.1': 2301, '6.2': 2401, '6.3': 2501, '7.1': 2701, '7.2': 2801, '7.3': 2901,
 };
