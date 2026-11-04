@@ -34,6 +34,9 @@ export function Shell({ children, topbar }: { children: ReactNode; topbar?: Reac
         <NavLink to="/gerador" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
           <NavIcon d="M12 3v3m0 12v3M3 12h3m12 0h3M6 6l2 2m8 8 2 2M6 18l2-2m8-8 2-2" /> Gerador de legião
         </NavLink>
+        <a className="nav-item" href="/manual/attack-wing-livro-de-regras.pdf" download>
+          <NavIcon d="M6 3h9l4 4v14H6Zm9 0v4h4M12 10v7m-3-3 3 3 3-3" /> Livro de regras (PDF)
+        </a>
         <NavLink to="/legioes" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
           <NavIcon d="M5 4h14v16l-7-4-7 4Z" /> Legiões salvas
           {saved.length > 0 && <span className="nav-count num">{saved.length}</span>}

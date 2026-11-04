@@ -182,7 +182,7 @@ export function Generator() {
                 <li>Um artefato por legião, salvo cartas que liberam mais.</li>
                 <li>Alinhamentos podem ser misturados. Quem gasta menos pontos decide a iniciativa.</li>
               </ul>
-              <p className="muted">Livro de regras de D&D Attack Wing, Construção de Legiões, páginas 28 e 29.</p>
+              <p className="muted">Livro de regras de D&D Attack Wing, Construção de Legiões, páginas 28 e 29. <a className="text-link" href="/manual/attack-wing-livro-de-regras.pdf" target="_blank" rel="noopener">Abrir o livro</a></p>
             </div>
           )}
           {busy && <p className="gen-busy">Testando dezenas de combinações…</p>}

@@ -131,6 +131,19 @@
 .h-slots img { border-radius: 6px; flex: none; }
 .h-slots strong { color: var(--h-ink); display: block; }
 
+/* manual */
+.h-manual {
+  display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(32px, 6vw, 96px); align-items: center;
+  padding: clamp(72px, 10vw, 150px) var(--h-pad);
+  background: #f4efe9;
+}
+.h-manual-cover { display: block; justify-self: center; width: min(340px, 100%); }
+.h-manual-cover img { width: 100%; height: auto; border-radius: 6px; transform: rotate(-3deg); transition: transform .3s ease; }
+.h-manual-cover:hover img { transform: rotate(0deg) translateY(-6px); }
+.h-manual-copy { display: flex; flex-direction: column; gap: 20px; max-width: 34em; }
+.h-link-dark { color: var(--h-ink); }
+.h-manual-meta { font-size: 15px; color: var(--h-muted); }
+
 /* convite */
 .h-invite {
   position: relative; overflow: hidden;
@@ -224,7 +237,8 @@
   .h-hero { min-height: 88vh; }
   .h-hero-art { object-position: 22% 30%; }
   .h-hero::after { background: linear-gradient(0deg, rgba(8, 12, 15, .9) 0%, rgba(8, 12, 15, .6) 55%, rgba(8, 12, 15, .15) 100%); }
-  .h-game, .h-memory, .h-upgrades { grid-template-columns: 1fr; }
+  .h-game, .h-memory, .h-upgrades, .h-manual { grid-template-columns: 1fr; }
+  .h-manual-cover { width: min(240px, 70%); }
   .h-anatomy { grid-template-columns: 1fr 1fr; gap: 20px; }
   .h-fan { min-height: 260px; }
   .h-fan img { width: 30vw; margin: 0 -5vw; }
