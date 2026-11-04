@@ -1841,6 +1841,9 @@ export const CHAPTER_COVER: Record<string, string> = {
   '6.1': 'pacatus',
   '6.2': 'malebolge',
   '6.3': 'ancoram',
+  '7.1': 'drizzt',
+  '7.2': 'eyruaad',
+  '7.3': 'maurghoros',
 };
 export const coverFor = (chapter?: number | string) => {
   const name = chapter !== undefined ? CHAPTER_COVER[String(chapter)] : undefined;
