@@ -1775,7 +1775,13 @@ export const CHAPTER_CREATURE: Record<string, number> = {
 export const CHAPTER_COVER: Record<string, string> = {
   '1': 'galadaeros',
   '2': 'balagos',
+  '3.1': 'claugiyliamatar',
+  '3.2': 'maximilian',
+  '3.3': 'nymmestra',
+  '3.4': 'jarl-horn',
   '3.5': 'balagos',
+  '3.6': 'zhentarim',
+  '3.7': 'harper-elfo',
 };
 export const coverFor = (chapter?: number | string) => {
   const name = chapter !== undefined ? CHAPTER_COVER[String(chapter)] : undefined;
