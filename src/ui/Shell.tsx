@@ -43,6 +43,9 @@ export function Shell({ children, topbar }: { children: ReactNode; topbar?: Reac
         <a className="nav-item" href="/manual/attack-wing-livro-de-regras.pdf" download>
           <NavIcon d="M6 3h9l4 4v14H6Zm9 0v4h4M12 10v7m-3-3 3 3 3-3" /> Livro de regras (PDF)
         </a>
+        <NavLink to="/leitor" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
+          <NavIcon d="M4 8h3l2-3h6l2 3h3v11H4Zm8 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" /> Leitor de cartas
+        </NavLink>
         <NavLink to="/legioes" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
           <NavIcon d="M5 4h14v16l-7-4-7 4Z" /> Legiões salvas
           {saved.length > 0 && <span className="nav-count num">{saved.length}</span>}

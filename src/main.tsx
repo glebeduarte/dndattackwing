@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { StoreProvider } from './store';
 import { Builder } from './pages/Builder';
 import { Home } from './pages/Home';
+import { CardReaderPage } from './pages/CardReader';
 import { RulesPage } from './pages/rules/Rules';
 import { Generator } from './pages/Generator';
 import { AdventurePage, AdventuresPage } from './pages/Adventures';
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/creatures" element={<Builder />} />
           <Route path="/upgrades" element={<Builder />} />
           <Route path="/gerador" element={<Generator />} />
+          <Route path="/leitor" element={<CardReaderPage />} />
           <Route path="/regras" element={<RulesPage />} />
           <Route path="/aventuras" element={<AdventuresPage />} />
           <Route path="/aventuras/:slug" element={<AdventurePage />} />

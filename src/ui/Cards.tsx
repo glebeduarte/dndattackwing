@@ -1,4 +1,6 @@
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { useCardImage, type CardKind } from '../cardImages';
 import { Upgrade } from '../engine/engine';
 import type { CreatureData, UpgradeData } from '../engine/types';
 import { useStore } from '../store';
@@ -25,6 +27,35 @@ function LevelBadge({ value, plus }: { value: number; plus?: boolean }) {
   );
 }
 
+/* Mostra a foto da carta original quando existe, com opção de ver a ficha do sistema. */
+function CardFace({ kind, uid, name, children }: { kind: CardKind; uid: number; name: string; children: ReactNode }) {
+  const url = useCardImage(kind, uid);
+  const [view, setView] = useState<'original' | 'sistema'>('original');
+  if (!url) {
+    return (
+      <>
+        {children}
+        <Link className="card-photo-link" to={`/leitor?tipo=${kind}&uid=${uid}`}>Adicionar foto da carta original</Link>
+      </>
+    );
+  }
+  return (
+    <>
+      <div className="card-view" role="tablist" aria-label="Versão da carta">
+        <button role="tab" aria-selected={view === 'original'} className={view === 'original' ? 'is-on' : ''} onClick={() => setView('original')}>Carta original</button>
+        <button role="tab" aria-selected={view === 'sistema'} className={view === 'sistema' ? 'is-on' : ''} onClick={() => setView('sistema')}>Ficha do sistema</button>
+      </div>
+      {view === 'original' ? (
+        <figure className="card-photo">
+          <img src={url} alt={`Carta original de ${name}`} />
+        </figure>
+      ) : (
+        children
+      )}
+    </>
+  );
+}
+
 const STAT_DEFS = [
   ['pwv', 'attack', 'Arma primária'],
   ['agility', 'agility', 'Agilidade'],
@@ -36,6 +67,7 @@ export function CreatureCard({ data, full = false }: { data: CreatureData; full?
   const elements = [data.element, ...(data.elements ?? [])].filter(Boolean) as string[];
   return (
     <div className={`card-wrap${full ? ' is-full' : ''}`}>
+      <CardFace kind="creature" uid={data.uid} name={data.name}>
       <article className="gcard gcard-creature" aria-label={`Carta ${data.name}`}>
         <div className="gc-rail">
           <CostSeal value={data.cost} unique={data.unique} />
@@ -90,6 +122,7 @@ export function CreatureCard({ data, full = false }: { data: CreatureData; full?
           </p>
         </div>
       </article>
+      </CardFace>
 
       <div className="dials">
         <ManeuverDial grid={data.movement?.flight} label="Voo" />
@@ -116,6 +149,7 @@ export function UpgradeCard({ data, full = false }: { data: UpgradeData; full?: 
 
   return (
     <div className={`card-wrap${full ? ' is-full' : ''}`}>
+      <CardFace kind="upgrade" uid={data.uid} name={data.name}>
       <article className={`gcard gcard-upgrade slot-${data.upgrade.toLowerCase()}`} aria-label={`Carta ${data.name}`}>
         <div className="gu-art">
           <CostSeal value={data.cost} unique={data.unique} />
@@ -143,6 +177,7 @@ export function UpgradeCard({ data, full = false }: { data: UpgradeData; full?: 
           {data.dts ? ` · ${data.dts} marcadores` : ''} · {data.set}
         </p>
       </article>
+      </CardFace>
       {!full && <LegionFit data={data} />}
       {!full && <Link className="text-link" to={`/card/upgrade/${data.uid}`}>Abrir página da carta</Link>}
     </div>
