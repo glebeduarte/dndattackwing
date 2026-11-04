@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ADVENTURES, CAMPAIGN_RULES, adventureBySlug, type Adventure, type MapSpec } from '../data/adventures';
+import { CAMPAIGNS, CAMPAIGN_RULES, adventureBySlug, campaignBySlug, campaignChapters, standaloneAdventures, type Adventure, type MapSpec } from '../data/adventures';
 import { Legion } from '../engine/engine';
 import { catalog, useStore } from '../store';
 import { Shell } from '../ui/Shell';
@@ -23,6 +23,7 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
           />
         )}
         {wall?.edge === 'W' && <line x1="0" y1="0" x2="0" y2="90" stroke={wall.color} strokeWidth="2.2" />}
+        {wall?.edge === 'N' && <line x1="0" y1="0" x2="90" y2="0" stroke={wall.color} strokeWidth="2.2" />}
         {map.areas.map((a) => (
           <g key={a.side}>
             <rect x={a.x} y={a.y} width={a.w} height={a.h} fill={color(a.side)} opacity="0.9" />
@@ -54,6 +55,23 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
   );
 }
 
+function AdventureItem({ a, label }: { a: Adventure; label: string }) {
+  return (
+    <Link to={`/aventuras/${a.slug}`} className="adv-item">
+      <span className="adv-num">{a.chapter ?? <img src="/brand-dragon-light.png" width={26} height={26} alt="" />}</span>
+      <div className="adv-item-copy">
+        <h3>{a.title}</h3>
+        <p className="adv-orig">{label} · {a.original}</p>
+        <p>{a.theme ?? a.synopsis[0]}</p>
+        <p className="adv-meta">
+          {a.players} jogadores · {a.sides.map((s) => `${s.name} ${s.points} pts`).join(' · ')}
+        </p>
+      </div>
+      <span className="adv-go" aria-hidden>→</span>
+    </Link>
+  );
+}
+
 export function AdventuresPage() {
   useEffect(() => {
     document.title = 'Aventuras · Attack Wing';
@@ -69,24 +87,36 @@ export function AdventuresPage() {
           </div>
         </header>
 
-        <section className="adv-list" aria-label="Aventuras disponíveis">
-          {ADVENTURES.map((a) => (
-            <Link key={a.slug} to={`/aventuras/${a.slug}`} className="adv-item">
-              <span className="adv-num">{a.number}</span>
-              <div className="adv-item-copy">
-                <h2>{a.title}</h2>
-                <p className="adv-orig">{a.original}</p>
-                <p>{a.synopsis[0]}</p>
-                <p className="adv-meta">
-                  {a.players} jogadores · {a.sides.map((s) => `${s.name} ${s.points} pts`).join(' · ')}
-                </p>
+        {CAMPAIGNS.map((c) => (
+          <section key={c.slug} className="adv-camp-group" aria-labelledby={`camp-${c.slug}`}>
+            <header className="adv-camp-head">
+              <div>
+                <h2 id={`camp-${c.slug}`}>Campanha: {c.title}</h2>
+                <p className="adv-orig">{c.original} · {c.source} · {c.status}</p>
+                <p>{c.summary}</p>
               </div>
-              <span className="adv-go" aria-hidden>→</span>
-            </Link>
-          ))}
-          <div className="adv-soon">
-            <h2>Novas aventuras</h2>
-            <p>As próximas aventuras do portal entram aqui, no mesmo formato: preparação, regras especiais, objetivos e recompensas para a campanha.</p>
+            </header>
+            <div className="adv-list">
+              {campaignChapters(c.slug).map((a) => <AdventureItem key={a.slug} a={a} label={`Capítulo ${a.chapter}`} />)}
+              {c.pending && (
+                <div className="adv-soon">
+                  <h3>Próximos capítulos</h3>
+                  <p>{c.pending}</p>
+                </div>
+              )}
+            </div>
+          </section>
+        ))}
+
+        <section className="adv-camp-group" aria-labelledby="avulsas">
+          <header className="adv-camp-head">
+            <div>
+              <h2 id="avulsas">Aventuras do portal</h2>
+              <p>Aventuras novas, criadas aqui com as peças da caixa básica. Jogam sozinhas ou entre os capítulos de uma campanha.</p>
+            </div>
+          </header>
+          <div className="adv-list">
+            {standaloneAdventures().map((a) => <AdventureItem key={a.slug} a={a} label="Avulsa" />)}
           </div>
         </section>
 
@@ -110,7 +140,7 @@ export function AdventuresPage() {
           </dl>
         </section>
         <p className="adv-source">
-          Guias escritos a partir do livro de regras de D&D Attack Wing, páginas 34 a 38. O texto completo, com os parágrafos de história, está no{' '}
+          Os capítulos da campanha são guias escritos a partir do livro de regras de D&D Attack Wing, páginas 34 a 38; o texto completo, com os parágrafos de história, está no{' '}
           <a className="text-link" href={MANUAL} target="_blank" rel="noopener">livro de regras em PDF</a>.
         </p>
       </div>
@@ -150,7 +180,10 @@ export function AdventurePage() {
     navigate('/construtor');
   };
 
-  const next = ADVENTURES.find((x) => x.number === a.number + 1);
+  const camp = campaignBySlug(a.campaign);
+  const chapters = camp ? campaignChapters(camp.slug) : [];
+  const next = camp ? chapters.find((x) => (x.chapter ?? 0) === (a.chapter ?? 0) + 1) : undefined;
+  const prev = camp ? chapters.find((x) => (x.chapter ?? 0) === (a.chapter ?? 0) - 1) : undefined;
 
   return (
     <Shell>
@@ -158,7 +191,9 @@ export function AdventurePage() {
         <header className="adv-hero adv-hero-sm">
           <img src="/home/keyart.webp" alt="" aria-hidden />
           <div className="adv-hero-copy">
-            <nav className="adv-crumbs" aria-label="Trilha"><Link to="/aventuras">Aventuras</Link> / Aventura {a.number}</nav>
+            <nav className="adv-crumbs" aria-label="Trilha">
+              <Link to="/aventuras">Aventuras</Link> / {camp ? `${camp.title}, capítulo ${a.chapter}` : 'Aventura do portal'}
+            </nav>
             <h1>{a.title}</h1>
             <p className="adv-orig-light">{a.original} · {a.source}</p>
           </div>
@@ -247,9 +282,15 @@ export function AdventurePage() {
             </section>
             {next && (
               <Link className="adv-next" to={`/aventuras/${next.slug}`}>
-                Próxima: Aventura {next.number}, {next.title} →
+                Capítulo {next.chapter}: {next.title} →
               </Link>
             )}
+            {prev && (
+              <Link className="adv-prev" to={`/aventuras/${prev.slug}`}>
+                ← Capítulo {prev.chapter}: {prev.title}
+              </Link>
+            )}
+            {camp && !next && camp.pending && <p className="adv-pending">{camp.pending}</p>}
           </aside>
         </div>
       </article>

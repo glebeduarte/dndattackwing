@@ -45,12 +45,38 @@ export interface Adventure {
   epilogue?: string;
   map: MapSpec;
   origin: 'livro' | 'portal';
+  campaign?: string; // slug da campanha; ausente = aventura avulsa
+  chapter?: number;
+  theme?: string; // uma linha sobre o clima da aventura
 }
 
+export interface Campaign {
+  slug: string;
+  title: string;
+  original: string;
+  source: string;
+  summary: string;
+  status: string;
+  pending?: string;
+}
+
+export const CAMPAIGNS: Campaign[] = [
+  {
+    slug: 'cemiterio-primordial',
+    title: 'O Cemitério Primordial',
+    original: 'The Primordial Graveyard',
+    source: 'Livro de regras de D&D Attack Wing e expansões',
+    summary:
+      'A campanha que abre o jogo. Uma rixa entre três dragões da caixa básica, um roubo e uma emboscada, termina com o dragão de cobre recebendo uma missão maior: achar o lugar sagrado onde os dragões antigos guardaram suas relíquias antes que os servos de Tiamat cheguem lá.',
+    status: '2 capítulos publicados',
+    pending: 'Os próximos capítulos continuam a história nas expansões do jogo e entram aqui na ordem da campanha.',
+  },
+];
+
 export const CAMPAIGN_RULES = {
-  title: 'Campanha do Cemitério Primordial',
+  title: 'Como funcionam as campanhas',
   intro:
-    'As aventuras do livro abrem a campanha do Cemitério Primordial, que continuou nas expansões do jogo. Dá para jogar cada aventura sozinha, como cenário, ou em sequência, como campanha. Na campanha, cada jogador escolhe um lado no começo de cada aventura e acumula pontos de experiência e artefatos.',
+    'Dá para jogar cada aventura sozinha, como cenário, ou em sequência, como campanha. Na campanha, cada jogador escolhe um lado no começo de cada aventura e acumula pontos de experiência e artefatos. As aventuras avulsas do portal também dão XP e podem entrar entre os capítulos de uma campanha.',
   rules: [
     { title: 'Diário de aventuras', text: 'Cada jogador anota quanta experiência (XP) ganhou e quais Artefatos de Campanha recebeu ao longo da campanha.' },
     { title: 'Gastar XP em pontos', text: 'No começo de cada aventura, 1 XP vira 1 Ponto de Legião extra. Gastar não consome a experiência: o total acumulado pode ser gasto de novo na aventura seguinte.' },
@@ -143,6 +169,8 @@ export const ADVENTURES: Adventure[] = [
       note: 'As cinco fichas formam um X: uma no centro e quatro a 15 cm dela.',
     },
     origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 1,
   },
   {
     slug: 'emboscada-no-vale',
@@ -231,7 +259,91 @@ export const ADVENTURES: Adventure[] = [
       note: 'Os jogadores escolhem onde ficam os gêiseres; o mapa mostra uma distribuição possível.',
     },
     origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 2,
+  },
+  {
+    slug: 'ninho-na-tempestade',
+    number: 3,
+    title: 'O ninho na tempestade',
+    original: 'Aventura original do portal',
+    source: 'Criada para este portal com as peças da caixa básica',
+    theme: 'Um saque às cegas dentro de uma tempestade de areia, com ovos verdadeiros e ovos de pedra.',
+    players: 2,
+    playArea: '90 x 90 cm, um campo de dunas no deserto onde Eshaedra esconde o ninho',
+    components: [
+      '4 fichas de objetivo, de número 1 a 4 (os ovos)',
+      '1 ficha de aventura (o ninho, no centro)',
+      '8 fichas de duração (a tempestade)',
+      'Fichas de exaustão',
+    ],
+    sides: [
+      { id: 'balagos', name: 'Balagos', creatureUid: 101, points: 60, color: '#c0282d' },
+      { id: 'eshaedra', name: 'Eshaedra', creatureUid: 103, points: 55, color: '#1f6fb5' },
+    ],
+    synopsis: [
+      'Dragões azuis fazem seus ninhos em desertos e caçam dentro das tempestades que eles mesmos atraem. Eshaedra guarda uma ninhada num campo de dunas, e Balagos, que nunca esqueceu quem entrou no seu covil, descobriu onde fica.',
+      'O vermelho chega com a tempestade já formada. Ele sabe que existem ovos no ninho, mas não sabe quais. Eshaedra, que esperava por esse dia, misturou pedras lisas aos ovos verdadeiros. Quando a areia baixar, alguém terá vencido a aposta.',
+    ],
+    setup: [
+      'Balagos tem 60 pontos e Eshaedra tem 55, e cada lado usa o seu dragão. Os 5 pontos a mais pagam a desvantagem de atacar no terreno do inimigo.',
+      'Coloquem a ficha de aventura no centro exato da área: é o ninho.',
+      'Sem que Balagos veja, Eshaedra coloca as 4 fichas de objetivo com o número para baixo, cada uma a até alcance 1 do ninho e a pelo menos 7,5 cm das outras. As fichas 1 e 2 são ovos verdadeiros. As fichas 3 e 4 são pedras.',
+      'Empilhem 8 fichas de duração ao lado da área. Esta pilha é a tempestade.',
+      'Eshaedra começa a até alcance 1 do ninho, em qualquer direção. Balagos começa na faixa da borda norte, a até 15 cm dela e a pelo menos 30 cm de cada canto.',
+    ],
+    specialRules: [
+      { title: 'A tempestade', text: 'Em cada Fase Final, tirem 1 ficha de duração da pilha. Quando a última sair, a areia baixa e a aventura termina.' },
+      { title: 'Areia nos olhos', text: 'Enquanto houver tempestade, ataques a alcance 3 ou mais rolam 1 dado de ataque a menos. Criaturas do Tipo de Energia Raio ignoram esta regra: é o clima delas.' },
+      { title: 'Raios', text: 'Em cada Fase Final, depois de tirar a ficha de duração, Eshaedra rola 1 dado de ataque. Num resultado de crítico, um raio cai sobre a criatura voadora mais distante do ninho: ela sofre 1 de dano normal, que penetra a Armadura. Criaturas do Tipo de Energia Raio não são atingidas.' },
+      { title: 'Ação: pegar um ovo', text: 'Uma criatura do lado de Balagos a até alcance 1 de uma ficha de objetivo pode usar a Ação para pegá-la e virá-la. Se for uma pedra (3 ou 4), a ficha sai do jogo e a criatura recebe uma ficha de exaustão pela raiva. Se for um ovo (1 ou 2), a criatura o carrega na carta. Cada criatura carrega no máximo 1 ovo.' },
+      { title: 'Carregar um ovo', text: 'A criatura com um ovo não pode fazer manobras vermelhas e rola 1 dado de defesa a menos. Se sofrer 2 ou mais de dano de uma mesma fonte num turno, larga o ovo logo atrás da base, com o número para cima. Qualquer criatura do lado de Eshaedra a até alcance 1 de um ovo largado pode usar a Ação para devolvê-lo ao ninho, encostado na ficha de aventura.' },
+      { title: 'A fuga', text: 'A criatura com um ovo que sai da área pela borda norte não é derrotada: ela escapa e o ovo conta como roubado. Sair por qualquer outra borda segue a regra normal de fuga do campo de batalha, e o ovo volta ao ninho.' },
+      { title: 'A mãe', text: 'Eshaedra rola 1 dado de defesa a mais enquanto estiver a até alcance 1 do ninho.' },
+    ],
+    objectives: [
+      {
+        side: 'Balagos',
+        text: [
+          'Vitória total: roubar os 2 ovos verdadeiros antes de a tempestade acabar (desfecho 1).',
+          'Vitória parcial: roubar 1 ovo verdadeiro antes de a tempestade acabar (desfecho 2).',
+          'Se a tempestade acabar sem nenhum ovo roubado, ele perde a aventura.',
+        ],
+      },
+      {
+        side: 'Eshaedra',
+        text: [
+          'Vitória total: derrotar Balagos, ou a tempestade acabar com os 2 ovos verdadeiros no ninho e nenhuma criatura de Balagos carregando um ovo (desfecho 3).',
+          'Se Eshaedra for derrotada, Balagos tem até a tempestade acabar para pegar e levar o que conseguir.',
+        ],
+      },
+    ],
+    outcomes: [
+      { id: '1', title: 'Os dois ovos levados', summary: 'Balagos sai da tempestade com a ninhada inteira. Eshaedra passa a lhe dever obediência, e o vermelho ganha uma aliada contra a vontade dela.', rewards: ['Balagos: 2 XP'] },
+      { id: '2', title: 'Um ovo levado', summary: 'Um dos ovos some com o vermelho. Eshaedra guarda o outro e jura reaver o primeiro, o que dá a Balagos uma vantagem sobre ela nas próximas vezes em que se encontrarem.', rewards: ['Balagos: 1 XP', 'Eshaedra: 1 XP se derrotou alguma criatura de Balagos'] },
+      { id: '3', title: 'O ninho resiste', summary: 'A areia baixa e o ninho está inteiro. Balagos voa para longe com as pedras que achou e uma lição sobre dragões azuis no próprio deserto.', rewards: ['Eshaedra: 2 XP'] },
+    ],
+    map: {
+      areas: [
+        { x: 30, y: 0, w: 30, h: 15, side: 'balagos', label: 'Balagos (borda norte)' },
+        { x: 37.5, y: 56, w: 15, h: 12, side: 'eshaedra', label: 'Eshaedra, a até alcance 1 do ninho' },
+      ],
+      tokens: [
+        { x: 37, y: 38 },
+        { x: 53, y: 38 },
+        { x: 36, y: 51 },
+        { x: 54, y: 51 },
+      ],
+      center: true,
+      walls: [{ edge: 'N', label: 'Borda norte: rota de fuga com os ovos', color: '#c0282d' }],
+      note: 'Eshaedra escolhe onde ficam os 4 ovos, a até alcance 1 do ninho; o mapa mostra uma disposição possível.',
+    },
+    origin: 'portal',
   },
 ];
 
 export const adventureBySlug = (slug: string) => ADVENTURES.find((a) => a.slug === slug);
+export const campaignBySlug = (slug?: string) => CAMPAIGNS.find((c) => c.slug === slug);
+export const campaignChapters = (slug: string) =>
+  ADVENTURES.filter((a) => a.campaign === slug).sort((a, b) => (a.chapter ?? 0) - (b.chapter ?? 0));
+export const standaloneAdventures = () => ADVENTURES.filter((a) => !a.campaign);

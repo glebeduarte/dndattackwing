@@ -815,13 +815,20 @@ button.icon-btn-sm { display: inline-grid; place-items: center; }
 }
 .adv-item:hover { background: var(--active); transform: translateX(4px); }
 .adv-num { width: 56px; height: 56px; border-radius: 50%; background: var(--seal); color: #fff; display: grid; place-items: center; font-size: 24px; font-weight: 600; box-shadow: inset 0 0 0 3px #b5493c; }
-.adv-item h2 { font-size: 22px; letter-spacing: -0.01em; }
+.adv-item h3 { font-size: 22px; letter-spacing: -0.01em; }
+.adv-camp-group { margin: 0 var(--pad); display: flex; flex-direction: column; gap: 14px; }
+.adv-camp-group .adv-list { margin: 0; }
+.adv-camp-head h2 { font-size: 26px; letter-spacing: -0.02em; margin-bottom: 4px; }
+.adv-camp-head p { font-size: 15px; line-height: 23px; max-width: 52em; }
+.adv-prev { font-size: 14px; color: var(--muted); text-decoration: none; padding: 0 4px; }
+.adv-prev:hover { color: var(--seal); }
+.adv-pending { font-size: 13px; color: var(--muted); padding: 12px 14px; border: 1px dashed var(--control); border-radius: 12px; }
 .adv-orig { font-style: italic; color: var(--muted); font-size: 13px; margin-bottom: 6px !important; }
 .adv-item-copy p { font-size: 15px; line-height: 22px; max-width: 62em; }
 .adv-meta { margin-top: 8px !important; color: var(--muted); font-size: 13px !important; }
 .adv-go { font-size: 22px; color: var(--seal); }
 .adv-soon { padding: 18px 24px; border-radius: 14px; border: 1px dashed var(--control); }
-.adv-soon h2 { font-size: 16px; }
+.adv-soon h3 { font-size: 16px; }
 .adv-soon p { color: var(--muted); font-size: 14px; }
 
 .adv-campaign { margin: 0 var(--pad); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 40px; background: var(--leather); color: var(--frame-ink); border-radius: 16px; padding: 32px; }
