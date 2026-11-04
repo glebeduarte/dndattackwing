@@ -51,8 +51,19 @@ export interface Adventure {
   theme?: string; // uma linha sobre o clima da aventura
 }
 
+/* Capítulo listado na campanha cujo guia ainda não foi escrito. */
+export interface PlannedChapter {
+  code: string; // "3.1"
+  title: string;
+  expansion: string;
+  wave: string;
+  artifacts: { name: string; uid: number }[];
+  premise?: string; // premissa oficial, quando a WizKids publicou
+}
+
 export interface Campaign {
   slug: string;
+  planned?: PlannedChapter[];
   title: string;
   original: string;
   source: string;
@@ -69,8 +80,36 @@ export const CAMPAIGNS: Campaign[] = [
     source: 'Livro de regras de D&D Attack Wing e expansões',
     summary:
       'A campanha que abre o jogo. Uma rixa entre três dragões da caixa básica, um roubo e uma emboscada, termina com o dragão de cobre recebendo uma missão maior: achar o lugar sagrado onde os dragões antigos guardaram suas relíquias antes que os servos de Tiamat cheguem lá.',
-    status: '2 capítulos publicados',
-    pending: 'Os próximos capítulos continuam a história nas expansões do jogo e entram aqui na ordem da campanha.',
+    status: '21 capítulos, 2 com guia completo',
+    pending: 'Os capítulos seguintes vinham nos livretos das expansões. Cada um entra aqui com o guia completo assim que o texto da aventura estiver disponível.',
+    planned: [
+      { code: '3.1', title: "The Green Queen's Demesne", expansion: 'Green Dragon', wave: 'Onda 1', artifacts: [{ name: 'Tome of Naming', uid: 408 }],
+        premise: 'Claugiyliamatar, a dragoa verde, defende a sua floresta de intrusos cada vez mais numerosos, que podem estar atrás de algo ligado ao Cemitério Primordial.' },
+      { code: '3.2', title: 'The Barony Below', expansion: 'Wraith', wave: 'Onda 1', artifacts: [{ name: 'Chisel', uid: 808 }],
+        premise: 'Lord Maximilian, um Dread Wraith que governa o Baronato Subterrâneo, enfrenta uma invasão: o passado dele interessa a quem procura o Cemitério Primordial.' },
+      { code: '3.3', title: 'The Toll of The Dread Alarum', expansion: 'Sun Elf Wizard', wave: 'Onda 1', artifacts: [{ name: 'Elixir of Healing', uid: 711 }],
+        premise: 'Nymmestra, maga dos elfos do sol, e Galadaeros, o dragão de cobre, defendem a vila de Auvandell de invasores.' },
+      { code: '3.4', title: 'Big Game Hunting', expansion: 'Frost Giant', wave: 'Onda 1', artifacts: [{ name: 'Scale of the White Wyrm', uid: 310 }],
+        premise: 'O gigante do gelo Jarl Hörn provoca uma avalanche para atrair presas, sem saber quantos inimigos vão responder.' },
+      { code: '3.5', title: 'Protect the Prototype', expansion: 'Dwarven Ballista', wave: 'Onda 1', artifacts: [{ name: 'Bag of Diamond Dust', uid: 209 }],
+        premise: 'Os anões apresentam a Calamity, uma balista protegida por runas, e Balagos decide destruir a arma e o campo onde ela é testada.' },
+      { code: '3.6', title: 'An Uphill Battle', expansion: 'Hobgoblin Troop', wave: 'Onda 1', artifacts: [{ name: 'Juggernaut Mantlet', uid: 510 }],
+        premise: 'O bando hobgoblin dos Zhentarim, contratado por Eshaedra, escolta uma carroça blindada contra salteadores.' },
+      { code: '3.7', title: 'Behind Enemy Lines', expansion: 'Sun Elf Troop', wave: 'Onda 1', artifacts: [{ name: 'Mithral Thorn', uid: 621 }],
+        premise: 'Os arqueiros de Limnen buscam uma mensagem na orla de uma floresta tomada por servos dos dragões.' },
+      { code: '4.1', title: 'The Howling Chasm', expansion: 'Aarakocra Troop', wave: 'Onda 2', artifacts: [{ name: '7th Shard of Law', uid: 1019 }] },
+      { code: '4.2', title: 'A Night of Shadows', expansion: 'Black Shadow Dragon', wave: 'Onda 2', artifacts: [{ name: 'The Ebon Cloak', uid: 1108 }] },
+      { code: '4.3', title: 'The Ever-Watchful Eyes', expansion: 'Movanic Deva Angel', wave: 'Onda 2', artifacts: [{ name: 'Tuning Fork of Neutrality', uid: 1209 }] },
+      { code: '5.1', title: 'A Grave Mistake', expansion: 'Wyvern', wave: 'Onda 3', artifacts: [{ name: 'Sulfuric Dagger', uid: 1908 }] },
+      { code: '5.2', title: 'Reclamation', expansion: 'Harpy', wave: 'Onda 3', artifacts: [{ name: 'Boots of Balance', uid: 2008 }] },
+      { code: '5.3', title: 'A Needle In The Eye', expansion: 'Silver Dragon', wave: 'Onda 3', artifacts: [{ name: 'Monocle of the Twitching Tail', uid: 2109 }] },
+      { code: '6.1', title: 'The Pulsating Gate', expansion: 'Gold Dragon', wave: 'Onda 4', artifacts: [{ name: 'Luck Gem', uid: 2309 }] },
+      { code: '6.2', title: 'The Gale Force Gate', expansion: 'Gargoyle', wave: 'Onda 4', artifacts: [{ name: 'Bag of Winds', uid: 2408 }] },
+      { code: '6.3', title: 'The Whispering Gate', expansion: 'Stone Giant', wave: 'Onda 4', artifacts: [{ name: 'Ring of Freedom', uid: 2509 }] },
+      { code: '7.1', title: 'Close Quarters', expansion: 'Drow Elf Ranger', wave: 'Onda 5', artifacts: [{ name: 'Spider Silk Shirt', uid: 2709 }] },
+      { code: '7.2', title: 'The Hall of Luminos the Mighty', expansion: 'Young Bronze Dragon', wave: 'Onda 5', artifacts: [{ name: 'Pearl of Power', uid: 2808 }] },
+      { code: '7.3', title: 'Annihilation and Victory', expansion: 'Red Dracolich', wave: 'Onda 5', artifacts: [{ name: 'Talisman of Ultimate Evil', uid: 2909 }, { name: 'Talisman of Pure Good', uid: 2908 }] },
+    ],
   },
 ];
 

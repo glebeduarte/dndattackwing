@@ -99,13 +99,39 @@ export function AdventuresPage() {
             </header>
             <div className="adv-list">
               {campaignChapters(c.slug).map((a) => <AdventureItem key={a.slug} a={a} label={`Capítulo ${a.chapter}`} />)}
-              {c.pending && (
-                <div className="adv-soon">
-                  <h3>Próximos capítulos</h3>
-                  <p>{c.pending}</p>
-                </div>
-              )}
             </div>
+            {c.planned && c.planned.length > 0 && (
+              <div className="adv-planned">
+                <div className="adv-planned-head">
+                  <h3>Capítulos das expansões</h3>
+                  {c.pending && <p>{c.pending}</p>}
+                </div>
+                {[...new Set(c.planned.map((p) => p.wave))].map((w) => (
+                  <div key={w} className="adv-wave">
+                    <h4>{w}</h4>
+                    <ol>
+                      {c.planned!.filter((p) => p.wave === w).map((p) => (
+                        <li key={p.code} className="adv-pl">
+                          <span className="adv-pl-code">{p.code}</span>
+                          <div className="adv-pl-body">
+                            <strong>{p.title}</strong>
+                            <span className="adv-pl-exp">Expansão {p.expansion}</span>
+                            {p.premise && <p>{p.premise}</p>}
+                            <span className="adv-pl-art">
+                              Artefato de Campanha:{' '}
+                              {p.artifacts.map((a, i) => (
+                                <span key={a.uid}>{i > 0 ? ' ou ' : ''}<Link to={`/card/upgrade/${a.uid}`}>{a.name}</Link></span>
+                              ))}
+                            </span>
+                          </div>
+                          <span className="adv-pl-status">Aguardando o texto</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         ))}
 
@@ -294,7 +320,11 @@ export function AdventurePage() {
                 ← Capítulo {prev.chapter}: {prev.title}
               </Link>
             )}
-            {camp && !next && camp.pending && <p className="adv-pending">{camp.pending}</p>}
+            {camp && !next && camp.planned?.[0] && (
+              <p className="adv-pending">
+                Próximo na campanha: capítulo {camp.planned[0].code}, {camp.planned[0].title} (expansão {camp.planned[0].expansion}). O guia entra aqui quando o texto da aventura estiver disponível.
+              </p>
+            )}
           </aside>
         </div>
       </article>
