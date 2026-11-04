@@ -1313,3 +1313,13 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
 .ai-feed .ai-kicker { color: #b9a57b; }
 .ai-feed ul { margin: 6px 0 0; padding-left: 18px; font-size: 14px; line-height: 21px; }
 .ai-readout { margin: 0; padding-left: 18px; font-size: 15px; line-height: 23px; }
+.ai-chip { cursor: pointer; }
+.ai-chip.is-viewed { box-shadow: 0 0 0 2px var(--gold, #b9a57b); }
+.ai-cards { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; align-items: flex-start; }
+.ai-cards > .card-wrap { flex: 0 0 340px; max-width: 340px; }
+.ai-weapons { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.ai-weapon { align-items: flex-start; text-align: left; justify-content: flex-start; }
+.ai-weapon .ai-tile-main { align-items: flex-start; }
+.ai-weapon.is-special { border-style: dashed; }
+.ai-weapon:disabled { opacity: .5; cursor: not-allowed; }
+.ai-tile-note { font-size: 11px; font-weight: 600; color: #8c2b22; }

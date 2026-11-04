@@ -5,12 +5,13 @@ import { generateLegions } from '../engine/generator';
 import {
   ACTION_NAME, COLOR_NAME, aiAttackRoll, aiDefenseRoll, applyAction, chooseAction, chooseManeuver, healOption, parseSpecial, paySpecial, planAttack, tickSpecials,
   maneuverLabel, resolveDamage, turnOrder,
-  type ArcAnswer, type AttackPlan, type AtkFace, type DefFace, type Dir, type Dist, type Edge, type Unit,
+  type ArcAnswer, type AttackPlan, type AtkFace, type Special, type DefFace, type Dir, type Dist, type Edge, type Unit,
 } from '../engine/opponent';
 import { catalog, useStore } from '../store';
 import { getLoadedTranslations, loadTranslations, type Translations } from '../i18n/cards';
 import { Shell } from '../ui/Shell';
 import { TableBoard } from '../ui/TableBoard';
+import { CreatureCard, UpgradeCard } from '../ui/Cards';
 import { arcsFromTable, deploy, loadTable, moveOnTable, offBoard, planOnTable, saveTable, situationFromTable, sizeOf, type Pose } from '../engine/table';
 
 /* ---------- estado da partida ---------- */
@@ -34,7 +35,7 @@ export function unitsFrom(legion: Legion, side: 'ai' | 'me'): Unit[] {
   return legion.creatures.map((c, i) => ({
     id: `${side}${i}`, side, uid: c.uid, name: c.name, level: c.level, attack: c.attack, agility: c.agility,
     health: c.health, armor: c.armor, flyer: c.flyer, movement: c.movement, attacks: c.data.primary_attacks,
-    actions: c.actions, upgrades: c.equipped.filter(Boolean).map((u) => u!.name),
+    actions: c.actions, upgrades: c.equipped.filter(Boolean).map((u) => u!.name), upgradeUids: c.equipped.filter(Boolean).map((u) => u!.uid),
     dmg: 0, crit: 0, alive: true, air: c.flyer, tokens: {},
     element: c.element,
     base: c.base,
@@ -87,10 +88,10 @@ const DIRS: { d: Dir; g: string; t: string; pos: string }[] = [
 const DISTS: { d: Dist; t: string }[] = [{ d: 1, t: 'Alcance 1' }, { d: 2, t: 'Alcance 2' }, { d: 3, t: 'Alcance 3' }, { d: 4, t: '4 ou mais' }];
 const EDGES: { e: Edge; g: string; t: string }[] = [{ e: 'none', g: '✓', t: 'Longe das bordas' }, { e: 'F', g: '▔', t: 'Borda à frente' }, { e: 'L', g: '▏', t: 'Borda à esquerda' }, { e: 'R', g: '▕', t: 'Borda à direita' }];
 
-function UnitChip({ u }: { u: Unit }) {
+function UnitChip({ u, on, onClick }: { u: Unit; on?: boolean; onClick?(): void }) {
   const pct = (left(u) / u.health) * 100;
   return (
-    <div className={`ai-chip side-${u.side}${u.alive ? '' : ' is-dead'}`}>
+    <div className={`ai-chip side-${u.side}${u.alive ? '' : ' is-dead'}${on ? ' is-viewed' : ''}`} role="button" tabIndex={0} onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter') onClick?.(); }} title="Ver as cartas">
       <div className="ai-chip-top"><strong>{u.name}</strong><span className="num muted">Nv {u.level}</span></div>
       <div className="ai-bar"><span style={{ width: `${pct}%` }} /></div>
       <div className="ai-chip-meta">
@@ -339,6 +340,19 @@ function ActivationStep({ m, update }: { m: Match; update(fn: (m: Match) => void
             </div>
           </>
         )}
+        <h3>Qual ação ela fez?</h3>
+        <div className="ai-tiles ai-tiles-sm">
+          {[...u.actions.filter((a) => ['Dodge', 'Target', 'Concentrate'].includes(a)), 'none'].map((a) => {
+            const on = a === 'none' ? !u.tokens.dodge && !u.tokens.target && !u.tokens.concentrate : a === 'Dodge' ? !!u.tokens.dodge : a === 'Target' ? !!u.tokens.target : !!u.tokens.concentrate;
+            return (
+              <Tile key={a} on={on} onClick={() => update((mm) => { const x = mm.units.find((y) => y.id === u.id)!; x.tokens = { exhausted: x.tokens.exhausted }; applyAction(x, a === 'none' ? null : a); })}>
+                {a !== 'none' && <img src={`/icons/${a === 'Target' ? 'target' : a === 'Dodge' ? 'dodge' : 'concentrate'}.png`} alt="" width={26} height={26} />}
+                {a === 'none' ? 'Outra ou nenhuma' : ACTION_NAME[a]}
+              </Tile>
+            );
+          })}
+        </div>
+        <p className="muted">As fichas marcadas liberam as melhorias que exigem Alvo ou Concentração no combate.</p>
         <div className="ai-actions"><button className="btn btn-primary" onClick={() => next()}>Pronto, próxima</button></div>
       </section>
     );
@@ -399,6 +413,139 @@ function useTr() {
 }
 
 const AREA_PT: Record<string, string> = { Line: 'Linha', Cone: 'Cone', Burst: 'Estouro' };
+
+interface Weapon {
+  key: string; label: string; sub: string; dice: number; fixed: number; penetrates: boolean;
+  area: Special['area']; element: string | null; range: number; special?: Special; effectOnly: boolean; blocked?: string; note?: string;
+}
+
+function weaponsOf(u: Unit): Weapon[] {
+  const out: Weapon[] = u.attacks.map((a, i) => ({
+    key: `p${i}`, label: a.description, dice: u.attack, fixed: 0, penetrates: false, area: null, element: null, range: a.range, effectOnly: false,
+    sub: `${a.type === 'Melee' ? 'Corpo a corpo' : 'À distância'} · arco ${a.arc === 'Rear' ? 'traseiro' : 'frontal'} · alcance ${a.range} · ${u.attack} dados`,
+  }));
+  for (const s of u.specials ?? []) {
+    if (s.kind !== 'attack') continue;
+    const dice = s.dice === 'pwv' ? u.attack : s.dice ?? 0;
+    const effectOnly = !dice && !s.fixed;
+    const bits = [
+      s.area ? AREA_PT[s.area] : s.arc === '360' ? 'qualquer direção' : s.arc === 'B' ? 'arco traseiro' : 'arco frontal',
+      `alcance ${s.minRange > 1 ? `${s.minRange} a ` : ''}${s.range}`,
+      s.fixed ? `${s.fixed} de dano fixo` : effectOnly ? 'efeito' : `${dice} dados`,
+      s.penetrates ? 'atravessa Armadura' : '',
+    ].filter(Boolean);
+    out.push({
+      key: `s${s.uid}`, label: s.name, sub: bits.join(' · '), dice, fixed: s.fixed, penetrates: s.penetrates, area: s.area, element: s.element,
+      range: s.range, special: s, effectOnly,
+      blocked: s.spent ? 'já descartada' : s.ready > 0 ? `volta em ${s.ready} rodada(s)` : undefined,
+      note: s.needs === 'target' ? 'gasta a ficha de Alvo' : s.needs === 'concentrate' ? 'gasta a ficha de Concentração' : s.discards ? 'descarta a carta' : s.dts ? `${s.dts} fichas de duração` : s.disables ? 'desativa a carta' : undefined,
+    });
+  }
+  return out;
+}
+
+function PlayerAttack({ u, enemies, pos, update, tr, onDone }: {
+  m: Match; u: Unit; enemies: Unit[]; pos: string; update(fn: (m: Match) => void): void; tr(uid: number, t: string): string; onDone(o: Outcome): void;
+}) {
+  const weapons = weaponsOf(u);
+  const [wk, setWk] = useState<string | null>(weapons.length === 1 ? weapons[0].key : null);
+  const [targets, setTargets] = useState<string[]>([]);
+  const [ranges, setRanges] = useState<Record<string, Dist>>({});
+  const [rolls, setRolls] = useState<Record<string, { h: number; c: number }>>({});
+  const w = weapons.find((x) => x.key === wk);
+  const auto = hasTable() ? arcsFromTable(u, enemies, loadTable().poses) : {};
+  const toggle = (id: string) => {
+    const a = auto[id];
+    if (a?.range) setRanges((r) => ({ ...r, [id]: a.range as Dist }));
+    setTargets((t) => (w?.area ? (t.includes(id) ? t.filter((x) => x !== id) : [...t, id]) : [id]));
+  };
+  const ready = !!w && targets.length > 0 && targets.every((id) => ranges[id]);
+  const fire = () => {
+    if (!w) return;
+    const lines: string[] = [];
+    const defFaces: DefFace[] = [];
+    const notes: string[] = [];
+    const results = targets.map((id) => {
+      const t = enemies.find((e) => e.id === id)!;
+      if (w.effectOnly) { lines.push(`Aplique em ${t.name} o efeito da carta.`); return { id, normal: 0, crit: 0, used: false, conc: false }; }
+      if (w.fixed && !w.dice) { lines.push(`${t.name} recebe ${w.fixed} de dano normal, sem defesa.`); return { id, normal: w.fixed, crit: 0, used: false, conc: false }; }
+      const d = aiDefenseRoll(t.agility, ranges[id], t.tokens, Math.random);
+      const resist = !!w.element && t.element === w.element;
+      defFaces.push(...d.roll);
+      notes.push(...d.notes.map((n) => `${t.name}: ${n}`));
+      if (resist) notes.push(`${t.name} resiste a ${w.element}: +1 esquiva.`);
+      const r = rolls[id] ?? { h: 0, c: 0 };
+      const res = resolveDamage(r.h, r.c, d.dodges + (resist ? 1 : 0), w.penetrates ? 0 : t.armor);
+      lines.push(res.normal + res.crit === 0 ? `${t.name} não sofre dano (${d.dodges + (resist ? 1 : 0)} esquiva(s)).` : `Coloque ${res.normal} carta(s) de dano virada(s) para baixo e ${res.crit} virada(s) para cima em ${t.name}.${res.blocked ? ` A Armadura parou ${res.blocked}.` : ''}`);
+      return { id, normal: res.normal, crit: res.crit, used: !!t.tokens.dodge, conc: !!t.tokens.concentrate && d.roll.includes('eye') };
+    });
+    update((mm) => {
+      for (const r of results) {
+        const x = mm.units.find((y) => y.id === r.id)!;
+        x.dmg += r.normal; x.crit += r.crit;
+        if (r.used) x.tokens.dodge = false;
+        if (r.conc) x.tokens.concentrate = false;
+        mm.log.push(`${u.name} usou ${w.label} em ${x.name}: ${r.normal} de dano e ${r.crit} crítico(s).`);
+      }
+      const me = mm.units.find((y) => y.id === u.id)!;
+      if (w.special) {
+        paySpecial(me, me.specials!.find((q) => q.uid === w.special!.uid)!);
+      }
+    });
+    onDone({ title: `${u.name} usa ${w.label}`, def: defFaces, notes: w.special ? [tr(w.special.uid, w.special.text), ...notes] : notes, text: lines.join(' ') });
+  };
+  return (
+    <section className="ai-card ai-ask">
+      <p className="ai-kicker">{pos}</p>
+      <h2>Sua vez de atacar: <span className="ai-name is-me">{u.name}</span></h2>
+      <h3>Com qual ataque?</h3>
+      <div className="ai-tiles ai-weapons">
+        {weapons.map((x) => (
+          <button key={x.key} type="button" disabled={!!x.blocked} className={`ai-tile ai-weapon${wk === x.key ? ' is-on' : ''}${x.special ? ' is-special' : ''}`} onClick={() => { setWk(x.key); setTargets([]); }}>
+            <span className="ai-tile-main">{x.label}</span>
+            <span className="ai-tile-sub">{x.blocked ?? x.sub}</span>
+            {x.note && !x.blocked && <span className="ai-tile-note">{x.note}</span>}
+          </button>
+        ))}
+      </div>
+      {w?.special && <details className="ai-cardtext"><summary>Texto da carta</summary><p>{tr(w.special.uid, w.special.text).replace(/\*/g, '')}</p></details>}
+      {w && (
+        <>
+          <h3>{w.area ? `Quem está dentro do gabarito (${AREA_PT[w.area]})? Toque em todas.` : 'Qual criatura da IA ela ataca?'}</h3>
+          <div className="ai-tiles">
+            {enemies.map((e) => {
+              const a = auto[e.id];
+              const hint = a ? (a.range ? `Alcance ${a.range}, ${a.arc === 'F' ? 'à frente' : a.arc === 'B' ? 'atrás' : 'ao lado'}` : 'fora de alcance') : `${left(e)} de vida`;
+              return <Tile key={e.id} on={targets.includes(e.id)} onClick={() => toggle(e.id)} sub={`${hint} · Agil. ${e.agility} · Arm. ${e.armor}`}>{e.name}</Tile>;
+            })}
+          </div>
+          {targets.map((id) => {
+            const t = enemies.find((e) => e.id === id)!;
+            return (
+              <div key={id} className="ai-hit">
+                <h3>Contra <span className="ai-name">{t.name}</span></h3>
+                <div className="ai-tiles ai-tiles-4">{DISTS.map((d) => <Tile key={d.d} on={ranges[id] === d.d} onClick={() => setRanges((r) => ({ ...r, [id]: d.d }))}><span className="ai-ruler">{'▮'.repeat(d.d)}</span>Alcance {d.d}</Tile>)}</div>
+                {!w.effectOnly && !(w.fixed && !w.dice) && (
+                  <>
+                    <p>Role <strong>{w.dice} dado(s) de ataque</strong>{w.area ? ' só contra ela' : ''}, aplique as suas fichas e informe o resultado final.</p>
+                    <div className="ai-steps">
+                      <Stepper label="Acertos" value={rolls[id]?.h ?? 0} set={(n) => setRolls((r) => ({ ...r, [id]: { h: n, c: r[id]?.c ?? 0 } }))} icon="hit" />
+                      <Stepper label="Críticos" value={rolls[id]?.c ?? 0} set={(n) => setRolls((r) => ({ ...r, [id]: { h: r[id]?.h ?? 0, c: n } }))} icon="critical" />
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </>
+      )}
+      <div className="ai-actions">
+        <button className="btn btn-ghost" onClick={() => onDone({ title: `${u.name} não ataca`, notes: [], text: 'Sem ataque nesta rodada.' })}>Não vai atacar</button>
+        <button className="btn btn-primary" disabled={!ready} onClick={fire}>{w?.effectOnly ? 'Aplicar' : 'A IA defende'}</button>
+      </div>
+    </section>
+  );
+}
 
 function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): void }) {
   const order = turnOrder(m.units, 'combate', m.initiative);
@@ -552,46 +699,7 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
   }
 
   if (u.side === 'me' && stage === 'ask') {
-    const tgt = enemies.find((e) => e.id === target);
-    const fire = () => {
-      if (!tgt || !range) return;
-      const d = aiDefenseRoll(tgt.agility, range, tgt.tokens, Math.random);
-      const res = resolveDamage(hits, crits, d.dodges, tgt.armor);
-      update((mm) => {
-        const x = mm.units.find((y) => y.id === tgt.id)!;
-        x.dmg += res.normal; x.crit += res.crit;
-        if (x.tokens.dodge) x.tokens.dodge = false;
-        if (x.tokens.concentrate && d.roll.includes('eye')) x.tokens.concentrate = false;
-        mm.log.push(`${u.name} atacou ${tgt.name}: ${res.normal} de dano e ${res.crit} crítico(s).`);
-      });
-      setOutcome({ title: `${u.name} ataca ${tgt.name}`, def: d.roll, notes: d.notes, text: res.normal + res.crit === 0 ? `${tgt.name} não sofre dano.` : `Coloque ${res.normal} carta(s) de dano virada(s) para baixo e ${res.crit} virada(s) para cima em ${tgt.name}.${res.blocked ? ` A Armadura dela parou ${res.blocked} acerto(s).` : ''}` });
-      setStage('done');
-    };
-    return (
-      <section className="ai-card ai-ask">
-        <p className="ai-kicker">{pos}</p>
-        <h2>Sua vez de atacar: <span className="ai-name is-me">{u.name}</span></h2>
-        <h3>Qual criatura da IA ela ataca?</h3>
-        <div className="ai-tiles">
-          {enemies.map((e) => <Tile key={e.id} on={target === e.id} onClick={() => { setTarget(e.id); const a = arcsFromTable(u, [e], loadTable().poses)[e.id]; if (a?.range) setRange(a.range); }} sub={`${left(e)} de vida · Agilidade ${e.agility} · Armadura ${e.armor}`}>{e.name}</Tile>)}
-        </div>
-        {tgt && (
-          <>
-            <h3>A que alcance?</h3>
-            <div className="ai-tiles ai-tiles-4">{DISTS.map((d) => <Tile key={d.d} on={range === d.d} onClick={() => setRange(d.d)}><span className="ai-ruler">{'▮'.repeat(d.d)}</span>Alcance {d.d}</Tile>)}</div>
-            <h3>Role o seu ataque, aplique as suas fichas e informe o resultado final</h3>
-            <div className="ai-steps">
-              <Stepper label="Acertos" value={hits} set={setHits} icon="hit" />
-              <Stepper label="Críticos" value={crits} set={setCrits} icon="critical" />
-            </div>
-          </>
-        )}
-        <div className="ai-actions">
-          <button className="btn btn-ghost" onClick={() => { setOutcome({ title: `${u.name} não ataca`, notes: [], text: 'Sem ataque nesta rodada.' }); setStage('done'); }}>Não vai atacar</button>
-          <button className="btn btn-primary" disabled={!tgt || !range} onClick={fire}>A IA defende</button>
-        </div>
-      </section>
-    );
+    return <PlayerAttack m={m} u={u} enemies={enemies} pos={pos} update={update} tr={tr} onDone={(o) => { setOutcome(o); setStage('done'); }} />;
   }
 
   return (
@@ -659,6 +767,31 @@ function MatchTable({ m, update }: { m: Match; update(fn: (m: Match) => void): v
   );
 }
 
+function activeUnit(m: Match): Unit | undefined {
+  if (m.phase === 'ativacao') return turnOrder(m.units, 'ativacao', m.initiative)[m.step];
+  if (m.phase === 'combate') return turnOrder(m.units, 'combate', m.initiative)[m.step];
+  if (m.phase === 'situacao') return m.units.filter((u) => u.side === 'ai' && u.alive)[m.step];
+  return undefined;
+}
+
+function UnitCards({ u }: { u: Unit }) {
+  const data = catalog.creatures.find((c) => c.uid === u.uid);
+  const ups = (u.upgradeUids ?? []).map((id) => catalog.upgrades.find((x) => x.uid === id)).filter(Boolean);
+  if (!data) return null;
+  return (
+    <section className="ai-card">
+      <div className="ai-table-head">
+        <h2>Cartas de <span className={`ai-name${u.side === 'me' ? ' is-me' : ''}`}>{u.name}</span></h2>
+        <span className="muted">{u.side === 'ai' ? 'Legião da IA' : 'Sua legião'} · {left(u)}/{u.health} de vida</span>
+      </div>
+      <div className="ai-cards">
+        <CreatureCard data={data} full />
+        {ups.map((x) => <UpgradeCard key={x!.uid} data={x!} full />)}
+      </div>
+    </section>
+  );
+}
+
 /* ---------- página ---------- */
 
 export function CompanionPage() {
@@ -666,6 +799,7 @@ export function CompanionPage() {
   useEffect(() => { document.title = 'Jogar contra a IA · Attack Wing'; }, []);
   useEffect(() => save(m), [m]);
   const [history, setHistory] = useState<Match[]>([]);
+  const [viewId, setViewId] = useState<string | null>(null);
   const [showTable, setShowTable] = useState<boolean>(() => { try { return localStorage.getItem('aw:showTable') === '1'; } catch { return false; } });
   
   const update = (fn: (mm: Match) => void) => setM((cur) => {
@@ -675,6 +809,9 @@ export function CompanionPage() {
   });
   const undo = () => setHistory((h) => { if (!h.length) return h; setM(h[h.length - 1]); return h.slice(0, -1); });
 
+  const active = m ? activeUnit(m) : undefined;
+  useEffect(() => { setViewId(null); }, [active?.id]);
+  const viewed = m ? m.units.find((x) => x.id === viewId) ?? active : undefined;
   const winner = m?.phase === 'acabou' ? (m.units.some((u) => u.side === 'me' && u.alive) ? 'Você venceu.' : m.units.some((u) => u.side === 'ai' && u.alive) ? 'A IA venceu.' : 'Empate: as duas legiões caíram.') : null;
 
   return (
@@ -701,9 +838,9 @@ export function CompanionPage() {
             <aside className="ai-roster" aria-label="Criaturas em jogo">
               <p className="ai-round">Rodada <span className="num">{m.round}</span></p>
               <h3>Legião da IA</h3>
-              {m.units.filter((u) => u.side === 'ai').map((u) => <UnitChip key={u.id} u={u} />)}
+              {m.units.filter((u) => u.side === 'ai').map((u) => <UnitChip key={u.id} u={u} on={u.id === viewed?.id} onClick={() => setViewId(u.id)} />)}
               <h3>Sua legião</h3>
-              {m.units.filter((u) => u.side === 'me').map((u) => <UnitChip key={u.id} u={u} />)}
+              {m.units.filter((u) => u.side === 'me').map((u) => <UnitChip key={u.id} u={u} on={u.id === viewed?.id} onClick={() => setViewId(u.id)} />)}
             </aside>
             <div className="ai-main">
               <ol className="ai-phases" aria-label="Fases da rodada">
@@ -733,6 +870,7 @@ export function CompanionPage() {
                   <div className="ai-actions"><button className="btn btn-primary" onClick={() => setM(null)}>Jogar de novo</button></div>
                 </section>
               )}
+              {viewed && <UnitCards u={viewed} />}
               {showTable && <MatchTable m={m} update={update} />}
               <details className="ai-log">
                 <summary>Histórico da partida</summary>

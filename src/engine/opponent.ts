@@ -32,6 +32,7 @@ export interface Unit {
   attacks: CreatureData['primary_attacks'];
   actions: string[];
   upgrades: string[];
+  upgradeUids?: number[];
   dmg: number;
   crit: number;
   alive: boolean;
