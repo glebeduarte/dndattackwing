@@ -130,9 +130,12 @@ export function Home() {
 
       <section id="memoria" className="h-memory" aria-labelledby="memoria-title">
         <div className="h-memory-head h-reveal">
-          <h2 id="memoria-title">A memória do jogo, carta por carta</h2>
+          <h2 id="memoria-title">Um jogo de 2014 que ainda tem mesa</h2>
           <p>
-            Durante anos a comunidade montou legiões no construtor do site dndaw.com. Quando ele saiu do ar, as listas de torneio, os links compartilhados e as regras de cada carta ficaram sem casa. Este construtor foi refeito a partir dos dados daquele site, com as mesmas cartas, as mesmas regras e os mesmos links.
+            D&D Attack Wing chegou em 2014 e cresceu onda após onda: dragões cromáticos e metálicos, gigantes, anjos, elfos, cultistas e heróis como Drizzt. Depois o jogo foi descontinuado. As miniaturas deixaram as lojas, mas continuam nas prateleiras de quem joga, e as partidas seguem acontecendo.
+          </p>
+          <p>
+            Este construtor guarda essa memória: todas as criaturas e todos os upgrades lançados, com as regras de cada carta, para que qualquer legião daquela época possa ser montada de novo.
           </p>
         </div>
 
@@ -154,7 +157,7 @@ export function Home() {
               </li>
             ))}
           </ol>
-          <p className="h-waves-note">Além das ondas, {op} kits de jogo organizado trouxeram cartas promocionais, todas no catálogo.</p>
+          <p className="h-waves-note">Além das ondas, {op} kits de jogo organizado trouxeram cartas promocionais para os torneios. Todas estão no catálogo.</p>
         </div>
       </section>
 
