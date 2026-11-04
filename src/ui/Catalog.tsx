@@ -1,8 +1,9 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { ENUM_ELEMENTS, ENUM_UPGRADES, Upgrade } from '../engine/engine';
 import type { CreatureData, UpgradeData } from '../engine/types';
 import { ALL_SETS, catalog, useStore, type SortKey } from '../store';
 import { GameIcon, SLOT_LABEL } from './bits';
+import { matches, parseQuery, QUERY_EXAMPLES } from './query';
 
 export type Tab = 'creatures' | 'upgrades';
 export interface Filters {
@@ -39,13 +40,13 @@ function sortBy<T extends { uid: number; name: string; cost: any }>(list: T[], k
 export function useFiltered(tab: Tab, f: Filters) {
   const { settings, legion, version } = useStore();
   return useMemo(() => {
-    const q = f.q.trim().toLowerCase();
+    const terms = parseQuery(f.q.trim(), haystack);
     const max = f.maxCost.trim() === '' ? null : Number(f.maxCost);
     const base = tab === 'creatures' ? catalog.creatures : catalog.upgrades;
     const list = (base as (CreatureData | UpgradeData)[]).filter((d) => {
       if (settings.sets[d.set] === false) return false;
       if (f.set && d.set !== f.set) return false;
-      if (q && !haystack(d).includes(q)) return false;
+      if (terms.length && !matches(d, terms)) return false;
       if (f.element) {
         const els = [d.element, (d as any).element2, ...((d as any).elements ?? [])];
         if (!els.includes(f.element)) return false;
@@ -80,6 +81,7 @@ interface CatalogProps {
 export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview }: CatalogProps) {
   const list = useFiltered(tab, filters);
   const { legion, version, settings, setSettings } = useStore();
+  const [help, setHelp] = useState(false);
   const patch = (p: Partial<Filters>) => setFilters({ ...filters, ...p });
   const sets = ALL_SETS;
   const hasFilters = !!(filters.q || filters.set || filters.element || filters.maxCost || filters.slot || filters.equippable);
@@ -96,10 +98,23 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
       </div>
 
       <div className="filters">
-        <label className="field field-search">
-          <span className="sr-only">Buscar no texto das cartas</span>
-          <input type="search" placeholder="Buscar nome, tipo, texto" value={filters.q} onChange={(e) => patch({ q: e.target.value })} />
-        </label>
+        <div className="qf">
+          <label className="qf-input">
+            <span className="sr-only">Filtrar por texto</span>
+            <input
+              type="search"
+              placeholder={tab === 'creatures' ? 'Ex.: nivel>=8 voa' : 'Ex.: slot:dragao custo<=4'}
+              value={filters.q}
+              onChange={(e) => patch({ q: e.target.value })}
+              spellCheck={false}
+              autoCapitalize="off"
+            />
+          </label>
+          <button type="button" className={`qf-help-btn${help ? ' is-on' : ''}`} aria-expanded={help} onClick={() => setHelp(!help)}>
+            Filtros
+          </button>
+        </div>
+        {help && <QueryHelp tab={tab} onPick={(ex) => patch({ q: ex })} />}
         <div className="filter-grid">
           <label className="field">
             <span>Coleção</span>
@@ -239,3 +254,24 @@ const UpgradeRow = memo(function UpgradeRow({ d, active, onPreview }: { d: Upgra
     </li>
   );
 });
+
+function QueryHelp({ tab, onPick }: { tab: Tab; onPick(q: string): void }) {
+  return (
+    <div className="qf-help">
+      <p>Escreva palavras soltas para buscar no nome e no texto, ou combine filtros separados por espaço. Um <b>-</b> na frente exclui.</p>
+      <dl className="qf-syntax">
+        <div><dt>Números</dt><dd>custo, nivel, ataque, agilidade, vida, armadura, alcance, slots, marcadores com &gt; &lt; &gt;= &lt;= =</dd></div>
+        <div><dt>Campos</dt><dd>alinhamento: base: slot: acao: tipo: elemento: colecao: onda: area: arco: nome: texto:</dd></div>
+        <div><dt>Palavras</dt><dd>voa, terrestre, unica, tropa, artefato, ataque, acao, penetra, variavel</dd></div>
+      </dl>
+      <p className="qf-ex-title">Exemplos</p>
+      <ul className="qf-examples">
+        {QUERY_EXAMPLES[tab].map(([q, label]) => (
+          <li key={q}>
+            <button type="button" onClick={() => onPick(q)}><code>{q}</code><span>{label}</span></button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
