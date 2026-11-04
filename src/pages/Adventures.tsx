@@ -24,6 +24,7 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
         )}
         {wall?.edge === 'W' && <line x1="0" y1="0" x2="0" y2="90" stroke={wall.color} strokeWidth="2.2" />}
         {wall?.edge === 'N' && <line x1="0" y1="0" x2="90" y2="0" stroke={wall.color} strokeWidth="2.2" />}
+        {wall?.edge === 'S' && <line x1="0" y1="90" x2="90" y2="90" stroke={wall.color} strokeWidth="2.2" />}
         {map.areas.map((a) => (
           <g key={a.side}>
             <rect x={a.x} y={a.y} width={a.w} height={a.h} fill={color(a.side)} opacity="0.9" />
@@ -176,7 +177,7 @@ export function AdventurePage() {
     if (d) l.addCreature(d);
     replace(l, `${a.title}: ${side.name}`);
     setSettings({ target: side.points });
-    notify('ok', `Legião de ${side.name} com limite de ${side.points} pontos. Complete com melhorias.`);
+    notify('ok', d ? `Legião de ${side.name} com limite de ${side.points} pontos. Complete com criaturas e melhorias.` : `Limite de ${side.points} pontos para ${side.name}. ${side.requires ?? ''}`);
     navigate('/construtor');
   };
 
@@ -273,11 +274,14 @@ export function AdventurePage() {
               <h2>Montar a legião</h2>
               <p className="muted">Abre o construtor com o dragão do lado escolhido e o limite de pontos da aventura.</p>
               {a.sides.map((s) => (
-                <button key={s.id} className="adv-side-btn" onClick={() => build(s)}>
-                  <span className="sw" style={{ background: s.color }} />
-                  <span>{s.name}</span>
-                  <span className="num">{s.points} pts</span>
-                </button>
+                <div key={s.id} className="adv-side-opt">
+                  <button className="adv-side-btn" onClick={() => build(s)}>
+                    <span className="sw" style={{ background: s.color }} />
+                    <span>{s.name}</span>
+                    <span className="num">{s.points} pts</span>
+                  </button>
+                  {s.requires && <p className="adv-requires">{s.requires}</p>}
+                </div>
               ))}
             </section>
             {next && (

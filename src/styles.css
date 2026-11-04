@@ -885,6 +885,8 @@ button.icon-btn-sm { display: inline-grid; place-items: center; }
   height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--control); background: var(--surface);
   font-weight: 500; text-align: left; transition: border-color .12s ease, background-color .12s ease;
 }
+.adv-side-opt { display: flex; flex-direction: column; gap: 6px; }
+.adv-requires { font-size: 13px; line-height: 19px; color: var(--muted); padding: 0 6px 4px; }
 .adv-side-btn:hover { border-color: var(--seal); background: var(--accent-wash); }
 .adv-next { display: block; padding: 14px 16px; border-radius: 12px; background: var(--seal); color: #fff; text-decoration: none; font-weight: 500; }
 .adv-next:hover { background: #a2342a; }
