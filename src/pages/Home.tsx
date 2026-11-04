@@ -99,7 +99,7 @@ export function Home() {
           <a href="#upgrades">Upgrades</a>
           <Link to="/gerador">Gerador</Link>
           <Link to="/aventuras">Aventuras</Link>
-          <a href="#manual">Manual</a>
+          <Link to="/regras">Regras</Link>
           <Link to="/legioes">Legiões salvas</Link>
         </nav>
         <Link className="h-btn h-btn-sm" to="/construtor">{hasLegion ? 'Voltar à legião' : 'Construir'}</Link>
@@ -206,16 +206,16 @@ export function Home() {
           <img src="/manual/capa.webp" width={579} height={819} alt="Capa do livro de regras de D&D Attack Wing" loading="lazy" />
         </a>
         <div className="h-manual-copy h-reveal">
-          <h2 id="manual-title">O livro de regras, em português</h2>
+          <h2 id="manual-title">As regras, do jeito mais fácil</h2>
           <p>
-            As 40 páginas do livro de regras: preparação, manobras, combate, dano, as regras avançadas de Construção de Legiões e Tropas, jogo em equipe, obstáculos e a campanha com aventuras. É o mesmo livro que o gerador de legião segue.
+            Um guia completo para ler na tela, com diagramas de manobras, alcance, arcos e ataques em área, um combate passo a passo e um resumo para a mesa. O livro de regras original, com 40 páginas em PDF, continua disponível para baixar.
           </p>
           <div className="h-cta">
-            <a className="h-btn" href={MANUAL} download>Baixar o livro de regras</a>
-            <a className="h-link h-link-dark" href={MANUAL} target="_blank" rel="noopener">Abrir no navegador</a>
+            <Link className="h-btn" to="/regras">Ler as regras no portal</Link>
+            <a className="h-link h-link-dark" href={MANUAL} download>Baixar o PDF</a>
             <Link className="h-link h-link-dark" to="/aventuras">Jogar as aventuras do livro</Link>
           </div>
-          <p className="h-manual-meta">PDF, 1,2 MB, gratuito.</p>
+          <p className="h-manual-meta">PDF do livro: 1,2 MB, gratuito.</p>
         </div>
       </section>
 
