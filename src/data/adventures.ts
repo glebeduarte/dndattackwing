@@ -80,10 +80,9 @@ export const CAMPAIGNS: Campaign[] = [
     source: 'Livro de regras de D&D Attack Wing e expansões',
     summary:
       'A campanha que abre o jogo. Uma rixa entre três dragões da caixa básica, um roubo e uma emboscada, termina com o dragão de cobre recebendo uma missão maior: achar o lugar sagrado onde os dragões antigos guardaram suas relíquias antes que os servos de Tiamat cheguem lá.',
-    status: '21 capítulos, 14 com guia completo',
+    status: '21 capítulos, 15 com guia completo',
     pending: 'Os capítulos seguintes vinham nos livretos das expansões. Cada um entra aqui com o guia completo assim que o texto da aventura estiver disponível.',
     planned: [
-      { code: '5.3', title: 'A Needle In The Eye', expansion: 'Silver Dragon', wave: 'Onda 3', artifacts: [{ name: 'Monocle of the Twitching Tail', uid: 2109 }] },
       { code: '6.1', title: 'The Pulsating Gate', expansion: 'Gold Dragon', wave: 'Onda 4', artifacts: [{ name: 'Luck Gem', uid: 2309 }] },
       { code: '6.2', title: 'The Gale Force Gate', expansion: 'Gargoyle', wave: 'Onda 4', artifacts: [{ name: 'Bag of Winds', uid: 2408 }] },
       { code: '6.3', title: 'The Whispering Gate', expansion: 'Stone Giant', wave: 'Onda 4', artifacts: [{ name: 'Ring of Freedom', uid: 2509 }] },
@@ -934,6 +933,60 @@ export const ADVENTURES: Adventure[] = [
     theme: 'Resgate de três prisioneiros elfos antes que a rainha harpia os sacrifique no ritual.',
   },
   {
+    slug: 'uma-agulha-no-olho',
+    number: 5.3,
+    title: 'Uma agulha no olho',
+    original: 'A Needle in the Eye',
+    source: 'Livreto da expansão Silver Dragon (Onda 3), aventura 5.3',
+    players: 2,
+    playArea: '90 x 90 cm, o olho da tempestade na Ilha da Tempestade, em volta da Agulha da Corrente',
+    components: ['1 ficha da Agulha da Corrente de 15 cm (6") de diâmetro', 'A carta de melhoria Monocle of the Twitching Tail'],
+    sides: [
+      { id: 'bem', name: 'Força dos dragões bons', creatureUid: 2101, points: 150, color: '#5b7fc4', requires: 'Vakka e aliados' },
+      { id: 'culto', name: 'Força do Culto', points: 150, color: '#c0282d', requires: 'Quaisquer criaturas e melhorias' },
+    ],
+    synopsis: [
+      'Os aventureiros a serviço dos dragões bons olham assombrados para a Agulha da Corrente, que sobe até sumir nas nuvens. Cada elo da corrente gigante foi forjado pelos anões séculos atrás, e a cada minuto um raio enorme desce por ela e faz o metal estalar. A Agulha fica no olho da tempestade, a única área segura da Ilha da Tempestade, cercada por um temporal giratório cheio de destroços voando.',
+      'Diante deles está a guardiã da ilha, a antiga dragoa de prata Vakka, a Usurpadora que expulsou a rainha harpia Sycorax muitos anos antes. Ela se nomeou guardiã da ilha, sem saber que os dragões bons a procuravam, e ficou feliz de achar aliados depois de décadas sozinha. Ela avisa que o céu abre um pouco mais no alto, mas que ninguém deve se afastar demais nem chegar perto demais da Agulha. Nesse momento um portal, parecido com o que trouxe os aventureiros, se abre perto da borda sul do olho do temporal, e as forças do Culto do Dragão entram. Tudo vira caos.',
+    ],
+    setup: [
+      'Cada lado monta a legião com 150 pontos. A Força dos dragões bons inclui Vakka e os aliados dela.',
+      'Coloquem a ficha da Agulha da Corrente no centro da área.',
+      'A área inicial de cada lado é metade de um anel em volta da Agulha: a metade norte para os dragões bons e a metade sul para o Culto. O anel vai de 15 a 30 cm (6" a 12") da ficha, ou seja, entre os alcances 3 e 4.',
+      'As criaturas são posicionadas na ordem normal para 2 jogadores, com a base inteira dentro da sua metade do anel.',
+      'Se o soldado da ponta de uma tropa for colocado de forma que não haja como montar a formação do resto da tropa, os soldados que não couberem numa formação válida ficam pressionados.',
+    ],
+    specialRules: [
+      { title: 'A Agulha da Corrente', text: 'A ficha representa a corrente gigante que prende o palácio de Luminos. Ela é um Obstáculo de solo e de ar, e o dano que causa penetra a Armadura.' },
+      { title: 'O olho e a tempestade', text: 'Ventos de tornado giram no sentido horário em volta do olho, que é a área circular até alcance 4 da Agulha. Depois que cada criatura faz qualquer manobra (inclusive as concedidas por investida, finta ou outra manobra especial), e antes de escolher a Ação, confiram se a base dela está inteira dentro do olho, a alcance 1 a 4 da ficha. Uma criatura, ou o soldado da ponta de uma tropa, que não estiver inteira no olho é levada pela tempestade na hora.' },
+      { title: 'Destroços', text: 'Façam um ataque de 5 dados contra cada criatura levada pela tempestade. Ela não rola defesa, mas a Armadura protege normalmente. Se o soldado da ponta de uma tropa for pego, o dano conta como ataque de área contra a tropa inteira. Se o soldado da ponta estiver seguro no olho, os soldados que estiverem fora dele ficam pressionados.' },
+      { title: 'Arrastada pelo vento', text: 'A criatura que sobreviver recebe pontos de vento: 1 por acerto e 2 por crítico rolados no ataque de 5 dados. Usem um gabarito de curva com esse número para movê-la no sentido horário em volta do olho; acima de 4, combinem gabaritos de curva que somem o total. Antes, virem a base para que o flanco direito fique voltado para a Agulha, com a borda da base paralela a ela, e movam a criatura para a frente. Se o movimento terminasse sobre outra criatura, continuem com mais gabaritos de curva até passar.' },
+      { title: 'Tropas na tempestade', text: 'Se o soldado da ponta for pego, ele é movido como descrito, e todos os outros soldados sobreviventes ficam pressionados, agarrados uns aos outros.' },
+      { title: 'Sem fôlego', text: 'Uma criatura que foi levada pela tempestade não faz Ação nem ataque nesse turno, mesmo que não tenha sofrido dano e que o vento não a tenha movido.' },
+    ],
+    objectives: [
+      { side: 'Força do Culto', text: ['Vence se eliminar a Força dos dragões bons (depois da batalha 1).'] },
+      { side: 'Força dos dragões bons', text: ['Vence se eliminar a Força do Culto (depois da batalha 2).'] },
+      { side: 'Empate', text: ['Se os dois lados forem eliminados na mesma rodada, joguem a aventura de novo.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'O Culto domina o olho', summary: 'Quase morta, Vakka sussurra palavras de poder e se teleporta com os aliados feridos para longe. Um dos cultistas vitoriosos olha o céu limpo e imagina os três portões místicos do Palácio das Nuvens de Luminos, o Poderoso, satisfeito por ser o primeiro a vê-los.', rewards: ['Força do Culto: 2 XP', 'Força do Culto recebe o Monocle of the Twitching Tail'] },
+      { id: '2', title: 'Os dragões bons vencem', summary: 'Vakka queria acabar com o inimigo moribundo, mas tinha prometido ao novo aliado dourado, o "Estorvo Dourado" como ela pensava nele, poupar os derrotados. Agora ela e os aliados olham para a Agulha da Corrente e se preparam para o voo sinuoso entre a corrente mortal e a borda da tempestade. Fazia muito tempo que ela tinha trocado o lar gelado por aquela ilha abafada, e ela fica feliz em entrar no grupo, ou melhor, em liderá-lo, na próxima etapa da viagem.', rewards: ['Força dos dragões bons: 2 XP', 'Força dos dragões bons recebe o Monocle of the Twitching Tail'] },
+    ],
+    map: {
+      areas: [
+        { x: 15, y: 15, w: 60, h: 15, side: 'bem', label: 'Dragões bons (metade norte do anel)' },
+        { x: 15, y: 60, w: 60, h: 15, side: 'culto', label: 'Culto (metade sul do anel)' },
+      ],
+      tokens: [{ x: 45, y: 45, label: 'Agulha da Corrente' }],
+      note: 'As áreas iniciais são as duas metades de um anel entre 15 e 30 cm da Agulha; o mapa simplifica como faixas. O olho da tempestade vai até alcance 4 da Agulha, e tudo além disso é temporal girando no sentido horário.',
+    },
+    origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 5.3,
+    theme: 'Batalha de 150 pontos no olho de um furacão que arrasta quem se afasta da corrente.',
+  },
+  {
     slug: 'ninho-na-tempestade',
     number: 3,
     title: 'O ninho na tempestade',
@@ -1136,7 +1189,7 @@ export const STAGES: Record<string, Stage[]> = {
     },
     {
       id: 'onda3', title: 'Atravessar a tempestade', wave: 'Onda 3',
-      summary: 'Com as Chaves na mão, ninguém consegue passar pela tempestade que protege o palácio. O livro que Legunt carregava aponta a rainha harpia Sycorax, exilada da Ilha da Tempestade, como a única que conhece o caminho. O ritual dela abre um portal para o olho do temporal.',
+      summary: 'Com as Chaves na mão, ninguém consegue passar pela tempestade que protege o palácio. O livro que Legunt carregava aponta a rainha harpia Sycorax, exilada da Ilha da Tempestade, como a única que conhece o caminho. O ritual dela abre um portal para o olho do temporal, onde a dragoa de prata Vakka guarda a Agulha da Corrente e o Culto chega pelo mesmo caminho.',
       codes: ['5.1', '5.2', '5.3'],
     },
     {
@@ -1168,6 +1221,7 @@ export const CHAPTER_HOOKS: Record<string, string> = {
   '4.3': 'A luneta da estátua mostra onde está a Agulha.',
   '5.1': 'O livro de Legunt aponta a rainha Sycorax.',
   '5.2': 'Uma moeda abre o portal para o olho da tempestade.',
+  '5.3': 'Vakka guia o voo até os três portões do Palácio das Nuvens.',
 };
 
 /* Criatura que representa cada capítulo das expansões (para a imagem da trilha). */
