@@ -39,6 +39,8 @@ export interface Unit {
   tokens: Tokens;
   plan?: Maneuver;
   sit?: Situation;
+  element?: string | null;
+  specials?: Special[];
 }
 
 const COL_NAME = ['Curva à esquerda', 'Inclinação à esquerda', 'Reta', 'Inclinação à direita', 'Curva à direita', 'Manobra especial'];
@@ -115,6 +117,8 @@ export function chooseAction(u: Unit, enemyAhead: boolean): string | null {
   if (u.tokens.exhausted) return null;
   const has = (a: string) => u.actions.includes(a);
   if (enemyAhead) {
+    const wants = (u.specials ?? []).filter((x) => x.kind === 'attack' && !x.spent && x.ready <= 0).map((x) => x.needs);
+    if (wants.includes('concentrate') && has('Concentrate') && !wants.includes('target')) return 'Concentrate';
     if (has('Target')) return 'Target';
     if (has('Concentrate')) return 'Concentrate';
     if (has('Dodge')) return 'Dodge';
@@ -204,4 +208,161 @@ export function turnOrder(units: Unit[], phase: 'ativacao' | 'combate', initiati
       if (a.side !== b.side) return a.side === initiative ? -1 : 1;
       return 0;
     });
+}
+
+/* ---------- ataques e ações de melhoria ---------- */
+
+export interface Special {
+  uid: number;
+  name: string;
+  kind: 'attack' | 'heal';
+  dice: number | 'pwv' | null; // null = efeito sem rolagem de dano
+  fixed: number; // dano fixo sem rolagem
+  minRange: number;
+  range: number;
+  arc: 'F' | 'B' | '360';
+  area: 'Line' | 'Cone' | 'Burst' | null;
+  penetrates: boolean;
+  needs: 'target' | 'concentrate' | null;
+  dts: number;
+  disables: boolean;
+  discards: boolean;
+  element: string | null;
+  heal: number;
+  text: string;
+  ready: number; // rodadas até poder usar de novo
+  spent: boolean;
+}
+
+interface UpgradeLike { uid: number; name: string; text?: string | null; attack?: unknown; action?: unknown; range?: unknown; area?: unknown; arc?: unknown; penetrates?: unknown; dts?: unknown; element?: unknown; upgrade?: string }
+
+export function parseSpecial(u: UpgradeLike): Special | null {
+  const t = (u.text ?? '').replace(/\s+/g, ' ');
+  if (/Formation/.test(u.name) || /Soldiers? in your/.test(t)) return null;
+  const isAttack = u.attack === true && /\*Attack:\*/.test(t);
+  const heal = /remove up to (\d+) face down Damage Cards?/i.exec(t);
+  if (!isAttack && !(heal && /\*Action:\*/.test(t))) return null;
+  const rr = /Range (\d)\s*-\s*(\d)/.exec(t);
+  const r1 = /Range (\d)/.exec(t);
+  const arcRaw = String(u.arc ?? '').toLowerCase();
+  const areaRaw = String(u.area ?? '').toLowerCase();
+  const area = areaRaw === 'line' ? 'Line' : areaRaw === 'cone' ? 'Cone' : areaRaw === 'burst' ? 'Burst' : null;
+  const nd = /\*?(\d+) Dice[\w\s]*Attack/i.exec(t);
+  const fx = /inflict (\d+) normal damage/i.exec(t);
+  const dts = Number(u.dts) || Number(/place (\d) \[DT\]/i.exec(t)?.[1] ?? 0);
+  const el = String(u.element ?? '');
+  return {
+    uid: u.uid, name: u.name, kind: isAttack ? 'attack' : 'heal',
+    dice: nd ? Number(nd[1]) : /Primary Weapon/.test(t) ? 'pwv' : null,
+    fixed: fx ? Number(fx[1]) : 0,
+    minRange: rr ? Number(rr[1]) : 1,
+    range: rr ? Number(rr[2]) : r1 ? Number(r1[1]) : Number(u.range) || 1,
+    arc: arcRaw.includes('rear') ? 'B' : arcRaw === '360' || /every direction|any direction/.test(t) ? '360' : 'F',
+    area,
+    penetrates: u.penetrates === true || /penetrates Armor/i.test(t),
+    needs: /spend your Target Token/i.test(t) ? 'target' : /spend your Concentrate Token/i.test(t) ? 'concentrate' : null,
+    dts,
+    disables: /Disable this Upgrade/i.test(t),
+    discards: /Discard this Upgrade/i.test(t),
+    element: el && el !== 'None' && el !== 'null' ? el : null,
+    heal: heal ? Number(heal[1]) : 0,
+    text: u.text ?? '',
+    ready: 0,
+    spent: false,
+  };
+}
+
+export const specialReady = (u: Unit, s: Special) =>
+  !s.spent && s.ready <= 0 && (s.needs !== 'target' || !!u.tokens.target) && (s.needs !== 'concentrate' || !!u.tokens.concentrate);
+
+/** Paga o custo do ataque: fichas de duração, desativar ou descartar, e a ficha exigida. */
+export function paySpecial(u: Unit, s: Special) {
+  if (s.discards) s.spent = true;
+  else if (s.dts) s.ready = s.dts;
+  else if (s.disables) s.ready = 2;
+  if (s.needs === 'target') u.tokens.target = false;
+  if (s.needs === 'concentrate') u.tokens.concentrate = false;
+}
+
+/** No fim da rodada sai uma ficha de duração de cada melhoria. */
+export function tickSpecials(u: Unit) {
+  for (const s of u.specials ?? []) if (s.ready > 0) s.ready -= 1;
+}
+
+const P_HIT = 3 / 8, P_CRIT = 1 / 8, P_DODGE = 3 / 8;
+/** Dano esperado de um ataque com n dados contra um alvo. */
+export function expectedDamage(n: number, target: Unit, penetrates: boolean, resist: boolean) {
+  const hits = n * P_HIT, crits = n * P_CRIT;
+  const dodges = target.agility * P_DODGE + (target.tokens.dodge ? 1 : 0) + (resist ? 1 : 0);
+  const afterH = Math.max(0, hits - dodges);
+  const afterC = Math.max(0, crits - Math.max(0, dodges - hits));
+  const armor = penetrates ? 0 : target.armor;
+  return Math.max(0, afterH - armor) + afterC;
+}
+
+export interface AttackPlan {
+  label: string;
+  special?: Special;
+  dice: number;
+  fixed: number;
+  penetrates: boolean;
+  element: string | null;
+  area: Special['area'];
+  targets: Unit[];
+  range: Dist;
+  level?: 'air' | 'ground';
+  score: number;
+  effectOnly: boolean;
+}
+
+const arcMatch = (want: 'F' | 'B' | '360', a: ArcAnswer) => want === '360' || want === a.arc;
+
+/** Compara armas primárias e ataques de melhoria e devolve o plano com mais dano esperado. */
+export function planAttack(u: Unit, enemies: Unit[], answers: Record<string, ArcAnswer>): AttackPlan | null {
+  const plans: AttackPlan[] = [];
+  const inReach = (e: Unit, min: number, max: number, arc: 'F' | 'B' | '360') => {
+    const a = answers[e.id];
+    return a && a.range && a.range >= min && a.range <= max && arcMatch(arc, a) ? (a.range as Dist) : null;
+  };
+  for (const w of u.attacks) {
+    for (const e of enemies) {
+      const r = inReach(e, 1, w.range, w.arc === 'Rear' ? 'B' : 'F');
+      if (!r || (w.type === 'Melee' && e.air !== u.air)) continue;
+      const exp = expectedDamage(u.attack, e, false, false);
+      const kill = exp >= e.health - e.dmg - e.crit ? 1.5 : 0;
+      plans.push({ label: w.description, dice: u.attack, fixed: 0, penetrates: false, element: null, area: null, targets: [e], range: r, score: exp + kill + (r === 4 ? -0.2 : 0), effectOnly: false });
+    }
+  }
+  for (const s of u.specials ?? []) {
+    if (s.kind !== 'attack' || !specialReady(u, s)) continue;
+    const dice = s.dice === 'pwv' ? u.attack : s.dice ?? 0;
+    const effectOnly = !dice && !s.fixed;
+    const hit = enemies.filter((e) => inReach(e, s.minRange, s.range, s.arc));
+    if (!hit.length) continue;
+    const value = (e: Unit) => (s.fixed ? s.fixed : effectOnly ? 0.9 : expectedDamage(dice, e, s.penetrates, !!s.element && e.element === s.element));
+    // custo de usar: carta descartada vale mais guardar para um bom momento
+    const cost = s.discards ? 1 : s.disables || s.dts ? 0.3 : 0;
+    if (s.area) {
+      const air = hit.filter((e) => e.air), ground = hit.filter((e) => !e.air);
+      const sum = (l: Unit[]) => l.reduce((t, e) => t + value(e), 0);
+      const pick = sum(air) >= sum(ground) ? { level: 'air' as const, list: air } : { level: 'ground' as const, list: ground };
+      if (!pick.list.length) continue;
+      const r = Math.min(...pick.list.map((e) => answers[e.id].range as number)) as Dist;
+      plans.push({ label: s.name, special: s, dice, fixed: s.fixed, penetrates: s.penetrates, element: s.element, area: s.area, targets: pick.list, range: r, level: pick.level, score: sum(pick.list) - cost + 0.2, effectOnly });
+    } else {
+      for (const e of hit) {
+        plans.push({ label: s.name, special: s, dice, fixed: s.fixed, penetrates: s.penetrates, element: s.element, area: null, targets: [e], range: answers[e.id].range as Dist, score: value(e) - cost, effectOnly });
+      }
+    }
+  }
+  if (!plans.length) return null;
+  plans.sort((a, b) => b.score - a.score);
+  return plans[0];
+}
+
+/** Melhoria de cura que a IA pode usar como ação, se valer a pena. */
+export function healOption(u: Unit) {
+  const s = (u.specials ?? []).find((x) => x.kind === 'heal' && specialReady(u, x));
+  if (!s || u.dmg < Math.min(2, s.heal)) return null;
+  return s;
 }

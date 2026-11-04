@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { loadLegionFromCode, type Legion } from '../engine/engine';
 import { generateLegions } from '../engine/generator';
 import {
-  ACTION_NAME, COLOR_NAME, aiAttackRoll, aiDefenseRoll, applyAction, chooseAction, chooseManeuver, chooseTarget,
+  ACTION_NAME, COLOR_NAME, aiAttackRoll, aiDefenseRoll, applyAction, chooseAction, chooseManeuver, healOption, parseSpecial, paySpecial, planAttack, tickSpecials,
   maneuverLabel, resolveDamage, turnOrder,
-  type ArcAnswer, type AtkFace, type DefFace, type Dir, type Dist, type Edge, type Unit,
+  type ArcAnswer, type AttackPlan, type AtkFace, type DefFace, type Dir, type Dist, type Edge, type Unit,
 } from '../engine/opponent';
 import { catalog, useStore } from '../store';
+import { getLoadedTranslations, loadTranslations, type Translations } from '../i18n/cards';
 import { Shell } from '../ui/Shell';
 
 /* ---------- estado da partida ---------- */
@@ -32,6 +33,8 @@ function unitsFrom(legion: Legion, side: 'ai' | 'me'): Unit[] {
     health: c.health, armor: c.armor, flyer: c.flyer, movement: c.movement, attacks: c.data.primary_attacks,
     actions: c.actions, upgrades: c.equipped.filter(Boolean).map((u) => u!.name),
     dmg: 0, crit: 0, alive: true, air: c.flyer, tokens: {},
+    element: c.element,
+    specials: c.equipped.filter(Boolean).map((x) => parseSpecial(x!.data as never)).filter(Boolean) as NonNullable<ReturnType<typeof parseSpecial>>[],
   }));
 }
 
@@ -95,6 +98,11 @@ function UnitChip({ u }: { u: Unit }) {
         {u.tokens.exhausted && <span className="ai-tag">exausta</span>}
         {!u.alive && <span className="ai-tag">derrotada</span>}
       </div>
+      {u.side === 'ai' && u.alive && (u.specials ?? []).length > 0 && (
+        <ul className="ai-specials">
+          {u.specials!.map((s) => <li key={s.uid} className={s.spent ? 'is-spent' : s.ready > 0 ? 'is-wait' : ''}>{s.name}{s.spent ? ' · usada' : s.ready > 0 ? ` · ${s.ready} rodada(s)` : ''}</li>)}
+        </ul>
+      )}
     </div>
   );
 }
@@ -267,7 +275,8 @@ function ActivationStep({ m, update }: { m: Match; update(fn: (m: Match) => void
   }
 
   const plan = u.plan;
-  const action = ahead === null ? null : chooseAction(u, ahead);
+  const heal = healOption(u);
+  const action = ahead === null || heal ? null : chooseAction(u, ahead);
   return (
     <section className="ai-card ai-ask ai-reveal">
       <p className="ai-kicker">{pos}</p>
@@ -289,13 +298,16 @@ function ActivationStep({ m, update }: { m: Match; update(fn: (m: Match) => void
       </div>
       {ahead !== null && (
         <div className="ai-decision">
-          {action ? (<><img src={`/icons/${action === 'Target' ? 'target' : action === 'Dodge' ? 'dodge' : 'concentrate'}.png`} alt="" width={32} height={32} /><p><strong>Ação: {ACTION_NAME[action]}.</strong> {action === 'Target' ? 'Coloque uma ficha de Alvo ao lado dela.' : `Coloque uma ficha de ${ACTION_NAME[action]} ao lado dela.`}</p></>)
+          {heal ? <p><strong>Ação: {heal.name}.</strong> Ela tira {Math.min(heal.heal, u.dmg)} carta(s) de dano virada(s) para baixo de si mesma.{heal.discards ? ' Descarte a carta.' : ''}</p>
+            : action ? (<><img src={`/icons/${action === 'Target' ? 'target' : action === 'Dodge' ? 'dodge' : 'concentrate'}.png`} alt="" width={32} height={32} /><p><strong>Ação: {ACTION_NAME[action]}.</strong> {action === 'Target' ? 'Coloque uma ficha de Alvo ao lado dela.' : `Coloque uma ficha de ${ACTION_NAME[action]} ao lado dela.`}</p></>)
             : <p><strong>Sem ação</strong>{u.tokens.exhausted ? ': ela está exausta.' : '.'}</p>}
         </div>
       )}
       <div className="ai-actions">
         <button className="btn btn-primary" disabled={ahead === null} onClick={() => next((x) => {
-          applyAction(x, chooseAction(x, ahead!));
+          const hx = healOption(x);
+          if (hx) { const n = Math.min(hx.heal, x.dmg); x.dmg -= n; paySpecial(x, x.specials!.find((q) => q.uid === hx.uid)!); }
+          else applyAction(x, chooseAction(x, ahead!));
           if (x.plan?.color === 'r') x.tokens.exhausted = true;
           else if (x.plan?.color === 'g') x.tokens.exhausted = false;
         })}>Feito, próxima</button>
@@ -307,21 +319,32 @@ function ActivationStep({ m, update }: { m: Match; update(fn: (m: Match) => void
 /* ---------- combate ---------- */
 
 interface Outcome { title: string; atk?: AtkFace[]; atkFirst?: AtkFace[]; def?: DefFace[]; notes: string[]; text: string }
+interface Roll { targetId: string; first: AtkFace[]; atk: AtkFace[]; notes: string[] }
+interface Pending { plan: AttackPlan; rolls: Roll[] }
+
+function useTr() {
+  const [tr, setTr] = useState<Translations | null>(getLoadedTranslations());
+  useEffect(() => { if (!tr) loadTranslations().then(setTr); }, [tr]);
+  return (uid: number, text: string) => tr?.u[uid] ?? text;
+}
+
+const AREA_PT: Record<string, string> = { Line: 'Linha', Cone: 'Cone', Burst: 'Estouro' };
 
 function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): void }) {
   const order = turnOrder(m.units, 'combate', m.initiative);
   const u = order[m.step];
   const enemies = m.units.filter((x) => x.alive && x.side !== u?.side);
+  const tr = useTr();
   const [answers, setAnswers] = useState<Record<string, ArcAnswer>>({});
   const [target, setTarget] = useState<string | null>(null);
   const [range, setRange] = useState<Dist | null>(null);
   const [hits, setHits] = useState(0);
   const [crits, setCrits] = useState(0);
-  const [dodges, setDodges] = useState(0);
+  const [dodges, setDodges] = useState<Record<string, number>>({});
   const [stage, setStage] = useState<'ask' | 'defend' | 'done'>('ask');
   const [outcome, setOutcome] = useState<Outcome | null>(null);
-  const [pending, setPending] = useState<{ targetId: string; atk: AtkFace[]; notes: string[]; first: AtkFace[]; weapon: string; range: Dist } | null>(null);
-  useEffect(() => { setAnswers({}); setTarget(null); setRange(null); setHits(0); setCrits(0); setDodges(0); setStage('ask'); setOutcome(null); setPending(null); }, [u?.id, m.round]);
+  const [pending, setPending] = useState<Pending | null>(null);
+  useEffect(() => { setAnswers({}); setTarget(null); setRange(null); setHits(0); setCrits(0); setDodges({}); setStage('ask'); setOutcome(null); setPending(null); }, [u?.id, m.round]);
   if (!u) return null;
 
   const advance = () => update((mm) => {
@@ -329,26 +352,51 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
     else { mm.phase = 'fim'; mm.step = 0; }
   });
   const pos = `Combate · ${m.step + 1} de ${order.length} · nível ${u.level}`;
-  const hasRear = u.attacks.some((a) => a.arc === 'Rear');
+  const rearMax = Math.max(0, ...u.attacks.filter((a) => a.arc === 'Rear').map((a) => a.range), ...(u.specials ?? []).filter((s) => s.kind === 'attack' && s.arc !== 'F' && !s.spent).map((s) => s.range));
 
   if (u.side === 'ai') {
     if (stage === 'ask') {
       const decide = () => {
-        const pick = chooseTarget(u, enemies, answers);
-        if (!pick) {
+        const plan = planAttack(u, enemies, answers);
+        if (!plan) {
           setOutcome({ title: `${u.name} não ataca`, notes: [], text: 'Nenhum inimigo está no arco e no alcance das armas dela.' });
           setStage('done');
           return;
         }
-        const r = aiAttackRoll(u.attack, u.tokens, Math.random);
-        setPending({ targetId: pick.target.id, atk: r.final, first: r.first, notes: r.notes, weapon: pick.weapon.description, range: pick.range });
-        update((mm) => { const x = mm.units.find((y) => y.id === u.id)!; if (r.usedTarget) x.tokens.target = false; if (r.usedConcentrate) x.tokens.concentrate = false; });
+        const tokens = { ...u.tokens };
+        if (plan.special?.needs === 'target') tokens.target = false;
+        if (plan.special?.needs === 'concentrate') tokens.concentrate = false;
+        let usedT = false, usedC = false;
+        const rolls: Roll[] = plan.targets.map((t, i) => {
+          if (!plan.dice) return { targetId: t.id, first: [], atk: [], notes: [] };
+          const r = aiAttackRoll(plan.dice, i === 0 ? tokens : {}, Math.random);
+          if (i === 0) { usedT = r.usedTarget; usedC = r.usedConcentrate; }
+          return { targetId: t.id, first: r.first, atk: r.final, notes: r.notes };
+        });
+        update((mm) => {
+          const x = mm.units.find((y) => y.id === u.id)!;
+          if (usedT) x.tokens.target = false;
+          if (usedC) x.tokens.concentrate = false;
+          if (plan.special) { const sp = x.specials!.find((q) => q.uid === plan.special!.uid)!; paySpecial(x, sp); }
+        });
+        setPending({ plan, rolls });
+        if (plan.effectOnly || (!plan.dice && plan.fixed)) {
+          const lines = plan.targets.map((t) => plan.fixed ? `${t.name} recebe ${plan.fixed} de dano normal, sem defesa.` : `Aplique em ${t.name} o efeito da carta.`);
+          if (plan.fixed) update((mm) => { for (const t of plan.targets) { const x = mm.units.find((y) => y.id === t.id)!; x.dmg += plan.fixed; } mm.log.push(`${u.name} usou ${plan.label}.`); });
+          else update((mm) => { mm.log.push(`${u.name} usou ${plan.label} em ${plan.targets.map((t) => t.name).join(', ')}.`); });
+          setOutcome({ title: `${u.name} usa ${plan.label}`, notes: [tr(plan.special!.uid, plan.special!.text)], text: lines.join(' ') });
+          setStage('done');
+          return;
+        }
         setStage('defend');
       };
       return (
         <section className="ai-card ai-ask">
           <p className="ai-kicker">{pos}</p>
           <h2>A IA ataca com <span className="ai-name">{u.name}</span></h2>
+          {(u.specials ?? []).some((s) => s.kind === 'attack') && (
+            <p className="muted">Ataques de melhoria: {(u.specials ?? []).filter((s) => s.kind === 'attack').map((s) => `${s.name}${s.spent ? ' (usada)' : s.ready > 0 ? ` (volta em ${s.ready})` : ''}`).join(', ')}.</p>
+          )}
           <h3>Para cada criatura sua: onde ela está em relação a {u.name}?</h3>
           <div className="ai-arcs">
             {enemies.map((e) => {
@@ -360,7 +408,7 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
                   <div className="ai-tiles ai-tiles-row">
                     <Tile on={!a.range} onClick={() => set({ range: 0 })} tone="mute">Fora</Tile>
                     {([1, 2, 3, 4] as Dist[]).map((d) => <Tile key={d} on={a.range === d && a.arc === 'F'} onClick={() => set({ range: d, arc: 'F' })} sub="à frente">↑ {d}</Tile>)}
-                    {hasRear && ([1, 2] as Dist[]).map((d) => <Tile key={`b${d}`} on={a.range === d && a.arc === 'B'} onClick={() => set({ range: d, arc: 'B' })} sub="atrás">↓ {d}</Tile>)}
+                    {([1, 2, 3, 4] as Dist[]).filter((d) => d <= rearMax).map((d) => <Tile key={`b${d}`} on={a.range === d && a.arc === 'B'} onClick={() => set({ range: d, arc: 'B' })} sub="atrás ou ao lado">↓ {d}</Tile>)}
                   </div>
                 </div>
               );
@@ -371,26 +419,45 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
       );
     }
     if (stage === 'defend' && pending) {
-      const t = m.units.find((x) => x.id === pending.targetId)!;
-      const h = pending.atk.filter((f) => f === 'hit').length;
-      const c = pending.atk.filter((f) => f === 'crit').length;
+      const { plan, rolls } = pending;
       const finish = () => {
-        const res = resolveDamage(h, c, dodges, t.armor);
-        update((mm) => { const x = mm.units.find((y) => y.id === t.id)!; x.dmg += res.normal; x.crit += res.crit; mm.log.push(`${u.name} atacou ${t.name}: ${res.normal} de dano e ${res.crit} crítico(s).`); });
-        setOutcome({ title: `${u.name} ataca ${t.name}`, atk: pending.atk, atkFirst: pending.first, notes: pending.notes, text: res.normal + res.crit === 0 ? `${t.name} não sofre dano.` : `${t.name} recebe ${res.normal} carta(s) de dano virada(s) para baixo e ${res.crit} virada(s) para cima.${res.blocked ? ` A Armadura parou ${res.blocked} acerto(s).` : ''}` });
+        const lines: string[] = [];
+        update((mm) => {
+          for (const r of rolls) {
+            const t = mm.units.find((y) => y.id === r.targetId)!;
+            const h = r.atk.filter((f) => f === 'hit').length, c = r.atk.filter((f) => f === 'crit').length;
+            const res = resolveDamage(h, c, dodges[r.targetId] ?? 0, plan.penetrates ? 0 : t.armor);
+            t.dmg += res.normal; t.crit += res.crit;
+            lines.push(res.normal + res.crit === 0 ? `${t.name} não sofre dano.` : `${t.name} recebe ${res.normal} carta(s) de dano virada(s) para baixo e ${res.crit} virada(s) para cima.${res.blocked ? ` A Armadura parou ${res.blocked}.` : ''}`);
+            mm.log.push(`${u.name} usou ${plan.label} em ${t.name}: ${res.normal} de dano e ${res.crit} crítico(s).`);
+          }
+        });
+        setOutcome({ title: `${u.name} usa ${plan.label}`, notes: plan.special ? [tr(plan.special.uid, plan.special.text)] : [], text: lines.join(' ') });
         setStage('done');
       };
       return (
         <section className="ai-card ai-ask ai-reveal">
           <p className="ai-kicker">{pos}</p>
-          <h2><span className="ai-name">{u.name}</span> ataca <span className="ai-name is-me">{t.name}</span></h2>
-          <p>Arma: <strong>{pending.weapon}</strong> a Alcance {pending.range}. {pending.range === 4 && 'Você rola 1 dado de defesa a mais.'}</p>
-          {pending.notes.length > 0 && <><p className="muted">Primeira rolagem</p><Dice faces={pending.first} kind="atk" /></>}
-          <p className="muted">Resultado final da IA</p>
-          <Dice faces={pending.atk} kind="atk" />
-          {pending.notes.map((n) => <p key={n} className="muted">{n}</p>)}
-          <p><strong>{h} acerto(s) e {c} crítico(s).</strong> Role a sua defesa ({t.agility + (pending.range === 4 ? 1 : 0)} dados), aplique as suas fichas e informe as esquivas.</p>
-          <Stepper label="Esquivas" value={dodges} set={setDodges} icon="dodge" />
+          <h2><span className="ai-name">{u.name}</span> usa <span className="ai-name">{plan.label}</span></h2>
+          {plan.area && <p className="ai-callout">Ataque em área: <strong>{AREA_PT[plan.area]}</strong>{plan.special ? ` de Alcance ${plan.special.range}` : ''}, contra criaturas <strong>{plan.level === 'air' ? 'no ar' : 'no solo'}</strong>. Posicione o gabarito e confira: cada criatura dentro dele sofre um ataque separado.</p>}
+          {plan.penetrates && <p className="ai-callout">Este ataque atravessa a Armadura.</p>}
+          {plan.special && <details className="ai-cardtext"><summary>Texto da carta</summary><p>{tr(plan.special.uid, plan.special.text).replace(/\*/g, '')}</p></details>}
+          {rolls.map((r) => {
+            const t = m.units.find((y) => y.id === r.targetId)!;
+            const h = r.atk.filter((f) => f === 'hit').length, c = r.atk.filter((f) => f === 'crit').length;
+            const resist = !!plan.element && t.element === plan.element;
+            const range = answers[t.id]?.range as Dist;
+            return (
+              <div key={r.targetId} className="ai-hit">
+                <h3>Contra <span className="ai-name is-me">{t.name}</span> · Alcance {range}</h3>
+                {r.notes.length > 0 && <><p className="muted">Primeira rolagem</p><Dice faces={r.first} kind="atk" /></>}
+                <Dice faces={r.atk} kind="atk" />
+                {r.notes.map((n) => <p key={n} className="muted">{n}</p>)}
+                <p><strong>{h} acerto(s) e {c} crítico(s).</strong> Role {t.agility + (range === 4 ? 1 : 0)} dado(s) de defesa{resist ? ' e some 1 esquiva pela resistência à energia' : ''}, aplique as suas fichas e informe as esquivas.</p>
+                <Stepper label="Esquivas" value={dodges[r.targetId] ?? 0} set={(n) => setDodges((d) => ({ ...d, [r.targetId]: n }))} icon="dodge" />
+              </div>
+            );
+          })}
           <div className="ai-actions"><button className="btn btn-primary" onClick={finish}>Calcular o dano</button></div>
         </section>
       );
@@ -461,6 +528,7 @@ function EndStep({ m, update }: { m: Match; update(fn: (m: Match) => void): void
     for (const u of mm.units) {
       if (u.alive && u.dmg + u.crit >= u.health) { u.alive = false; mm.log.push(`${u.name} foi derrotada.`); }
       u.tokens = { exhausted: u.tokens.exhausted };
+      tickSpecials(u);
     }
     const me = mm.units.some((u) => u.side === 'me' && u.alive);
     const ai = mm.units.some((u) => u.side === 'ai' && u.alive);
@@ -484,7 +552,13 @@ export function CompanionPage() {
   const [m, setM] = useState<Match | null>(load);
   useEffect(() => { document.title = 'Jogar contra a IA · Attack Wing'; }, []);
   useEffect(() => save(m), [m]);
-  const update = (fn: (mm: Match) => void) => setM((cur) => { if (!cur) return cur; const next: Match = JSON.parse(JSON.stringify(cur)); fn(next); return next; });
+  const [history, setHistory] = useState<Match[]>([]);
+  const update = (fn: (mm: Match) => void) => setM((cur) => {
+    if (!cur) return cur;
+    setHistory((h) => [...h.slice(-19), cur]);
+    const next: Match = JSON.parse(JSON.stringify(cur)); fn(next); return next;
+  });
+  const undo = () => setHistory((h) => { if (!h.length) return h; setM(h[h.length - 1]); return h.slice(0, -1); });
 
   const winner = m?.phase === 'acabou' ? (m.units.some((u) => u.side === 'me' && u.alive) ? 'Você venceu.' : m.units.some((u) => u.side === 'ai' && u.alive) ? 'A IA venceu.' : 'Empate: as duas legiões caíram.') : null;
 
@@ -496,7 +570,12 @@ export function CompanionPage() {
             <h1>Jogar contra a IA</h1>
             <p>Você joga na mesa com as miniaturas e conta o que vê. A IA decide as manobras, as ações e os ataques das criaturas dela, rola os dados e calcula o dano.</p>
           </div>
-          {m && <button className="btn btn-ghost" onClick={() => { if (confirm('Encerrar esta partida?')) setM(null); }}>Nova partida</button>}
+          {m && (
+            <div className="ai-head-btns">
+              <button className="btn btn-ghost" disabled={!history.length} onClick={undo}>Desfazer</button>
+              <button className="btn btn-ghost" onClick={() => { if (confirm('Encerrar esta partida?')) { setM(null); setHistory([]); } }}>Nova partida</button>
+            </div>
+          )}
         </header>
 
         {!m && <Setup onStart={setM} />}

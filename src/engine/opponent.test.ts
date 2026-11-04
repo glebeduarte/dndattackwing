@@ -40,3 +40,28 @@ describe('IA adversária', () => {
     expect(turnOrder([a, b], 'combate', 'ai')[0].id).toBe('a');
   });
 });
+
+import upgrades from '../data/upgrades.json';
+import { parseSpecial, planAttack } from './opponent';
+const up = (uid: number) => (upgrades as any[]).find((x) => x.uid === uid);
+describe('ataques de melhoria', () => {
+  it('lê o Fire Breath como cone com a arma primária', () => {
+    const s = parseSpecial(up(108))!;
+    expect(s).toMatchObject({ kind: 'attack', dice: 'pwv', area: 'Cone', range: 3, arc: 'F', dts: 3 });
+  });
+  it('lê o Magic Missile como dano fixo que exige Alvo', () => {
+    expect(parseSpecial(up(119))).toMatchObject({ fixed: 1, needs: 'target', arc: '360' });
+  });
+  it('usa o sopro quando ele pega duas criaturas', () => {
+    const ai = mk(101, 'ai', 'a'); ai.specials = [parseSpecial(up(108))!];
+    const e1 = mk(103, 'me', 'e1'), e2 = mk(105, 'me', 'e2');
+    const plan = planAttack(ai, [e1, e2], { e1: { range: 2, arc: 'F' }, e2: { range: 3, arc: 'F' } })!;
+    expect(plan.label).toBe('Fire Breath');
+    expect(plan.targets).toHaveLength(2);
+  });
+  it('o sopro em recarga não é usado', () => {
+    const ai = mk(101, 'ai', 'a'); const s = parseSpecial(up(108))!; s.ready = 2; ai.specials = [s];
+    const plan = planAttack(ai, [mk(103, 'me', 'e1')], { e1: { range: 2, arc: 'F' } })!;
+    expect(plan.label).not.toBe('Fire Breath');
+  });
+});

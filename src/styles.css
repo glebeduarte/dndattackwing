@@ -1279,3 +1279,12 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
   .ai-tiles-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ai-head { flex-direction: column; }
 }
+.ai-head-btns { display: flex; gap: 8px; }
+.ai-callout { padding: 10px 14px; border-radius: 12px; background: #f6e3df; font-size: 14px; line-height: 21px; }
+.ai-hit { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: 1px solid var(--control); }
+.ai-cardtext summary { cursor: pointer; font-size: 14px; color: var(--muted); }
+.ai-cardtext p { font-size: 14px; line-height: 21px; margin-top: 6px; white-space: pre-line; }
+.ai-specials { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.ai-specials li { font-size: 11px; padding: 2px 7px; border-radius: 6px; background: #f6e3df; color: #8c2b22; }
+.ai-specials li.is-wait { background: #ece7e0; color: var(--muted); }
+.ai-specials li.is-spent { background: #ece7e0; color: var(--muted); text-decoration: line-through; }
