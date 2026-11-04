@@ -80,11 +80,9 @@ export const CAMPAIGNS: Campaign[] = [
     source: 'Livro de regras de D&D Attack Wing e expansões',
     summary:
       'A campanha que abre o jogo. Uma rixa entre três dragões da caixa básica, um roubo e uma emboscada, termina com o dragão de cobre recebendo uma missão maior: achar o lugar sagrado onde os dragões antigos guardaram suas relíquias antes que os servos de Tiamat cheguem lá.',
-    status: '21 capítulos, 8 com guia completo',
+    status: '21 capítulos, 9 com guia completo',
     pending: 'Os capítulos seguintes vinham nos livretos das expansões. Cada um entra aqui com o guia completo assim que o texto da aventura estiver disponível.',
     planned: [
-      { code: '3.7', title: 'Behind Enemy Lines', expansion: 'Sun Elf Troop', wave: 'Onda 1', artifacts: [{ name: 'Mithral Thorn', uid: 621 }],
-        premise: 'Os arqueiros de Limnen buscam uma mensagem na orla de uma floresta tomada por servos dos dragões.' },
       { code: '4.1', title: 'The Howling Chasm', expansion: 'Aarakocra Troop', wave: 'Onda 2', artifacts: [{ name: '7th Shard of Law', uid: 1019 }] },
       { code: '4.2', title: 'A Night of Shadows', expansion: 'Black Shadow Dragon', wave: 'Onda 2', artifacts: [{ name: 'The Ebon Cloak', uid: 1108 }] },
       { code: '4.3', title: 'The Ever-Watchful Eyes', expansion: 'Movanic Deva Angel', wave: 'Onda 2', artifacts: [{ name: 'Tuning Fork of Neutrality', uid: 1209 }] },
@@ -612,6 +610,56 @@ export const ADVENTURES: Adventure[] = [
     campaign: 'cemiterio-primordial',
     chapter: 3.6,
     theme: 'Escolta de uma carroça blindada que precisa ser empurrada ladeira acima sob ataque.',
+  },
+  {
+    slug: 'atras-das-linhas-inimigas',
+    number: 3.7,
+    title: 'Atrás das linhas inimigas',
+    original: 'Behind Enemy Lines',
+    source: 'Livreto da expansão Sun Elf Troop (Onda 1), aventura 3.7',
+    players: 2,
+    playArea: '90 x 90 cm, a orla de uma grande floresta onde um exército inimigo acampou',
+    components: ['Nenhum componente especial', 'A carta de melhoria Mithral Thorn'],
+    sides: [
+      { id: 'elfos', name: 'Elfos', points: 120, color: '#3f8a4a', requires: 'Criaturas e melhorias, com pelo menos um soldado dos Harper Legion Elves' },
+      { id: 'inimigo', name: 'Inimigo', points: 120, color: '#7a3a9a', requires: 'Quaisquer criaturas e melhorias' },
+    ],
+    synopsis: [
+      'Uma informação importante foi deixada para a Legião Harpista no ponto de entrega de sempre, na orla de uma grande floresta. Isso foi antes de uma força inimiga acampar bem na frente dele.',
+      'Ontem à noite, a Legião mandou uma tropa de elfos entrar escondida e buscar a mensagem. Para sair com a luz da manhã, eles vão precisar que uma batalha campal distraia o inimigo.',
+    ],
+    setup: [
+      'Cada lado monta a legião com 120 pontos. A legião dos Elfos precisa ter pelo menos um soldado dos Harper Legion Elves.',
+      'Os Elfos colocam a tropa da Legião Harpista a até 15 cm (6") da borda inicial sul.',
+      'O Inimigo coloca as criaturas dele a até 7,5 cm (3") da linha do meio, entre as duas bordas iniciais.',
+      'Os Elfos colocam o resto das criaturas a até 15 cm da borda inicial norte.',
+    ],
+    specialRules: [
+      { title: 'A tropa escondida', text: 'Nenhuma criatura do Inimigo pode atacar a tropa de elfos até que uma destas coisas aconteça: a tropa ataca uma criatura inimiga; a tropa cruza a linha do meio; todos os aliados da tropa são derrotados; ou a tropa é pega no mesmo ataque de área que atinge pelo menos 1 aliado dela.' },
+      { title: 'A saída', text: 'Um soldado da tropa de elfos que sai pela borda inicial norte não é derrotado. É a única forma de deixar a área sem ser derrotado nesta aventura.' },
+    ],
+    objectives: [
+      { side: 'Elfos', text: ['Vencem se pelo menos um soldado da tropa de elfos sair pela borda inicial norte (depois da batalha 1).'] },
+      { side: 'Inimigo', text: ['Vence se ainda tiver alguma criatura em jogo quando o último soldado da tropa de elfos morrer (depois da batalha 2).'] },
+      { side: 'Empate', text: ['Se nenhum dos objetivos for cumprido, joguem a aventura de novo.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'A mensagem chega', summary: 'Nymmestra, a maga dos elfos do sol, lê o relatório e escreve na hora para Galadaeros: o inimigo já sabe que os planos dele foram descobertos e que o dragão de cobre está tentando impedi-los, e talvez tenha as mesmas pistas que eles. Ela pede cuidado, avisa que forças maiores vão se voltar contra ele nos próximos meses e promete mandar a ajuda que puder.', rewards: ['Harper Legion Elves: 1 XP', 'Harper Legion Elves recebem o Mithral Thorn'] },
+      { id: '2', title: 'A mensagem é interceptada', summary: 'A mensagem achada no corpo de um elfo é decifrada e levada a Rezmir, que a lê sorrindo: agora os inimigos sabem de tudo. Ela pergunta se houve movimento de tropas para o oeste e ouve que ainda não. Fica satisfeita, porque eles têm as mesmas pistas, mas ainda não encontraram a Agulha da Corrente.', rewards: ['Inimigo: 1 XP', 'Inimigo recebe o Mithral Thorn'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'elfos', label: 'Aliados dos elfos (saída ao norte)' },
+        { x: 0, y: 37.5, w: 90, h: 15, side: 'inimigo', label: 'Inimigo (linha do meio)' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'elfos', label: 'Tropa da Legião Harpista' },
+      ],
+      tokens: [],
+      note: 'A tropa da Legião Harpista começa no sul e precisa atravessar o acampamento inimigo até sair pela borda norte.',
+    },
+    origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 3.7,
+    theme: 'Fuga com uma mensagem secreta através do acampamento inimigo, com a batalha como distração.',
   },
   {
     slug: 'ninho-na-tempestade',
