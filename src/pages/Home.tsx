@@ -67,7 +67,21 @@ export function Home() {
       { rootMargin: '0px 0px -10% 0px' },
     );
     els.forEach((el) => io.observe(el));
+
+    // A arte da capa desce mais devagar que a página.
+    const art = document.querySelector<HTMLElement>('.h-hero-art');
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        if (art && !still && window.scrollY < window.innerHeight * 1.2) art.style.setProperty('--h-sy', `${window.scrollY * 0.3}px`);
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
       io.disconnect();
       document.documentElement.classList.remove('h-anim');
     };
@@ -150,8 +164,8 @@ export function Home() {
         <div className="h-waves h-reveal">
           <h3>Do kit inicial à décima onda</h3>
           <ol className="h-wave-list">
-            {waves.map(([w, e]) => (
-              <li key={w}>
+            {waves.map(([w, e], i) => (
+              <li key={w} style={{ '--i': i } as React.CSSProperties}>
                 <span className="h-wave-name">{w === 'Starter' ? 'Kit inicial' : w.replace('Wave', 'Onda')}</span>
                 <span className="h-wave-count"><strong>{e.creatures.length}</strong> criaturas</span>
                 <span className="h-wave-names">{[...new Set(e.creatures)].slice(0, 4).join(', ')}{new Set(e.creatures).size > 4 ? '…' : ''}</span>
@@ -196,7 +210,7 @@ export function Home() {
       </section>
 
       <footer className="h-footer">
-        <p className="h-footer-name"><Mark size={40} light /> Attack Wing</p>
+        <p className="h-footer-name"><Mark size={26} light /> Attack Wing</p>
         <p>
           Ferramenta de fã, gratuita e sem fins comerciais. D&D Attack Wing, nomes, textos, ilustrações e ícones das cartas são da WizKids e da Wizards of the Coast. Dados reconstruídos a partir do antigo construtor do dndaw.com.
         </p>
