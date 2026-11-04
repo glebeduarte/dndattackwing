@@ -11,7 +11,7 @@ import { catalog, useStore } from '../store';
 import { getLoadedTranslations, loadTranslations, type Translations } from '../i18n/cards';
 import { Shell } from '../ui/Shell';
 import { TableBoard } from '../ui/TableBoard';
-import { applyManeuver, arcsFromTable, deploy, loadTable, saveTable, situationFromTable, sizeOf, type Pose } from '../engine/table';
+import { arcsFromTable, deploy, loadTable, moveOnTable, offBoard, planOnTable, saveTable, situationFromTable, sizeOf, type Pose } from '../engine/table';
 
 /* ---------- estado da partida ---------- */
 
@@ -23,6 +23,7 @@ interface Match {
   units: Unit[];
   initiative: 'me' | 'ai';
   log: string[];
+  feed?: string[];
 }
 
 const KEY = 'aw:match';
@@ -207,6 +208,23 @@ function SituationStep({ m, update }: { m: Match; update(fn: (m: Match) => void)
   const [edge, setEdge] = useState<Edge>(u?.sit?.edge ?? 'none');
   useEffect(() => { setDir(u?.sit?.dir ?? null); setDist(u?.sit?.dist ?? null); setEdge(u?.sit?.edge ?? 'none'); }, [u?.id]);
   if (!u) return null;
+  if (hasTable()) {
+    const auto = () => update((mm) => {
+      const t = loadTable();
+      for (const a of mm.units.filter((y) => y.side === 'ai' && y.alive)) a.plan = planOnTable(a, mm.units, t.poses, Math.random) ?? undefined;
+      mm.phase = 'planejamento'; mm.step = 0;
+      mm.log.push(`Rodada ${mm.round}: a IA leu a mesa e escolheu as manobras.`);
+    });
+    return (
+      <section className="ai-card ai-ask">
+        <p className="ai-kicker">Leitura da mesa · rodada {m.round}</p>
+        <h2>A IA lê a mesa sozinha</h2>
+        <p>Para cada criatura dela, a IA testa todas as manobras do disco sobre a mesa e escolhe a que deixa uma criatura sua no arco e ao alcance dela, longe dos seus arcos, sem bater em outras bases e sem sair da mesa.</p>
+        <p className="muted">Confira se as bases na mesa estão nas posições reais antes de continuar.</p>
+        <div className="ai-actions"><button className="btn btn-primary" onClick={auto}>A IA escolhe as manobras</button></div>
+      </section>
+    );
+  }
   const confirm = () => update((mm) => {
     const x = mm.units.find((y) => y.id === u.id)!;
     x.sit = { dir: dir!, dist: dist!, edge };
@@ -244,6 +262,52 @@ function SituationStep({ m, update }: { m: Match; update(fn: (m: Match) => void)
 
 /* ---------- ativação ---------- */
 
+/** Com a mesa ligada, a IA move as próprias criaturas e faz as ações sem esperar o jogador. */
+function runAiActivations(mm: Match) {
+  if (!hasTable() || mm.phase !== 'ativacao') return;
+  const t = loadTable();
+  mm.feed = mm.feed ?? [];
+  for (;;) {
+    if (mm.phase !== 'ativacao') break;
+    const order = turnOrder(mm.units, 'ativacao', mm.initiative);
+    const x = order[mm.step];
+    if (!x || x.side !== 'ai') break;
+    const enemies = mm.units.filter((y) => y.side === 'me' && y.alive);
+    let line = `${x.name}: `;
+    if (x.plan && t.poses[x.id]) {
+      const r = moveOnTable(x, x.plan, t.poses, mm.units);
+      t.poses[x.id] = r.pose;
+      line += `${maneuverLabel(x.plan)} (${x.plan.color === 'g' ? 'verde' : x.plan.color === 'r' ? 'vermelha' : 'branca'})${r.bumped ? ', bateu em outra base e parou antes' : ''}`;
+      if (offBoard(r.pose, sizeOf(x))) { x.alive = false; line += ', saiu da mesa e foi derrotada'; }
+    } else line += 'ficou parada';
+    if (x.alive) {
+      const a = arcsFromTable(x, enemies, t.poses);
+      const ahead = Object.values(a).some((v) => v.arc === 'F' && v.range && v.range <= 3);
+      const hx = healOption(x);
+      if (hx) { const n = Math.min(hx.heal, x.dmg); x.dmg -= n; paySpecial(x, x.specials!.find((q) => q.uid === hx.uid)!); line += `; ação ${hx.name}, curou ${n}`; }
+      else { const act = chooseAction(x, ahead); applyAction(x, act); line += act ? `; ação ${ACTION_NAME[act]}` : '; sem ação'; }
+      if (x.plan?.color === 'r') x.tokens.exhausted = true;
+      else if (x.plan?.color === 'g') x.tokens.exhausted = false;
+    }
+    mm.feed.push(line + '.');
+    mm.log.push(line + '.');
+    mm.step += 1;
+    if (mm.step >= order.length) { mm.phase = 'combate'; mm.step = 0; }
+  }
+  saveTable(t);
+  setTimeout(() => window.dispatchEvent(new Event('aw-table')), 0);
+}
+
+function AiFeed({ m }: { m: Match }) {
+  if (!m.feed?.length) return null;
+  return (
+    <div className="ai-feed">
+      <p className="ai-kicker">O que a IA fez na mesa</p>
+      <ul>{m.feed.map((f, i) => <li key={i}>{f}</li>)}</ul>
+    </div>
+  );
+}
+
 function ActivationStep({ m, update }: { m: Match; update(fn: (m: Match) => void): void }) {
   const order = turnOrder(m.units, 'ativacao', m.initiative);
   const u = order[m.step];
@@ -255,6 +319,7 @@ function ActivationStep({ m, update }: { m: Match; update(fn: (m: Match) => void
     fn?.(x);
     if (mm.step + 1 < order.length) mm.step += 1;
     else { mm.phase = 'combate'; mm.step = 0; }
+    runAiActivations(mm);
   });
   const pos = `Ativação · ${m.step + 1} de ${order.length} · nível ${u.level}`;
 
@@ -262,8 +327,9 @@ function ActivationStep({ m, update }: { m: Match; update(fn: (m: Match) => void
     return (
       <section className="ai-card ai-ask">
         <p className="ai-kicker">{pos}</p>
+        <AiFeed m={m} />
         <h2>Sua vez: <span className="ai-name is-me">{u.name}</span></h2>
-        <p>Revele o disco, faça a manobra e a ação dela.</p>
+        <p>{hasTable() ? 'Revele o disco e mova a base dela na mesa abaixo: toque nela, escolha a manobra no disco e toque em Executar. Depois faça a ação.' : 'Revele o disco, faça a manobra e a ação dela.'}</p>
         {u.flyer && (
           <>
             <h3>Onde ela terminou?</h3>
@@ -295,16 +361,6 @@ function ActivationStep({ m, update }: { m: Match; update(fn: (m: Match) => void
         </div>
       ) : <p>Ela fica parada nesta rodada.</p>}
       <p className="muted">Mova a miniatura da IA com o gabarito indicado.</p>
-      {hasTable() && plan && (
-        <div className="ai-actions ai-actions-left">
-          <button className="btn btn-ghost" onClick={() => {
-            const t = loadTable(); const p = t.poses[u.id];
-            if (p) { t.poses[u.id] = applyManeuver(p, plan, sizeOf(u)).pose; saveTable(t); window.dispatchEvent(new Event('aw-table')); }
-            const a = arcsFromTable(u, m.units.filter((x) => x.side === 'me' && x.alive), t.poses);
-            setAhead(Object.values(a).some((x) => x.arc === 'F' && x.range && x.range <= 3));
-          }}>Mover na mesa e ler</button>
-        </div>
-      )}
       <h3>Depois do movimento, há um inimigo no arco frontal dela, a Alcance 1 a 3?</h3>
       <div className="ai-tiles ai-tiles-sm">
         <Tile on={ahead === true} onClick={() => setAhead(true)}><span className="ai-big">✓</span>Sim</Tile>
@@ -371,7 +427,9 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
   if (u.side === 'ai') {
     if (stage === 'ask') {
       const decide = () => {
-        const plan = planAttack(u, enemies, answers);
+        const ans = hasTable() ? arcsFromTable(u, enemies, loadTable().poses) : answers;
+        if (hasTable()) setAnswers(ans);
+        const plan = planAttack(u, enemies, ans);
         if (!plan) {
           setOutcome({ title: `${u.name} não ataca`, notes: [], text: 'Nenhum inimigo está no arco e no alcance das armas dela.' });
           setStage('done');
@@ -411,6 +469,14 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
           {(u.specials ?? []).some((s) => s.kind === 'attack') && (
             <p className="muted">Ataques de melhoria: {(u.specials ?? []).filter((s) => s.kind === 'attack').map((s) => `${s.name}${s.spent ? ' (usada)' : s.ready > 0 ? ` (volta em ${s.ready})` : ''}`).join(', ')}.</p>
           )}
+          {hasTable() ? (
+            <ul className="ai-readout">
+              {Object.entries(arcsFromTable(u, enemies, loadTable().poses)).map(([id, a]) => {
+                const e = enemies.find((x) => x.id === id)!;
+                return <li key={id}><strong>{e.name}</strong>: {a.range ? `Alcance ${a.range}` : 'fora de alcance'}, {a.arc === 'F' ? 'no arco frontal' : a.arc === 'B' ? 'no arco traseiro' : 'ao lado'}</li>;
+              })}
+            </ul>
+          ) : (<>
           <h3>Para cada criatura sua: onde ela está em relação a {u.name}?</h3>
           <div className="ai-arcs">
             {enemies.map((e) => {
@@ -428,8 +494,8 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
               );
             })}
           </div>
+          </>)}
           <div className="ai-actions">
-            {hasTable() && <button className="btn btn-ghost" onClick={() => setAnswers(arcsFromTable(u, enemies, loadTable().poses))}>Ler da mesa</button>}
             <button className="btn btn-primary" onClick={decide}>A IA decide e rola</button>
           </div>
         </section>
@@ -439,14 +505,18 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
       const { plan, rolls } = pending;
       const finish = () => {
         const lines: string[] = [];
+        const results = rolls.map((r) => {
+          const t = m.units.find((y) => y.id === r.targetId)!;
+          const h = r.atk.filter((f) => f === 'hit').length, c = r.atk.filter((f) => f === 'crit').length;
+          const res = resolveDamage(h, c, dodges[r.targetId] ?? 0, plan.penetrates ? 0 : t.armor);
+          lines.push(res.normal + res.crit === 0 ? `${t.name} não sofre dano.` : `${t.name} recebe ${res.normal} carta(s) de dano virada(s) para baixo e ${res.crit} virada(s) para cima.${res.blocked ? ` A Armadura parou ${res.blocked}.` : ''}`);
+          return { id: t.id, name: t.name, res };
+        });
         update((mm) => {
-          for (const r of rolls) {
-            const t = mm.units.find((y) => y.id === r.targetId)!;
-            const h = r.atk.filter((f) => f === 'hit').length, c = r.atk.filter((f) => f === 'crit').length;
-            const res = resolveDamage(h, c, dodges[r.targetId] ?? 0, plan.penetrates ? 0 : t.armor);
-            t.dmg += res.normal; t.crit += res.crit;
-            lines.push(res.normal + res.crit === 0 ? `${t.name} não sofre dano.` : `${t.name} recebe ${res.normal} carta(s) de dano virada(s) para baixo e ${res.crit} virada(s) para cima.${res.blocked ? ` A Armadura parou ${res.blocked}.` : ''}`);
-            mm.log.push(`${u.name} usou ${plan.label} em ${t.name}: ${res.normal} de dano e ${res.crit} crítico(s).`);
+          for (const x of results) {
+            const t = mm.units.find((y) => y.id === x.id)!;
+            t.dmg += x.res.normal; t.crit += x.res.crit;
+            mm.log.push(`${u.name} usou ${plan.label} em ${x.name}: ${x.res.normal} de dano e ${x.res.crit} crítico(s).`);
           }
         });
         setOutcome({ title: `${u.name} usa ${plan.label}`, notes: plan.special ? [tr(plan.special.uid, plan.special.text)] : [], text: lines.join(' ') });
@@ -530,7 +600,7 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
       <h2>{outcome?.title}</h2>
       {outcome?.atk && <Dice faces={outcome.atk} kind="atk" />}
       {outcome?.def && <><p className="muted">Defesa da IA</p><Dice faces={outcome.def} kind="def" /></>}
-      {outcome?.notes.map((n) => <p key={n} className="muted">{n}</p>)}
+      {outcome?.notes.map((n) => <p key={n} className="muted">{n.replace(/\*/g, '')}</p>)}
       <p className="ai-result">{outcome?.text}</p>
       <div className="ai-actions"><button className="btn btn-primary" onClick={advance}>Próximo ataque</button></div>
     </section>
@@ -650,7 +720,7 @@ export function CompanionPage() {
                     {m.units.filter((u) => u.side === 'ai' && u.alive).map((u) => <div key={u.id} className="ai-disc"><span>?</span><small>{u.name}</small></div>)}
                   </div>
                   <p>As manobras dela ficam escondidas até a ativação. Escolha agora as manobras das suas criaturas nos discos físicos.</p>
-                  <div className="ai-actions"><button className="btn btn-primary" onClick={() => update((mm) => { mm.phase = 'ativacao'; mm.step = 0; })}>Meus discos estão prontos</button></div>
+                  <div className="ai-actions"><button className="btn btn-primary" onClick={() => update((mm) => { mm.phase = 'ativacao'; mm.step = 0; mm.feed = []; runAiActivations(mm); })}>Meus discos estão prontos</button></div>
                 </section>
               )}
               {m.phase === 'ativacao' && <ActivationStep m={m} update={update} />}

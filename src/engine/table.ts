@@ -176,3 +176,65 @@ export function arcsFromTable(u: UnitWithBase, enemies: UnitWithBase[], poses: R
   }
   return out;
 }
+
+/* ---------- IA autônoma: planeja a manobra simulando cada gabarito na mesa ---------- */
+
+import { availableManeuvers as _avail } from './opponent';
+
+function overlaps(p: Pose, s: number, others: { p: Pose; s: number }[]) {
+  return others.some((o) => baseDistance(p, s, o.p, o.s) === 0);
+}
+export const offBoard = (p: Pose, s: number) => corners(p, s).some((c) => c.x < 0 || c.y < 0 || c.x > BOARD || c.y > BOARD);
+
+/** Resultado da manobra respeitando as outras bases: se terminar sobre outra base, recua pelo gabarito. */
+export function moveOnTable(u: UnitWithBase, m: Maneuver, poses: Record<string, Pose>, units: UnitWithBase[]) {
+  const p = poses[u.id];
+  const s = sizeOf(u);
+  const res = applyManeuver(p, m, s);
+  const others = units.filter((x) => x.alive && x.id !== u.id && poses[x.id]).map((x) => ({ p: poses[x.id], s: sizeOf(x) }));
+  if (!overlaps(res.pose, s, others)) return { pose: res.pose, bumped: false, path: res.path };
+  // recua em passos de 10% do caminho até não sobrepor
+  for (let k = 0.9; k > 0; k -= 0.1) {
+    const q: Pose = { x: p.x + (res.pose.x - p.x) * k, y: p.y + (res.pose.y - p.y) * k, a: p.a + (((res.pose.a - p.a + 540) % 360) - 180) * k };
+    if (!overlaps(q, s, others)) return { pose: q, bumped: true, path: res.path };
+  }
+  return { pose: { ...p }, bumped: true, path: res.path };
+}
+
+export function planOnTable(u: UnitWithBase, units: UnitWithBase[], poses: Record<string, Pose>, rng: () => number) {
+  const p = poses[u.id];
+  if (!p) return null;
+  const s = sizeOf(u);
+  const enemies = units.filter((x) => x.alive && x.side !== u.side && poses[x.id]);
+  const fRange = Math.max(1, ...u.attacks.filter((a) => a.arc !== 'Rear').map((a) => a.range), ...(u.specials ?? []).filter((x) => x.kind === 'attack' && !x.spent && x.arc !== 'B').map((x) => x.range));
+  const rRange = Math.max(0, ...u.attacks.filter((a) => a.arc === 'Rear').map((a) => a.range));
+  let best: { m: Maneuver; score: number } | null = null;
+  for (const m of _avail(u)) {
+    if (u.tokens.exhausted && m.color === 'r') continue;
+    const { pose: q, bumped } = moveOnTable(u, m, poses, units);
+    let score = 0;
+    if (offBoard(q, s)) score -= 1000;
+    if (bumped) score -= 6;
+    let attack = 0, nearest = Infinity, threat = 0;
+    for (const e of enemies) {
+      const ep = poses[e.id], es = sizeOf(e);
+      const d = baseDistance(q, s, ep, es);
+      nearest = Math.min(nearest, d);
+      const r = band(d);
+      if (r && r <= fRange && inArc(q, ep, es, 'F')) attack = Math.max(attack, 12 - r * 1.5 + (e.health - e.dmg - e.crit <= 2 ? 2 : 0));
+      else if (r && rRange && r <= rRange && inArc(q, ep, es, 'B')) attack = Math.max(attack, 6);
+      const er = band(baseDistance(ep, es, q, s));
+      const eRange = Math.max(1, ...e.attacks.filter((a) => a.arc !== 'Rear').map((a) => a.range));
+      if (er && er <= eRange && inArc(ep, q, s, 'F')) threat += 1 + e.attack * 0.4;
+    }
+    score += attack;
+    score -= threat * 1.2;
+    if (!attack && nearest < Infinity) score -= (nearest / RANGE_BAND) * 1.5;
+    const margin = Math.min(...corners(q, s).flatMap((c) => [c.x, c.y, BOARD - c.x, BOARD - c.y]));
+    if (margin < 40) score -= 4;
+    score += m.color === 'g' ? (u.tokens.exhausted ? 3 : 0.5) : m.color === 'r' ? -2 : 0;
+    score += rng() * 0.6;
+    if (!best || score > best.score) best = { m, score };
+  }
+  return best?.m ?? null;
+}

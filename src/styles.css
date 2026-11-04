@@ -1309,3 +1309,7 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
 .ai-table-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ai-actions-left { justify-content: flex-start; }
 @media (max-width: 1100px) { .tb { grid-template-columns: 1fr; } }
+.ai-feed { padding: 12px 14px; border-radius: 12px; background: #1d1815; color: #efe7da; }
+.ai-feed .ai-kicker { color: #b9a57b; }
+.ai-feed ul { margin: 6px 0 0; padding-left: 18px; font-size: 14px; line-height: 21px; }
+.ai-readout { margin: 0; padding-left: 18px; font-size: 15px; line-height: 23px; }
