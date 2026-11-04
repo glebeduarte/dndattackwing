@@ -1189,3 +1189,7 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
   .trail-stage::before { left: 14px; top: 30px; }
   .trail-card { width: 168px; }
 }
+.trail-art-cover { background: #fff; object-position: 30% 35%; }
+.adv-hero.has-cover { background: #fff; }
+.adv-hero.has-cover img { left: auto; right: 0; width: min(62%, 760px); object-fit: cover; object-position: 30% 40%; }
+.adv-hero.has-cover::after { background: linear-gradient(90deg, rgba(10, 8, 7, .94) 0%, rgba(10, 8, 7, .88) 38%, rgba(10, 8, 7, .25) 70%, rgba(10, 8, 7, 0) 100%); }

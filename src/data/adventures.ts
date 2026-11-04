@@ -1228,3 +1228,14 @@ export const CHAPTER_HOOKS: Record<string, string> = {
 export const CHAPTER_CREATURE: Record<string, number> = {
   '3.3': 701, '3.6': 501, '3.7': 602, '4.1': 1002, '5.3': 2101, '6.1': 2301, '6.2': 2401, '6.3': 2501, '7.1': 2701, '7.2': 2801, '7.3': 2901,
 };
+
+/* Capa de cada capítulo (arquivo em public/aventuras/<nome>.svg). */
+export const CHAPTER_COVER: Record<string, string> = {
+  '1': 'galadaeros',
+  '2': 'balagos',
+  '3.5': 'balagos',
+};
+export const coverFor = (chapter?: number | string) => {
+  const name = chapter !== undefined ? CHAPTER_COVER[String(chapter)] : undefined;
+  return name ? `/aventuras/${name}.svg` : undefined;
+};

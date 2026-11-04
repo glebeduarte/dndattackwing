@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { CAMPAIGNS, CAMPAIGN_RULES, adventureBySlug, campaignBySlug, campaignChapters, standaloneAdventures, type Adventure, type MapSpec } from '../data/adventures';
+import { CAMPAIGNS, CAMPAIGN_RULES, coverFor, adventureBySlug, campaignBySlug, campaignChapters, standaloneAdventures, type Adventure, type MapSpec } from '../data/adventures';
 import { Legion } from '../engine/engine';
 import { catalog, useStore } from '../store';
 import { Shell } from '../ui/Shell';
@@ -183,8 +183,8 @@ export function AdventurePage() {
   return (
     <Shell>
       <article className="adv adv-detail">
-        <header className="adv-hero adv-hero-sm">
-          <img src="/home/keyart.webp" alt="" aria-hidden />
+        <header className={`adv-hero adv-hero-sm${coverFor(a.chapter) ? ' has-cover' : ''}`}>
+          <img src={coverFor(a.chapter) ?? '/home/keyart.webp'} alt="" aria-hidden />
           <div className="adv-hero-copy">
             <nav className="adv-crumbs" aria-label="Trilha">
               <Link to="/aventuras">Aventuras</Link> / {camp ? `${camp.title}, capítulo ${a.chapter}` : 'Aventura do portal'}

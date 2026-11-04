@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCardImage } from '../cardImages';
-import { CHAPTER_CREATURE, CHAPTER_HOOKS, STAGES, campaignChapters, type Campaign } from '../data/adventures';
+import { CHAPTER_CREATURE, CHAPTER_HOOKS, STAGES, coverFor, campaignChapters, type Campaign } from '../data/adventures';
 import { catalog } from '../store';
 
 interface Node {
@@ -19,6 +19,8 @@ function ChapterArt({ code, uid }: { code: string; uid?: number }) {
   const [staticOk, setStaticOk] = useState(true);
   const photo = useCardImage('creature', uid ?? -1);
   const name = uid ? catalog.creatures.find((c) => c.uid === uid)?.name : undefined;
+  const cover = coverFor(code);
+  if (cover) return <img className="trail-art trail-art-cover" src={cover} alt="" loading="lazy" />;
   if (staticOk) {
     return <img className="trail-art" src={`/aventuras/${code}.webp`} alt="" loading="lazy" onError={() => setStaticOk(false)} />;
   }
