@@ -20,7 +20,7 @@ export function LinkRoute() {
     } else {
       notify('error', problems[0] ?? 'Este link não traz nenhuma criatura.');
     }
-    navigate('/', { replace: true });
+    navigate('/construtor', { replace: true });
   }, [code]);
   return null;
 }
@@ -39,7 +39,7 @@ export function SavedPage() {
             <p className="title-sub">Ficam neste navegador. Para levar a outro aparelho, copie o link da legião.</p>
           </div>
           <div className="title-actions">
-            <Link className="btn btn-primary" to="/">Abrir o construtor</Link>
+            <Link className="btn btn-primary" to="/construtor">Abrir o construtor</Link>
           </div>
         </div>
 
@@ -71,7 +71,7 @@ export function SavedPage() {
                   <td className="num">{s.cost} pts</td>
                   <td className="num">{fmt.format(new Date(s.updated))}</td>
                   <td className="t-actions">
-                    <button className="btn btn-secondary btn-sm" onClick={() => { loadSaved(s); navigate('/'); }}>Abrir</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => { loadSaved(s); navigate('/construtor'); }}>Abrir</button>
                     <button
                       className="btn btn-text btn-sm"
                       onClick={async () => {
@@ -116,12 +116,12 @@ export function CardPage({ kind }: { kind: 'creature' | 'upgrade' }) {
     <Shell>
       <div className="page card-page">
         <nav className="crumbs" aria-label="Trilha">
-          <Link to="/">Construtor</Link> <span aria-hidden>/</span> <span>{kind === 'creature' ? 'Criaturas' : 'Upgrades'}</span>
+          <Link to="/construtor">Construtor</Link> <span aria-hidden>/</span> <span>{kind === 'creature' ? 'Criaturas' : 'Upgrades'}</span>
         </nav>
         {!name ? (
           <>
             <h1 className="page-title">Carta não encontrada</h1>
-            <p>Nenhuma carta com o número {id}. <Link to="/">Voltar ao construtor</Link></p>
+            <p>Nenhuma carta com o número {id}. <Link to="/construtor">Voltar ao construtor</Link></p>
           </>
         ) : (
           <>
@@ -133,7 +133,7 @@ export function CardPage({ kind }: { kind: 'creature' | 'upgrade' }) {
                     Adicionar à legião
                   </button>
                 )}
-                <Link className="btn btn-secondary" to="/">Voltar ao construtor</Link>
+                <Link className="btn btn-secondary" to="/construtor">Voltar ao construtor</Link>
               </div>
             </div>
             <div className="card-page-body">

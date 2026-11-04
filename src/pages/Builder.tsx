@@ -22,7 +22,7 @@ export function Builder() {
   const list = useFiltered(tab, filters);
 
   useEffect(() => {
-    if (loc.pathname === '/creatures' || loc.pathname === '/upgrades') navigate('/', { replace: true });
+    if (loc.pathname === '/creatures' || loc.pathname === '/upgrades') navigate('/construtor', { replace: true });
   }, [loc.pathname, navigate]);
 
   const changeTab = (t: Tab) => {

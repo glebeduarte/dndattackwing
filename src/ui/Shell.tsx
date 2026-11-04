@@ -1,16 +1,11 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useStore } from '../store';
 import { SettingsDialog } from './Settings';
 
-export function Mark({ size = 28 }: { size?: number }) {
-  // Asa de três penas sobre um escudo: o "Attack Wing" do nome.
-  return (
-    <svg className="mark" width={size} height={size} viewBox="0 0 32 32" aria-hidden>
-      <path d="M16 2 28 6v9c0 7.5-5 12.5-12 15C9 27.5 4 22.5 4 15V6Z" fill="var(--accent)" />
-      <path d="M9 19c4-1 7-4 9-9 1 4 0 8-3 11 2.5 0 5-1 7-3-1 4-4 6.5-8 7-2 .3-4-.5-5-2 1-.5 1.5-1.5 1.5-2.5-.5.5-1 .5-1.5-1.5Z" fill="#fff" />
-    </svg>
-  );
+export function Mark({ size = 28, light = false }: { size?: number; light?: boolean }) {
+  // O ícone dos upgrades de dragão do jogo, recortado do fundo de pergaminho.
+  return <img className="mark" src={light ? '/brand-dragon-light.png' : '/brand-dragon-dark.png'} width={size} height={size} alt="" aria-hidden />;
 }
 
 export function Shell({ children, topbar }: { children: ReactNode; topbar?: ReactNode }) {
@@ -22,15 +17,18 @@ export function Shell({ children, topbar }: { children: ReactNode; topbar?: Reac
 
   const nav = (
     <>
-      <div className="brand">
+      <Link to="/" className="brand" aria-label="Início">
         <Mark />
         <div>
           <span className="brand-name">Attack Wing</span>
           <span className="brand-sub">Construtor de legião</span>
         </div>
-      </div>
+      </Link>
       <nav className="nav" aria-label="Principal">
         <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
+          <NavIcon d="M4 11 12 4l8 7v9h-5v-6H9v6H4Z" /> Início
+        </NavLink>
+        <NavLink to="/construtor" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
           <NavIcon d="M4 6h16M4 12h16M4 18h10" /> Construtor
         </NavLink>
         <NavLink to="/legioes" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
@@ -54,7 +52,7 @@ export function Shell({ children, topbar }: { children: ReactNode; topbar?: Reac
         <button className="menu-btn" aria-label="Abrir menu" onClick={() => setMenuOpen(true)}>
           <NavIcon d="M4 7h16M4 12h16M4 17h16" />
         </button>
-        <span className="topbar-brand"><Mark size={22} /> Attack Wing</span>
+        <Link to="/" className="topbar-brand"><Mark size={22} /> Attack Wing</Link>
         <div className="topbar-slot">{topbar}</div>
       </header>
       <main className="sheet">{children}</main>
