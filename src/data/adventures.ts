@@ -80,12 +80,9 @@ export const CAMPAIGNS: Campaign[] = [
     source: 'Livro de regras de D&D Attack Wing e expansões',
     summary:
       'A campanha que abre o jogo. Uma rixa entre três dragões da caixa básica, um roubo e uma emboscada, termina com o dragão de cobre recebendo uma missão maior: achar o lugar sagrado onde os dragões antigos guardaram suas relíquias antes que os servos de Tiamat cheguem lá.',
-    status: '21 capítulos, 15 com guia completo',
+    status: '21 capítulos, 18 com guia completo',
     pending: 'Os capítulos seguintes vinham nos livretos das expansões. Cada um entra aqui com o guia completo assim que o texto da aventura estiver disponível.',
     planned: [
-      { code: '6.1', title: 'The Pulsating Gate', expansion: 'Gold Dragon', wave: 'Onda 4', artifacts: [{ name: 'Luck Gem', uid: 2309 }] },
-      { code: '6.2', title: 'The Gale Force Gate', expansion: 'Gargoyle', wave: 'Onda 4', artifacts: [{ name: 'Bag of Winds', uid: 2408 }] },
-      { code: '6.3', title: 'The Whispering Gate', expansion: 'Stone Giant', wave: 'Onda 4', artifacts: [{ name: 'Ring of Freedom', uid: 2509 }] },
       { code: '7.1', title: 'Close Quarters', expansion: 'Drow Elf Ranger', wave: 'Onda 5', artifacts: [{ name: 'Spider Silk Shirt', uid: 2709 }] },
       { code: '7.2', title: 'The Hall of Luminos the Mighty', expansion: 'Young Bronze Dragon', wave: 'Onda 5', artifacts: [{ name: 'Pearl of Power', uid: 2808 }] },
       { code: '7.3', title: 'Annihilation and Victory', expansion: 'Red Dracolich', wave: 'Onda 5', artifacts: [{ name: 'Talisman of Ultimate Evil', uid: 2909 }, { name: 'Talisman of Pure Good', uid: 2908 }] },
@@ -987,6 +984,157 @@ export const ADVENTURES: Adventure[] = [
     theme: 'Batalha de 150 pontos no olho de um furacão que arrasta quem se afasta da corrente.',
   },
   {
+    slug: 'o-portao-pulsante',
+    number: 6.1,
+    title: 'O Portão Pulsante',
+    original: 'The Pulsating Gate',
+    source: 'Livreto da expansão Gold Dragon (Onda 4), aventura 6.1',
+    players: 2,
+    playArea: '90 x 90 cm, a câmara do Portão Pulsante no Palácio de Luminos',
+    components: ['2 fichas de pulso de 5 x 5 cm (2" x 2") com entalhes, uma positiva e uma negativa', '1 ficha de iniciativa', 'A carta de melhoria Luck Gem'],
+    sides: [
+      { id: 'guardioes', name: 'Guardiões do Portão', points: 150, color: '#7a3a9a', requires: 'Quaisquer criaturas e melhorias' },
+      { id: 'chaveiros', name: 'Mestres da Chave', points: 150, color: '#c0282d', requires: 'O lado que ganhou o Tuning Fork of Neutrality na aventura 4.3' },
+    ],
+    synopsis: [
+      'O Palácio de Luminos, o Poderoso, tem 3 portões externos, e cada um só abre com a Chave certa. Por longos meses os dragões malignos e os inimigos deles procuraram essas Chaves, e agora cada uma está nas mãos de um dos lados. O Portão Pulsante foi aberto pelo Tuning Fork of Neutrality, a Chave entregue pelo anjo deva movânico Sarpiel.',
+      'O dragão de ouro Pacatus, um dos principais dragões bons que mandaram Galadaeros na missão, trouxe aliados para proteger o portão dos dragões malignos. Outro grupo acabou de chegar, cansado dessa gente intrometida, e decidido a fazer a sua própria dissuasão. O problema é que dentro da câmara há duas sentinelas de energia pura que flutuam na direção dos grupos: uma irradia ondas de energia brilhante, a outra é cercada por uma aura escura e parasita.',
+    ],
+    setup: [
+      'Os Guardiões do Portão montam a legião com 150 pontos. Os Mestres da Chave montam a legião com 150 pontos: é o lado que ganhou o artefato Tuning Fork of Neutrality na aventura 4.3, Os olhos sempre atentos.',
+      'Pelo menos um dos lados precisa incluir Pacatus.',
+      'Coloquem a ficha de pulso positiva centralizada na borda oeste e a negativa centralizada na borda leste, com os entalhes virados para leste e oeste.',
+      'Os jogadores posicionam as criaturas nas áreas iniciais pela preparação padrão para 2 jogadores: os Guardiões ao norte e os Mestres da Chave ao sul.',
+      'A ficha de iniciativa é obrigatória nesta aventura, mesmo que não haja criaturas do mesmo Nível dos dois lados. Usem a regra de Iniciativa na Construção da Legião, na página 28 do livro de regras completo, para decidir quem começa com ela. Ela passa para o adversário na Fase Final, como de costume.',
+    ],
+    specialRules: [
+      { title: 'As sentinelas de energia', text: 'As fichas de pulso se movem como criaturas voadoras, inclusive para sobreposição, mas não podem ser atacadas nem sofrer dano.' },
+      { title: 'O pulso', text: 'No começo da Fase Final, o jogador com a ficha de iniciativa escolhe uma das fichas de pulso e a move com o gabarito reto ou de curva 1 ou 2, encaixado num dos entalhes (da frente ou de trás). Se o movimento levaria a ficha para fora da área, ela não se move nessa rodada. Depois de mover, a ficha causa 1 de dano a todas as criaturas no solo e no ar a alcance 1 dela. Ninguém rola defesa, e o dano ignora toda Armadura, mesmo a que não pode ser penetrada. Criaturas do mesmo tipo de energia (positiva ou negativa) ignoram esse dano, e quem carrega o Tuning Fork of Neutrality é imune aos dois tipos.' },
+      { title: 'A outra sentinela', text: 'Em seguida, o jogador sem a ficha de iniciativa move a outra ficha de pulso do mesmo jeito, e o dano é aplicado de novo a alcance 1 dela.' },
+      { title: 'Choque entre as sentinelas', text: 'Se uma ficha de pulso passar por cima, encostar ou se sobrepor à outra, em vez de 1 de dano às criaturas ao redor, façam um ataque de 5 dados contra cada criatura a alcance 1 das duas fichas, no ponto onde elas se encontraram. Ninguém rola defesa, e o dano ignora toda Armadura. Criaturas de energia positiva ou negativa podem ignorar 1 acerto ou crítico à escolha delas, e quem carrega o Tuning Fork of Neutrality pode ignorar 2.' },
+    ],
+    objectives: [
+      { side: 'Guardiões do Portão', text: ['Vencem se os Mestres da Chave forem eliminados.'] },
+      { side: 'Mestres da Chave', text: ['Vencem se os Guardiões do Portão forem eliminados.'] },
+      { side: 'Qual final ler', text: ['Se o lado de Pacatus vencer, leiam o final 1. Se não, leiam o final 2. Se os dois lados forem eliminados na mesma rodada, joguem a aventura de novo.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'Pacatus vence', summary: 'Depois de curar a si mesmo e aos sobreviventes dos dois lados, de olho nas sentinelas flutuantes, Pacatus pega o Tuning Fork of Neutrality e bate com ele perto do ouvido. Uma nota pura soa, e as sentinelas de energia se aproximam uma da outra e param a uns vinte passos de distância. Talvez a Luck Gem que ele preparou de manhã o tenha ajudado a descobrir o verdadeiro poder do diapasão. Com a câmara segura, ele toca a runa no centro e ouve um grande mecanismo girar dentro das muralhas. A câmara não leva mais para dentro da fortaleza, mas ele está um passo mais perto do pátio do palácio e do Cemitério Primordial.', rewards: ['Pacatus: 1 XP', 'Pacatus recebe a Luck Gem'] },
+      { id: '2', title: 'O lado de Pacatus perde', summary: 'O vilão diz que aquilo vai ensinar Pacatus a pensar antes de se meter e bate com tanta força no ombro do dragão ferido que solta uma escama dourada. Embaixo dela brilha uma joia, que a criatura maligna pega na hora e testa com o Tuning Fork of Neutrality para ver se tem alguma proteção. As sentinelas de energia se aproximam e param a uns vinte passos uma da outra. Sorrindo, a criatura toca a runa no centro da câmara e ouve um grande mecanismo girar dentro das muralhas: está um passo mais perto do pátio do palácio e do Cemitério Primordial.', rewards: ['Jogador vencedor: 1 XP', 'Jogador vencedor recebe a Luck Gem'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'guardioes', label: 'Guardiões do Portão' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'chaveiros', label: 'Mestres da Chave' },
+      ],
+      tokens: [{ x: 3, y: 45, label: 'pulso positivo' }, { x: 87, y: 45, label: 'pulso negativo' }],
+      note: 'O pulso positivo começa no centro da borda oeste e o negativo no centro da borda leste, com os entalhes virados para leste e oeste.',
+    },
+    origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 6.1,
+    theme: 'Batalha de 150 pontos entre duas sentinelas de energia que os jogadores empurram rodada a rodada.',
+  },
+  {
+    slug: 'o-portao-da-ventania',
+    number: 6.2,
+    title: 'O Portão da Ventania',
+    original: 'The Gale Force Gate',
+    source: 'Livreto da expansão Gargoyle (Onda 4), aventura 6.2',
+    players: 2,
+    playArea: '90 x 90 cm, a câmara do Portão da Ventania, com o poleiro de Malebolge ao fundo',
+    components: ['2 fichas de basilisco de 4 cm (1,5") com entalhe', '10 fichas de dano', '10 fichas de petrificação', 'A carta de melhoria Bag of Winds'],
+    sides: [
+      { id: 'malebolge', name: 'Malebolge', creatureUid: 2401, points: 50, color: '#5b8fc4', requires: 'Malebolge e melhorias' },
+      { id: 'invasores', name: 'Invasores do Portão', points: 90, color: '#c0282d', requires: 'O lado que ganhou o 7th Shard of Law na aventura 4.1' },
+    ],
+    synopsis: [
+      'O Portão da Ventania é guardado por gárgulas desde pouco depois de ser construído, mas o tempo cobrou o seu preço até dessas criaturas, e só sobrou Malebolge. Ele e as duas estátuas mágicas de basilisco, Leão e Tigre, foram postos ali para pegar e matar qualquer coisa que entrasse pelo portão.',
+      'Faz séculos que ele não tem uma luta decente, mas paciência é algo que uma gárgula entende. Agora essa paciência vai ser recompensada: chegaram criaturas com a Chave, provavelmente achando que só ela basta para passar em segurança até o pátio do palácio. No poleiro do outro lado da câmara, Malebolge ri da ideia.',
+    ],
+    setup: [
+      'Malebolge monta a legião com 50 pontos. Os Invasores do Portão montam a legião com 90 pontos: é o lado que ganhou o artefato 7th Shard of Law na aventura 4.1, O abismo uivante.',
+      'Malebolge se coloca de costas para o centro da borda norte, a borda inicial dele, e depois coloca as 2 fichas de basilisco em qualquer outro ponto da área inicial dele.',
+      'Depois os Invasores colocam as criaturas na área inicial deles, no sul. Deixem as fichas de dano e de petrificação ao lado da mesa por enquanto.',
+    ],
+    specialRules: [
+      { title: 'Os basiliscos', text: 'Cada ficha de basilisco é uma criatura terrestre sem dados de ataque nem de defesa, com Armadura 0 e 5 de Vida, imune a efeitos críticos. Marquem o dano de cada basilisco com fichas de dano ao lado dele. Um basilisco que recebe dano letal sai da área na hora, sem esperar a Fase Final.' },
+      { title: 'O olhar de pedra', text: 'No fim da Fase de Ativação, depois que todas as outras criaturas se moveram, Malebolge controla os 2 basiliscos. Cada um pode girar livremente para qualquer direção ou andar para a frente com o gabarito reto 1, 2 ou 3. Logo depois de se mover, o basilisco pode pôr 1 ficha de petrificação numa criatura a alcance 1 a 3 no arco de ataque frontal dele.' },
+      { title: 'Petrificação', text: 'Cada criatura com fichas de petrificação rola -1 dado de ataque e -1 dado de defesa por ficha. Isso pode tirar todos os dados de defesa dela, mas ela sempre rola pelo menos 1 dado de ataque. Se a soma de fichas de petrificação e Cartas de Dano chegar à Vida da criatura, ela vira pedra para sempre: conta como derrotada e sai da área na hora, sem esperar a Fase Final.' },
+      { title: 'Desfazer a pedra', text: 'No começo da Fase Final, se os dois basiliscos já foram derrotados, os Invasores podem tirar 1 ficha de petrificação de uma das criaturas sobreviventes deles. Uma criatura que já virou pedra por inteiro não pode ser recuperada.' },
+    ],
+    objectives: [
+      { side: 'Malebolge', text: ['Vence se os Invasores do Portão forem eliminados (depois da batalha 1).'] },
+      { side: 'Invasores do Portão', text: ['Vencem se eliminarem Malebolge e os basiliscos (depois da batalha 2).'] },
+      { side: 'Empate', text: ['Se os dois lados forem eliminados na mesma rodada, joguem a aventura de novo.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'A gárgula vence', summary: 'Um canto da boca de granito de Malebolge se curva para cima: a espera valeu a pena. Ele pega o 7th Shard of Law, uma relíquia dos aarakocras que ele despreza, e ela queima as mãos dele. Uma runa embaixo do poleiro brilha e um vento forte varre a câmara sem tocá-lo. Ele ouve um grande mecanismo girar dentro das muralhas sem entender o que significa, e quando o vento passa volta ao poleiro para esperar a próxima vítima, desconfiado da bolsa mágica que surgiu no centro da câmara.', rewards: ['Malebolge: 1 XP', 'Malebolge recebe o Bag of Winds'] },
+      { id: '2', title: 'O portão é vencido', summary: 'O vencedor, de pé sobre os restos de Malebolge e dos bichos dele, leva a Chave até o poleiro da gárgula. O nome do portão faz sentido na hora: ventos tão fortes quanto os da tempestade lá embaixo jogam tudo e todos para fora da câmara, menos quem segura o 7th Shard of Law, que fica numa bolha de calma. Um grande mecanismo gira dentro das muralhas, o vento para, e no centro da câmara fica uma bolsa mágica com propriedades maravilhosas.', rewards: ['Invasores do Portão: 1 XP', 'Invasores do Portão recebem o Bag of Winds'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 12, side: 'malebolge', label: 'Malebolge e basiliscos' },
+        { x: 0, y: 78, w: 90, h: 12, side: 'invasores', label: 'Invasores do Portão' },
+      ],
+      tokens: [{ x: 45, y: 4, label: 'Malebolge' }, { x: 25, y: 7, label: 'basilisco' }, { x: 65, y: 7, label: 'basilisco' }],
+      note: 'Malebolge começa de costas para o centro da borda norte. Os dois basiliscos ficam em qualquer outro ponto da área inicial dele.',
+    },
+    origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 6.2,
+    theme: 'Uma gárgula paciente e dois basiliscos que transformam os invasores em pedra.',
+  },
+  {
+    slug: 'o-portao-sussurrante',
+    number: 6.3,
+    title: 'O Portão Sussurrante',
+    original: 'The Whispering Gate',
+    source: 'Livreto da expansão Stone Giant (Onda 4), aventura 6.3',
+    players: 2,
+    playArea: '90 x 90 cm, a câmara do Portão dos Sussurros, com o arco selado ao norte',
+    components: ['1 ficha de arco de 15 x 2,5 cm (6" x 1")', '1 ficha da Umbra (Shadowfell)', 'A carta de melhoria Ring of Freedom of Movement'],
+    sides: [
+      { id: 'ancoram', name: 'Ancoram', creatureUid: 2501, points: 50, color: '#5b8fc4', requires: 'Ancoram e melhorias' },
+      { id: 'despertadores', name: 'Os que o acordaram', points: 90, color: '#c0282d', requires: 'O lado que ganhou The Ebon Cloak na aventura 4.2' },
+    ],
+    synopsis: [
+      'O ancião gigante de pedra Ancoram dorme em animação suspensa há muitos séculos, a pedido dele mesmo, como recompensa por ter construído a âncora de pedra que prende a Agulha da Corrente no chão e o arremate na outra ponta, que segura o Palácio de Luminos. Também foi ele quem criou as runas de pedra espalhadas pelo palácio, que ativam os mecanismos internos.',
+      'Uma maldição poderosa, vinda de uma força maligna no fundo do palácio, caiu sobre a runa de pedra do outro lado desta câmara. A lanterna de latão que seria a Chave virou pó, e a magia passou para o pano sujo com que Ancoram polia a runa, que ficou negro como breu. Esse pano virou The Ebon Cloak, a Chave da câmara, e o portão começou a sussurrar pensamentos sombrios para o mundo. O feitiço que mantém Ancoram vivo e adormecido se alimentava da energia da Umbra que sairia do Portão dos Sussurros. Com a volta da Chave, o feitiço se rompe, e ondas mortais de energia da Umbra saem da runa. Acordado pelo anel encantado, o gigante fica furioso e decide não deixar os intrusos chegarem à runa, que está sob um enorme arco selado que ele vai guardar até o último suspiro.',
+    ],
+    setup: [
+      'Ancoram monta a legião com 50 pontos. Os que o acordaram montam a legião com 90 pontos: é o lado que ganhou o artefato The Ebon Cloak na aventura 4.2, Uma noite de sombras.',
+      'Coloquem a ficha de arco centralizada, com o lado comprido encostado na borda inicial de Ancoram, ao norte.',
+      'Depois os jogadores posicionam as criaturas nas áreas iniciais pela preparação padrão para 2 jogadores: Ancoram ao norte e os que o acordaram ao sul.',
+    ],
+    specialRules: [
+      { title: 'Ondas da Umbra', text: 'Ondas de energia de sombra saem do portão em intervalos regulares e em várias direções. Ancoram conhece o padrão e costuma conseguir desviar delas.' },
+      { title: 'O cone de sombra', text: 'No começo da Fase Final, Ancoram coloca a ficha da Umbra com a ponta encostada na marca central da ficha de arco e a parte larga apontando para onde ele quiser. A ficha marca o arco de um ataque em cone que atinge todas as criaturas a alcance 1 a 4 da borda arredondada, dentro do arco de 60 graus da ficha.' },
+      { title: 'Quem a sombra atinge', text: 'As criaturas no cone com a palavra-chave sombra, inclusive quem está equipado com The Ebon Cloak, sofrem 1 de dano normal. As outras criaturas no cone, inclusive Ancoram se estiver nele, sofrem 1 de dano crítico. Ninguém rola defesa, e o dano ignora toda Armadura, mesmo a que não pode ser penetrada. Depois tirem a ficha da Umbra, para que ela seja colocada de novo na rodada seguinte.' },
+    ],
+    objectives: [
+      { side: 'Ancoram', text: ['Vence no fim de qualquer rodada em que todos os inimigos dele tenham sido eliminados (depois da batalha 1).'] },
+      { side: 'Os que o acordaram', text: ['Vencem se Ancoram for eliminado (depois da batalha 2).'] },
+      { side: 'Empate', text: ['Se os dois lados forem eliminados na mesma rodada, joguem a aventura de novo.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'Ancoram defende o arco', summary: 'Ele sabe que não vai conseguir voltar a dormir, mas talvez ainda dê para evitar que o palácio seja invadido de vez se correr. Pega uma caixa de pedra pequena e grossa que construiu há muito tempo para isso e guarda a capa nela. Quando vai fechar a caixa, ouve o som que temia: as grandes engrenagens de pedra que ele fez dentro das muralhas estão girando e realinhando o portão num padrão que pode destrancar o portão do pátio. Frustrado, ele quebra a caixa. Se os outros cilindros da fechadura mística também já giraram, a entrada do pátio de Luminos, o Poderoso, está aberta de novo.', rewards: ['Ancoram: 1 XP', 'Ancoram recebe o Ring of Freedom of Movement'] },
+      { id: '2', title: 'O gigante cai', summary: 'Os sussurros tinham dito ao vencedor que não deixasse nada detê-lo, porque havia grandes recompensas ao alcance. Ele ouviu e ainda está ouvindo, mesmo quando os ecos são abafados pelo som de um grande mecanismo atrás das paredes. O portão do pátio do palácio finalmente se abriu.', rewards: ['Os que o acordaram: 1 XP', 'Os que o acordaram recebem o Ring of Freedom of Movement'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 12, side: 'ancoram', label: 'Ancoram' },
+        { x: 0, y: 78, w: 90, h: 12, side: 'despertadores', label: 'Os que o acordaram' },
+      ],
+      tokens: [{ x: 37.5, y: 1.5, label: 'arco' }, { x: 45, y: 1.5, label: 'arco' }, { x: 52.5, y: 1.5, label: 'arco' }, { x: 45, y: 8, label: 'Umbra' }],
+      note: 'O arco de 15 x 2,5 cm fica centralizado na borda norte. A ficha da Umbra não está na mesa no começo: Ancoram a coloca em cada Fase Final, com a ponta no centro do arco.',
+    },
+    origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 6.3,
+    theme: 'Um gigante recém-acordado e ondas de sombra que varrem a câmara a cada rodada.',
+  },
+  {
     slug: 'ninho-na-tempestade',
     number: 3,
     title: 'O ninho na tempestade',
@@ -1194,7 +1342,7 @@ export const STAGES: Record<string, Stage[]> = {
     },
     {
       id: 'onda4', title: 'Os três portões', wave: 'Onda 4',
-      summary: 'Dentro da tempestade, cada Chave abre um portão da fortaleza externa de Luminos: o Portão Pulsante, o Portão da Ventania e o Portão Sussurrante. Cada capítulo é a batalha por um deles.',
+      summary: 'Cada Chave abre um dos três portões externos do Palácio de Luminos. O Tuning Fork of Neutrality, de Sarpiel, abre o Portão Pulsante, guardado por duas sentinelas de energia. O 7th Shard of Law, dos aarakocras, abre o Portão da Ventania, onde a gárgula Malebolge espera com dois basiliscos. The Ebon Cloak, a capa de Umberlis, abre o Portão Sussurrante e acorda o gigante Ancoram, que construiu a âncora da Agulha da Corrente. Cada portão vencido gira as engrenagens da fechadura do pátio, e no fim o portão do pátio do palácio se abre.',
       codes: ['6.1', '6.2', '6.3'],
     },
     {
@@ -1222,6 +1370,9 @@ export const CHAPTER_HOOKS: Record<string, string> = {
   '5.1': 'O livro de Legunt aponta a rainha Sycorax.',
   '5.2': 'Uma moeda abre o portal para o olho da tempestade.',
   '5.3': 'Vakka guia o voo até os três portões do Palácio das Nuvens.',
+  '6.1': 'O Tuning Fork acalma as sentinelas e gira o primeiro mecanismo.',
+  '6.2': 'O 7th Shard of Law vence a ventania e gira o segundo mecanismo.',
+  '6.3': 'O portão do pátio do palácio se abre.',
 };
 
 /* Criatura que representa cada capítulo das expansões (para a imagem da trilha). */
