@@ -80,12 +80,9 @@ export const CAMPAIGNS: Campaign[] = [
     source: 'Livro de regras de D&D Attack Wing e expansões',
     summary:
       'A campanha que abre o jogo. Uma rixa entre três dragões da caixa básica, um roubo e uma emboscada, termina com o dragão de cobre recebendo uma missão maior: achar o lugar sagrado onde os dragões antigos guardaram suas relíquias antes que os servos de Tiamat cheguem lá.',
-    status: '21 capítulos, 18 com guia completo',
+    status: '21 capítulos, todos com guia completo',
     pending: 'Os capítulos seguintes vinham nos livretos das expansões. Cada um entra aqui com o guia completo assim que o texto da aventura estiver disponível.',
     planned: [
-      { code: '7.1', title: 'Close Quarters', expansion: 'Drow Elf Ranger', wave: 'Onda 5', artifacts: [{ name: 'Spider Silk Shirt', uid: 2709 }] },
-      { code: '7.2', title: 'The Hall of Luminos the Mighty', expansion: 'Young Bronze Dragon', wave: 'Onda 5', artifacts: [{ name: 'Pearl of Power', uid: 2808 }] },
-      { code: '7.3', title: 'Annihilation and Victory', expansion: 'Red Dracolich', wave: 'Onda 5', artifacts: [{ name: 'Talisman of Ultimate Evil', uid: 2909 }, { name: 'Talisman of Pure Good', uid: 2908 }] },
     ],
   },
 ];
@@ -1135,6 +1132,167 @@ export const ADVENTURES: Adventure[] = [
     theme: 'Um gigante recém-acordado e ondas de sombra que varrem a câmara a cada rodada.',
   },
   {
+    slug: 'combate-de-perto',
+    number: 7.1,
+    title: 'Combate de perto',
+    original: 'Close Quarters',
+    source: 'Livreto da expansão Drow Elf Ranger (Onda 5), aventura 7.1',
+    players: 2,
+    playArea: '90 x 90 cm, o pátio murado do palácio de Luminos, coberto por uma Muralha de Energia',
+    components: ['Nenhum componente especial', 'A carta de melhoria Spider Silk Shirt'],
+    sides: [
+      { id: 'drizzt', name: 'Forças de Drizzt', creatureUid: 2701, points: 120, color: '#3a56b0', requires: 'Drizzt com aliados Neutros e Bons' },
+      { id: 'culto', name: 'Forças do Culto do Dragão', points: 120, color: '#c0282d', requires: 'Só criaturas Neutras e Malignas' },
+    ],
+    synopsis: [
+      'Quem vive tanto quanto um elfo ou um dragão tem tempo de acumular muitos juros numa dívida. É nisso que Drizzt Do\'Urden pensa ao entrar no pátio de Luminos, o Poderoso. O portão do pátio finalmente abriu, depois que três mecanismos escondidos foram ativados em câmaras secretas nas bordas do palácio do gigante das nuvens. O dragão de ouro Pacatus, a quem Drizzt deve um favor e que o trouxe até ali, avisou que qualquer coisa pode acontecer naquele pátio majestoso. Por enquanto Drizzt só vê belas estátuas de heróis e divindades antigas, e saca as cimitarras mesmo assim, porque o que é bonito pode ser perigoso.',
+      'Olhando para cima, ele entende por que o pátio aberto não pode ser invadido pelo céu: os ventos de fora não passam por uma barreira invisível, provavelmente uma Muralha de Energia. Ele acha bom, porque isso dificulta o voo e ele prefere a luta de perto. Logo um estrondo atrás dele mostra os companheiros entrando às pressas no pátio, e alguém grita que as forças do Culto do Dragão chegaram. Drizzt está pronto.',
+    ],
+    setup: [
+      'Cada lado monta a legião com 120 pontos. As Forças de Drizzt incluem Drizzt e aliados Neutros e Bons. As Forças do Culto do Dragão usam só criaturas Neutras e Malignas.',
+      'Os jogadores posicionam as criaturas nas áreas iniciais pela preparação padrão para 2 jogadores: Drizzt ao norte e o Culto ao sul.',
+    ],
+    specialRules: [
+      { title: 'Muros do pátio', text: 'As bordas da área são os muros do pátio. Uma criatura que fosse terminar o movimento fora da área não é derrotada: recua até ficar inteira dentro da área. Uma criatura voadora nessa situação precisa pousar na hora.' },
+      { title: 'A Muralha de Energia', text: 'Como uma Muralha de Energia fecha o alto do pátio, cada criatura voadora começa o jogo com uma ficha de rasante. No passo de mudar de altitude da Fase de Ativação, cada criatura voadora escolhe se continua em rasante ou se pousa. Uma criatura voadora que decola do solo recebe uma ficha de rasante na hora.' },
+    ],
+    objectives: [
+      { side: 'Forças de Drizzt', text: ['Vencem se todas as Forças do Culto forem eliminadas (depois da batalha 1).'] },
+      { side: 'Forças do Culto do Dragão', text: ['Vencem se todas as Forças de Drizzt forem eliminadas (depois da batalha 2).'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'Drizzt vence', summary: 'Drizzt e os aliados recuperam o fôlego e seguem até as grandes portas de adamantina no fim do pátio. O patrulheiro drow levou alguns golpes fortes, mas a camisa de seda de aranha desviou o pior. As portas são grossas e enormes, largas o bastante para gigantes e dragões, mas ninguém acha o mecanismo que as abre. Enquanto os dragões batem e sopram contra elas sem resultado, Drizzt examina as paredes em volta do arco e acha uma trava que abre uma porta secreta, pequena demais para os aliados maiores. Ele chama quem couber para entrar e tentar abrir as portas por dentro.', rewards: ['Forças de Drizzt: 1 XP', 'Forças de Drizzt recebem o Spider Silk Shirt'] },
+      { id: '2', title: 'O Culto vence', summary: 'O líder das forças do Culto revira o pátio e tira a camisa de seda de aranha do rival drow desacordado. Um aliado avisa que as grandes portas do palácio não abrem por mais que batam, mas que um batedor achou uma passagem pequena. O cultista aprova e aponta para as estátuas, antes belas, agora em pedaços pelo pátio: já quebrou ossos e estátuas o bastante por um dia.', rewards: ['Forças do Culto: 1 XP', 'Forças do Culto recebem o Spider Silk Shirt'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'drizzt', label: 'Forças de Drizzt' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'culto', label: 'Forças do Culto' },
+      ],
+      tokens: [],
+      walls: [{ edge: 'all', label: 'Muros do pátio', color: '#55505a' }],
+      note: 'Todas as bordas são muros. Quem voa fica em rasante por causa da Muralha de Energia no alto.',
+    },
+    origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 7.1,
+    theme: 'Luta de 120 pontos num pátio murado onde ninguém consegue voar alto.',
+  },
+  {
+    slug: 'o-salao-de-luminos',
+    number: 7.2,
+    title: 'O salão de Luminos, o Poderoso',
+    original: 'The Hall of Luminos the Mighty',
+    source: 'Livreto da expansão Young Bronze Dragon (Onda 5), aventura 7.2',
+    players: 2,
+    playArea: '90 x 90 cm, o grande salão do trono de Luminos, pouco iluminado',
+    components: ['Nenhum componente especial', 'A carta de melhoria Pearl of Power'],
+    sides: [
+      { id: 'eyruaad', name: 'Forças de Eyruaad', creatureUid: 2801, points: 120, color: '#3a56b0', requires: 'Eyruaad com aliados Neutros e Bons' },
+      { id: 'culto', name: 'Forças do Culto do Dragão', points: 120, color: '#c0282d', requires: 'Só criaturas Neutras e Malignas' },
+    ],
+    synopsis: [
+      'O jovem dragão de bronze Eyruaad, filho da ilustre Quelindritar, se pergunta de novo como virou a maior criatura da sala pela primeira vez na vida. Como as portas de adamantina do pátio não cederam, acharam uma passagem secreta pequena demais para os dragões grandes. A mãe dele e outros dragões tentaram se transformar em humanos, mas um encanto do pátio força todos à forma original. Os lacaios seguiram na frente para tentar abrir as portas por dentro, e Eyruaad, pequeno o bastante para se espremer pela passagem, ficou na retaguarda. Uma entrada sem dignidade, mas da qual ele se orgulha, porque adora provar o seu valor aos outros dragões.',
+      'Parece que havia duas passagens, porque Eyruaad e os companheiros estão diante de uma força inimiga também feita de criaturas menores. Os dois lados hesitam, maravilhados com o salão, que deve ter sido glorioso milhares de anos atrás, no auge do poder de Luminos. E veem pela primeira vez o gigante das nuvens: Luminos, o Poderoso, sentado para sempre no trono, agora só um esqueleto colossal em trajes rasgados, com um cetro encimado por uma pérola no colo. Até a visão mais impressionante só prende os ambiciosos por um tempo. Os dois lados percebem que os segredos da câmara vão ser revelados a uma só facção, e esse vai ser o maior prêmio da batalha.',
+    ],
+    setup: [
+      'Cada lado monta a legião com 120 pontos. As Forças de Eyruaad incluem Eyruaad e aliados Neutros e Bons. As Forças do Culto do Dragão usam só criaturas Neutras e Malignas.',
+      'Todas as criaturas, menos Eyruaad, precisam ter base pequena. Se os jogadores não tiverem criaturas de base pequena suficientes, podem usar criaturas de base grande, mas cada uma custa +10 Pontos de Legião.',
+      'Os jogadores posicionam as criaturas nas áreas iniciais pela preparação padrão para 2 jogadores: Eyruaad ao norte e o Culto ao sul.',
+    ],
+    specialRules: [
+      { title: 'Paredes do salão', text: 'As bordas da área são as paredes do salão. Uma criatura que fosse terminar o movimento fora da área não é derrotada: recua até ficar inteira dentro da área. Uma criatura voadora nessa situação precisa pousar na hora.' },
+      { title: 'Salão escuro', text: 'O salão antigo é mal iluminado, e todas as criaturas de sombra contam como "no escuro".' },
+    ],
+    objectives: [
+      { side: 'Forças de Eyruaad', text: ['Vencem se todas as Forças do Culto forem eliminadas.'] },
+      { side: 'Forças do Culto do Dragão', text: ['Vencem se todas as Forças de Eyruaad forem eliminadas.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'Luminos se levanta', summary: 'Uma voz poderosa grita "Basta!". A poeira do trono se mexe e o esqueleto gigante se levanta, erguendo o cetro. Ele diz que esperou muito pelos guerreiros: uma profecia antiga anunciou que ele abriria o caminho para o Cemitério Primordial quando o seu salão de banquetes virasse campo de batalha, e isso acaba de acontecer diante dos olhos frios dele. Um portal mágico brilhante se abre ao lado do trono, e ao mesmo tempo as portas de adamantina do pátio se abrem. Lá fora a batalha recomeçou com força, com mais tropas dos dragões bons e malignos chegando. Mas a luta para quando todos veem Luminos. Ele proíbe mais combate no salão sagrado e explica que o cemitério fica num plano distante do nosso. Os vencedores do salão têm o direito de entrar primeiro no Portal com os aliados, e os rivais podem segui-los depois, para que todos encontrem o destino anunciado quando as estrelas eram jovens. Enquanto o exército vencedor se prepara, o esqueleto real tira a pérola cintilante do cetro e, inclinando a cabeça em respeito, entrega a joia como prêmio pela coragem.', rewards: ['Força vencedora: 2 XP', 'Força vencedora recebe o Pearl of Power'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'eyruaad', label: 'Forças de Eyruaad' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'culto', label: 'Forças do Culto' },
+      ],
+      tokens: [],
+      walls: [{ edge: 'all', label: 'Paredes do salão', color: '#55505a' }],
+      note: 'Todas as bordas são paredes. Só criaturas de base pequena, com exceção de Eyruaad.',
+    },
+    origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 7.2,
+    theme: 'Criaturas pequenas lutam no salão escuro diante do esqueleto de Luminos pelo direito de entrar primeiro no Cemitério.',
+  },
+  {
+    slug: 'aniquilacao-e-vitoria',
+    number: 7.3,
+    title: 'Aniquilação e vitória',
+    original: 'Annihilation and Victory',
+    source: 'Livreto da expansão Red Dracolich (Onda 5), aventura 7.3',
+    players: 2,
+    playArea: '90 x 90 cm, o Cemitério Primordial (pode ser maior se a batalha tiver mais pontos)',
+    components: ['7 fichas de objetivo, numeradas de 1 a 7 (as proteções antigas)', 'As cartas de melhoria Talisman of Ultimate Evil e Talisman of Pure Good'],
+    sides: [
+      { id: 'mal', name: 'Dragões malignos', creatureUid: 2901, points: 200, color: '#c0282d', requires: 'Maurghoros com aliados Neutros e Malignos; Balagos não pode ser usado' },
+      { id: 'bem', name: 'Dragões bons', points: 200, color: '#3aa0d8', requires: 'Só criaturas Neutras e Boas' },
+    ],
+    synopsis: [
+      'O exército vencedor atravessa o portal para o Cemitério Primordial, seguido logo depois pelo exército inimigo. O tamanho e a grandeza do lugar superam tudo o que imaginavam: tesouros poderosos estão espalhados entre os ossos de dragões antigos, intocados desde o começo dos tempos. Na hora, uma voz troveja pedindo que os servos a libertem da prisão de eras. Todos olham para a origem da voz: uma gema negra flutuando logo além da borda do cemitério, um filactério de dragão antigo cheio de energia necrótica, que guarda uma alma de escuridão primordial.',
+      'Balagos, o dragão vermelho, sente o poder e avança antes que alguém o segure. Claugiyliamatar grita para ele esperar, e Eshaedra só sorri. No primeiro passo fora do cemitério, uma onda de energia sobe sob os pés de Balagos, com raios, fogo, ácido, frio e luz radiante rasgando o corpo e a alma dele, e ele cai morto com um olhar de traição. Quelindritar reconhece as proteções antigas, e Pacatus nota que funcionaram até bem demais: a energia sombria sai do filactério e entra no corpo destroçado de Balagos, que se levanta com um brilho vermelho nos olhos destruídos. É Maurghoros, um dragão mais velho que o mundo e antigo consorte de Tiamat, que se declara o novo senhor dos dragões. Eshaedra e o Wyrmspeaker Rezmir correm para o lado dele. Nymmestra acusa Quelindritar de saber de tudo, e a anciã de bronze admite: eles conheciam a profecia do retorno de Maurghoros e queriam estar ali quando acontecesse, porque só ali, no Cemitério Primordial, há um jeito de destruir o espírito dele para sempre. Vakka discorda do plano, mas fica. Drizzt saca as cimitarras e chama a pantera Guenhwyvar, e o elfo Limnen manda os arqueiros se prepararem. Maurghoros dá a ordem, e a batalha do Cemitério Primordial começa.',
+    ],
+    setup: [
+      'Cada lado monta a legião com 200 pontos. Os Dragões malignos incluem Maurghoros e aliados Neutros e Malignos; Balagos não pode ser usado nesta aventura. Os Dragões bons usam só criaturas Neutras e Boas.',
+      'Os jogadores podem combinar mais de 200 pontos para deixar a batalha final ainda maior. Nesse caso, usem uma área maior que 90 x 90 cm e ajustem as medidas.',
+      'Embaralhem as 7 fichas de objetivo e coloquem viradas para baixo como no mapa: uma no centro exato, duas ao lado dela, a leste e a oeste, e as outras perto das áreas iniciais, a 23 cm (9") delas.',
+      'Os jogadores posicionam as criaturas nas áreas iniciais pela preparação padrão para 2 jogadores: os Dragões malignos ao norte e os Dragões bons ao sul.',
+    ],
+    specialRules: [
+      { title: 'As proteções antigas', text: 'As fichas de objetivo não são obstáculos. Elas representam proteções antigas que os dragões bons podem ativar. Enquanto houver qualquer ficha de objetivo na área, Maurghoros não pode ser derrotado, não importa quanto dano receba.' },
+      { title: 'Ação: ativar uma proteção', text: 'Uma criatura dos Dragões bons, ou o soldado da ponta de uma tropa desse lado, a alcance 1 de uma ficha virada para baixo, pode usar a Ação para revelá-la e aplicar o efeito dela. Só pode haver 1 ficha virada para cima por vez: ninguém faz essa Ação se já houver uma.' },
+      { title: 'Fim da proteção', text: 'No começo da Fase Final, tirem da área a ficha virada para cima, que deixa de ter efeito. Quando a última ficha sair da área, Maurghoros é aniquilado na hora, com ou sem dano, e os Dragões bons vencem a aventura.' },
+      { title: 'Ficha 1: energia positiva', text: 'Uma onda de energia positiva percorre o campo. Cada criatura remove 1 Carta de Dano virada para baixo, se puder. Criaturas de energia negativa recebem 1 Carta de Dano virada para baixo em vez disso.' },
+      { title: 'Ficha 2: chuva ácida', text: 'Cada criatura, menos as de ácido, vira 1 ficha de Armadura para o lado quebrado. Cada criatura sem ficha de Armadura virada para cima recebe 1 Carta de Dano virada para baixo em vez disso. Criaturas de ácido são imunes.' },
+      { title: 'Ficha 3: energia vampírica', text: 'Cada criatura, menos as de energia negativa, com pelo menos 1 Carta de Dano virada para baixo escolhe uma delas ao acaso, vira para cima e sofre o efeito da carta na hora.' },
+      { title: 'Ficha 4: ventos gelados', text: 'Nenhuma criatura, menos as de frio, pode fazer Ações pelo resto da rodada.' },
+      { title: 'Ficha 5: magia selvagem', text: 'Nesta rodada, quem ataca com uma melhoria de feitiço pode rolar os dados de ataque duas vezes seguidas e escolher qual resultado manter.' },
+      { title: 'Ficha 6: música de heroísmo', text: 'Todas as criaturas rolam +1 dado de ataque sempre que atacam nesta rodada.' },
+      { title: 'Ficha 7: esfera de aniquilação', text: 'Uma esfera de aniquilação aparece sobre o campo de batalha. Cada criatura precisa descartar na hora 1 melhoria à sua escolha.' },
+    ],
+    objectives: [
+      { side: 'Dragões malignos', text: [
+        'Vencem se todas as forças dos Dragões bons forem eliminadas (depois da batalha 1).',
+        'Se isso acontecer durante a Fase de Combate, por exemplo pela habilidade de Maurghoros de derrotar inimigos na hora, sem esperar a Fase Final, os Dragões malignos vencem imediatamente, sem passar para a Fase Final.',
+      ] },
+      { side: 'Dragões bons', text: [
+        'Vencem imediatamente no começo da Fase Final se a última ficha de objetivo sair da área (depois da batalha 2).',
+        'Vencem mesmo que todas as criaturas restantes deles fossem eliminadas depois, nessa Fase Final, por dano letal: o poder do cemitério revitaliza as criaturas que morreriam dos ferimentos nessa rodada.',
+        'Lembrem que Maurghoros não pode ser derrotado enquanto houver fichas de objetivo na área, então os Dragões bons só vencem ativando todas as proteções.',
+      ] },
+    ],
+    outcomes: [
+      { id: '1', title: 'Maurghoros triunfa', summary: 'Maurghoros despedaça os inimigos com uma fúria que assusta até os novos aliados. Ele declara que o cemitério é deles para profanar: a maioria dos objetos é abençoada e não serve para eles, então vão derretê-los e oferecer o metal à sua amada senhora. Um aliado mostra que entre as relíquias há uma que vai agradá-lo, e Maurghoros olha para o colar que os dragões bons esperavam enterrar ali, onde os dragões malignos nunca o achariam. Ele aprova e decide usá-lo no pescoço na mesma hora.', rewards: ['Dragões malignos: 4 XP', 'Dragões malignos recebem o Talisman of Ultimate Evil'] },
+      { id: '2', title: 'As proteções se fecham', summary: 'Quando a última proteção é ativada, a esfera de aniquilação que flutuava sobre o campo cresce e engole Maurghoros. Entre gritos de agonia, o globo escuro bane o espírito dele e o corpo roubado do multiverso para sempre, e depois se fecha. Os aliados do dracolich, derrotados e feridos, se rendem, cada um já planejando a vingança. Pacatus diz que eles não vão morrer, mas vão sofrer pelo que quase conseguiram. Galadaeros, aliviado, diz que venceram afinal. Quelindritar o chama de Chama do Poente, elogia a coragem dele ao longo de meses de conflito e, embora a maior parte dos tesouros deva ficar com os ancestrais, entrega a ele um símbolo de coragem e bondade. Galadaeros aceita o presente brilhante com humildade e já pensa nas próximas aventuras com Nymmestra e os outros, agora que a amizade deles foi forjada em sangue e vitória.', rewards: ['Dragões bons: 4 XP', 'Dragões bons recebem o Talisman of Pure Good'] },
+    ],
+    epilogue: 'Fim da campanha O Cemitério Primordial. Somem a XP de cada jogador: vence a campanha quem tiver mais experiência acumulada.',
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 12, side: 'mal', label: 'Dragões malignos' },
+        { x: 0, y: 78, w: 90, h: 12, side: 'bem', label: 'Dragões bons' },
+      ],
+      tokens: [
+        { x: 45, y: 45, label: '1 a 7' }, { x: 14, y: 45 }, { x: 76, y: 45 },
+        { x: 30, y: 23 }, { x: 62, y: 18 }, { x: 33, y: 68 }, { x: 62, y: 67 },
+      ],
+      note: 'As 7 proteções ficam viradas para baixo: uma no centro, duas ao lado dela, a leste e a oeste, e duas perto de cada área inicial, a 23 cm dela. O número de cada uma só aparece quando um dragão bom a ativa.',
+    },
+    origin: 'livro',
+    campaign: 'cemiterio-primordial',
+    chapter: 7.3,
+    theme: 'A batalha final de 200 pontos: os dragões bons precisam ativar as sete proteções antes que Maurghoros os destrua.',
+  },
+  {
     slug: 'ninho-na-tempestade',
     number: 3,
     title: 'O ninho na tempestade',
@@ -1347,7 +1505,7 @@ export const STAGES: Record<string, Stage[]> = {
     },
     {
       id: 'onda5', title: 'O salão de Luminos', wave: 'Onda 5',
-      summary: 'O fim da campanha: a luta corpo a corpo nos corredores, o Salão de Luminos, o Poderoso, e a batalha final, em que os Talismãs do Mal Supremo e do Bem Puro decidem quem fica com as relíquias do Cemitério Primordial.',
+      summary: 'Com o portão do pátio aberto, Drizzt e o Culto lutam no pátio murado, onde ninguém voa alto. As portas de adamantina não abrem, e só criaturas pequenas passam pelas passagens secretas até o salão do trono, onde o esqueleto de Luminos se levanta e abre o portal para o Cemitério Primordial. Lá dentro, Balagos morre nas proteções antigas e o espírito do dracolich Maurghoros toma o corpo dele. Na batalha final, os dragões bons precisam ativar as sete proteções para banir Maurghoros, e o lado vencedor leva o Talismã do Mal Supremo ou o Talismã do Bem Puro.',
       codes: ['7.1', '7.2', '7.3'],
     },
   ],
@@ -1373,6 +1531,9 @@ export const CHAPTER_HOOKS: Record<string, string> = {
   '6.1': 'O Tuning Fork acalma as sentinelas e gira o primeiro mecanismo.',
   '6.2': 'O 7th Shard of Law vence a ventania e gira o segundo mecanismo.',
   '6.3': 'O portão do pátio do palácio se abre.',
+  '7.1': 'As portas não abrem, mas há uma passagem secreta pequena.',
+  '7.2': 'Luminos abre o portal para o Cemitério Primordial.',
+  '7.3': 'Maurghoros é banido ou toma o cemitério. Fim da campanha.',
 };
 
 /* Criatura que representa cada capítulo das expansões (para a imagem da trilha). */
