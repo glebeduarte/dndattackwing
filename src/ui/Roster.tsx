@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creature, Upgrade } from '../engine/engine';
 import { catalog, useStore } from '../store';
-import { ALIGN_LABEL, ARC_LABEL, GameIcon, SLOT_LABEL } from './bits';
+import { ALIGN_LABEL, GameIcon, SLOT_LABEL } from './bits';
 import type { Selection } from './Catalog';
 
 /* Uid do upgrade sendo arrastado no catálogo, para marcar quem pode recebê-lo. */
@@ -168,11 +168,6 @@ function RosterCard({ c, n, dragState, onSlotClick, onPreview }: { c: Creature; 
               </span>
             ))}
           </div>
-          <p className="rc-attacks">
-            {c.data.primary_attacks.map((a, i) => (
-              <span key={i}>{a.description} <span className="muted">{ARC_LABEL[a.arc] ?? a.arc} {a.range}</span></span>
-            ))}
-          </p>
           <div className="icon-row" aria-label="Barra de ações">
             {c.actions.map((a) => <GameIcon key={a} type={a} size={20} />)}
           </div>

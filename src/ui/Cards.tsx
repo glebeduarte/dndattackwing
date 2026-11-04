@@ -2,66 +2,109 @@ import { Link } from 'react-router-dom';
 import { Upgrade } from '../engine/engine';
 import type { CreatureData, UpgradeData } from '../engine/types';
 import { useStore } from '../store';
-import { ALIGN_LABEL, ARC_LABEL, BASE_LABEL, CardText, CostBadge, GameIcon, ManeuverDial, SLOT_LABEL, StatRow } from './bits';
+import { ALIGN_LABEL, ARC_LABEL, BASE_LABEL, CardText, GameIcon, ManeuverDial, SLOT_LABEL } from './bits';
+
+/* Cartas desenhadas como as originais do Attack Wing: selo de custo, coluna de atributos e slots,
+   faixa com o nome, texto sobre o pergaminho e os ataques em escudos no canto. */
+
+function CostSeal({ value, unique }: { value: number | string; unique?: boolean }) {
+  return (
+    <span className={`seal${unique ? ' is-unique' : ''}`} title={unique ? 'Custo, carta única' : 'Custo'}>
+      <span className="seal-label">Custo</span>
+      <span className="seal-value">{value}</span>
+    </span>
+  );
+}
+
+function LevelBadge({ value, plus }: { value: number; plus?: boolean }) {
+  return (
+    <span className="lvl" title="Nível">
+      <span className="lvl-label">Nv</span>
+      <span className="lvl-value">{value}{plus ? '+' : ''}</span>
+    </span>
+  );
+}
+
+const STAT_DEFS = [
+  ['pwv', 'attack', 'Arma primária'],
+  ['agility', 'agility', 'Agilidade'],
+  ['health', 'health', 'Vida'],
+  ['armor', 'armor', 'Armadura'],
+] as const;
 
 export function CreatureCard({ data, full = false }: { data: CreatureData; full?: boolean }) {
   const elements = [data.element, ...(data.elements ?? [])].filter(Boolean) as string[];
   return (
-    <article className="card card-creature" aria-label={data.name}>
-      <header className="card-head">
-        <div>
-          {!full && <h2 className="card-name">{data.name}</h2>}
-          <p className="card-class">{data.classtype}</p>
-        </div>
-        <CostBadge value={data.cost} unique={data.unique} />
-      </header>
-
-      <div className="card-tags">
-        <span className="tag-level" title="Nível">Nível <span className="num">{data.level}</span></span>
-        <span className="tag-icon"><GameIcon type={data.alignment} color size={22} title={ALIGN_LABEL[data.alignment]} />{ALIGN_LABEL[data.alignment]}</span>
-        {elements.map((e) => (
-          <span className="tag-icon" key={e}><GameIcon type={e} color size={22} />{e}</span>
-        ))}
-        {data.unique && <span className="tag-plain">Única</span>}
-      </div>
-
-      <StatRow attack={data.attack} agility={data.agility} health={data.health} armor={data.armor} size={26} />
-
-      <dl className="kv">
-        <div><dt>Slots</dt><dd className="icon-row">{data.upgrades.map((s, i) => <GameIcon key={i} type={s} size={24} title={SLOT_LABEL[s] ?? s} />)}</dd></div>
-        <div><dt>Ações</dt><dd className="icon-row">{data.actions.map((a) => <GameIcon key={a} type={a} size={24} />)}</dd></div>
-        {data.primary_attacks.map((a, i) => (
-          <div key={i}>
-            <dt>{a.type === 'Melee' ? 'Corpo a corpo' : 'À distância'}</dt>
-            <dd>{a.description} <span className="muted">· arco {ARC_LABEL[a.arc] ?? a.arc}, alcance {a.range}</span></dd>
+    <div className={`card-wrap${full ? ' is-full' : ''}`}>
+      <article className="gcard gcard-creature" aria-label={`Carta ${data.name}`}>
+        <div className="gc-rail">
+          <CostSeal value={data.cost} unique={data.unique} />
+          <div className="gc-slots" aria-label="Slots de upgrade">
+            {data.upgrades.map((s, i) => (
+              <GameIcon key={i} type={s} size={26} title={SLOT_LABEL[s] ?? s} />
+            ))}
           </div>
-        ))}
-        <div><dt>Base</dt><dd>{BASE_LABEL[data.base] ?? data.base}{data.flyer ? ' · voa' : ' · terrestre'}</dd></div>
-        <div><dt>Coleção</dt><dd>{data.set} <span className="muted">· {data.wave}</span></dd></div>
-      </dl>
+          <dl className="gc-stats">
+            {STAT_DEFS.map(([icon, key, label]) => (
+              <div className={`gc-stat gc-stat-${icon}`} key={icon} title={label}>
+                <dt><GameIcon type={icon} color size={24} title={label} /></dt>
+                <dd>{(data as any)[key]}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
 
-      {data.special && <CardText text={data.special} />}
+        <div className="gc-main">
+          <div className="gc-top">
+            <div className="gc-medals">
+              <GameIcon type={data.alignment} color size={30} title={ALIGN_LABEL[data.alignment]} />
+              {elements.map((e) => <GameIcon key={e} type={e} color size={30} />)}
+            </div>
+            <LevelBadge value={data.level} />
+          </div>
+
+          <div className="gc-banner">
+            <h2 className="gc-name">{data.name}</h2>
+            <p className="gc-class">{data.classtype}</p>
+          </div>
+
+          <div className="gc-body">
+            <div className="gc-text">
+              {data.special ? <CardText text={data.special} iconSize={16} /> : <p className="gc-none">Sem habilidade especial.</p>}
+              <div className="gc-actions" aria-label="Barra de ações">
+                {data.actions.map((a) => <GameIcon key={a} type={a} size={24} />)}
+              </div>
+            </div>
+            <div className="gc-attacks">
+              {data.primary_attacks.map((a, i) => (
+                <div className="gc-attack" key={i} title={`${a.description}: arco ${ARC_LABEL[a.arc] ?? a.arc}, alcance ${a.range}`}>
+                  <span className="gc-shield">{a.range}</span>
+                  <span className="gc-atk-name">{a.description}</span>
+                  <span className="gc-atk-type">{a.type === 'Melee' ? 'Corpo a corpo' : 'Distância'}{a.arc === 'Rear' ? ' · trás' : ''}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <p className="gc-foot">
+            {BASE_LABEL[data.base] ?? data.base} · {data.flyer ? 'voa' : 'terrestre'}{data.unique ? ' · única' : ''} · {data.set}
+          </p>
+        </div>
+      </article>
 
       <div className="dials">
         <ManeuverDial grid={data.movement?.flight} label="Voo" />
         <ManeuverDial grid={data.movement?.ground} label="Solo" />
       </div>
-
-      {!full && (
-        <Link className="text-link" to={`/card/creature/${data.uid}`}>Abrir página da carta</Link>
-      )}
-    </article>
+      {!full && <Link className="text-link" to={`/card/creature/${data.uid}`}>Abrir página da carta</Link>}
+    </div>
   );
 }
 
 const yes = (v: unknown) => v === true;
 
 export function UpgradeCard({ data, full = false }: { data: UpgradeData; full?: boolean }) {
-  const facts: [string, string][] = [];
-  if (data.range !== null && data.range !== undefined && data.range !== '') facts.push(['Alcance', String(data.range)]);
-  if (data.arc) facts.push(['Arco', ARC_LABEL[data.arc] ?? data.arc]);
-  if (data.area && data.area !== 'false') facts.push(['Área', data.area]);
-  if (data.dts) facts.push(['Marcadores de dano', String(data.dts)]);
+  const area = data.area && data.area !== 'false' ? data.area : null;
+  const hasRange = data.range !== null && data.range !== undefined && data.range !== '';
   const flags = [
     yes(data.action) && 'Ação',
     yes(data.attack) && 'Ataque',
@@ -70,37 +113,39 @@ export function UpgradeCard({ data, full = false }: { data: UpgradeData; full?: 
     yes(data.discards) && 'Descarta',
     yes(data.disables) && 'Desativa',
   ].filter(Boolean) as string[];
+
   return (
-    <article className="card card-upgrade" aria-label={data.name}>
-      <header className="card-head">
-        <div>
-          {!full && <h2 className="card-name">{data.name}</h2>}
-          <p className="card-class">{data.classtype}</p>
+    <div className={`card-wrap${full ? ' is-full' : ''}`}>
+      <article className={`gcard gcard-upgrade slot-${data.upgrade.toLowerCase()}`} aria-label={`Carta ${data.name}`}>
+        <div className="gu-art">
+          <CostSeal value={data.cost} unique={data.unique} />
+          {data.level ? <LevelBadge value={data.level} plus /> : null}
+          <span className="gu-emblem"><GameIcon type={data.upgrade} size={72} title={SLOT_LABEL[data.upgrade]} /></span>
+          {data.element && <span className="gu-element"><GameIcon type={data.element} color size={30} /></span>}
+          {(hasRange || area) && (
+            <span className="gu-scroll" title={[area, hasRange && `alcance ${data.range}`].filter(Boolean).join(', ')}>
+              {hasRange && <span className="gu-range">{data.range}</span>}
+              <span className="gu-scroll-label">{area ?? (data.arc ? ARC_LABEL[data.arc] ?? data.arc : 'Alcance')}</span>
+            </span>
+          )}
         </div>
-        <CostBadge value={data.cost} unique={data.unique} />
-      </header>
-      <div className="card-tags">
-        <span className="tag-icon"><GameIcon type={data.upgrade} size={22} />{SLOT_LABEL[data.upgrade] ?? data.upgrade}</span>
-        {data.level ? <span className="tag-level">Nível <span className="num">{data.level}+</span></span> : null}
-        {data.element && <span className="tag-icon"><GameIcon type={data.element} color size={22} />{data.element}</span>}
-        {data.unique && <span className="tag-plain">Única</span>}
-        {data.artifact && <span className="tag-plain">Artefato{data.artifactSet ? ` ${data.artifactSet}` : ''}</span>}
-      </div>
-      <CardText text={data.text} />
-      {(facts.length > 0 || flags.length > 0) && (
-        <dl className="kv">
-          {facts.map(([k, v]) => (
-            <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
-          ))}
-          {flags.length > 0 && <div><dt>Efeitos</dt><dd>{flags.join(' · ')}</dd></div>}
-        </dl>
-      )}
-      <dl className="kv">
-        <div><dt>Coleção</dt><dd>{data.set} <span className="muted">· {data.wave}</span></dd></div>
-      </dl>
+        <div className="gc-banner">
+          <h2 className="gc-name">{data.name}</h2>
+          <p className="gc-class">{data.classtype}</p>
+        </div>
+        <div className="gu-body">
+          <CardText text={data.text} iconSize={16} />
+        </div>
+        <p className="gc-foot">
+          {SLOT_LABEL[data.upgrade] ?? data.upgrade}
+          {data.artifact ? ` · artefato${data.artifactSet ? ` ${data.artifactSet}` : ''}` : ''}
+          {flags.length ? ` · ${flags.join(', ')}` : ''}
+          {data.dts ? ` · ${data.dts} marcadores` : ''} · {data.set}
+        </p>
+      </article>
       {!full && <LegionFit data={data} />}
       {!full && <Link className="text-link" to={`/card/upgrade/${data.uid}`}>Abrir página da carta</Link>}
-    </article>
+    </div>
   );
 }
 
@@ -118,7 +163,7 @@ function LegionFit({ data }: { data: UpgradeData }) {
           const why = ok ? null : legion.whyNot(c, probe);
           return (
             <li key={c.key} className={ok ? 'fit-ok' : 'fit-no'}>
-              <span className="fit-name"><span className="num muted">#{i + 1}</span> {c.name}</span>
+              <span className="fit-name"><span className="num muted">{i + 1}</span> {c.name}</span>
               {ok ? (
                 <>
                   <span className="num fit-cost">{probe.costForCreature(c, legion)} pts</span>
