@@ -4,6 +4,8 @@ import type { CreatureData, UpgradeData } from '../engine/types';
 import { ALL_SETS, catalog, useStore, type SortKey } from '../store';
 import { GameIcon, SLOT_LABEL } from './bits';
 import { matches, parseQuery, QUERY_EXAMPLES } from './query';
+import { getLoadedTranslations, useCardLang } from '../i18n/cards';
+import { translateClasstype } from '../i18n/classtypes';
 
 export type Tab = 'creatures' | 'upgrades';
 export interface Filters {
@@ -16,11 +18,20 @@ export interface Filters {
 }
 export type Selection = { kind: 'creature'; uid: number } | { kind: 'upgrade'; uid: number } | null;
 
-const hay = new Map<object, string>();
+// Texto de busca de cada carta; inclui a tradução quando ela já foi carregada.
+let hay = new Map<object, string>();
+let hayWithPt = false;
 function haystack(d: CreatureData | UpgradeData) {
+  const tr = getLoadedTranslations();
+  if (tr && !hayWithPt) {
+    hay = new Map();
+    hayWithPt = true;
+  }
   let h = hay.get(d);
   if (!h) {
-    h = [d.name, d.classtype, d.set, d.wave, (d as any).text, (d as any).special, ...((d as any).identifiers ?? []), (d as any).upgrade]
+    const isC = Array.isArray((d as any).upgrades);
+    const pt = tr ? (isC ? tr.c[d.uid] : tr.u[d.uid]) : undefined;
+    h = [d.name, d.classtype, tr ? translateClasstype(d.classtype) : '', pt, d.set, d.wave, (d as any).text, (d as any).special, ...((d as any).identifiers ?? []), (d as any).upgrade]
       .filter(Boolean)
       .join(' ')
       .toLowerCase();
@@ -192,6 +203,7 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
 
 const CreatureRow = memo(function CreatureRow({ d, active, onPreview }: { d: CreatureData; active: boolean; onPreview(s: Selection, open?: boolean): void }) {
   const { mutate } = useStore();
+  const t = useCardLang();
   const add = () => mutate((l) => l.addCreature(d), `${d.name} entrou na legião.`);
   return (
     <li
@@ -205,7 +217,7 @@ const CreatureRow = memo(function CreatureRow({ d, active, onPreview }: { d: Cre
     >
       <button className="row-main" onClick={() => onPreview({ kind: 'creature', uid: d.uid }, true)} onFocus={() => onPreview({ kind: 'creature', uid: d.uid })}>
         <span className="row-name">{d.name}{d.unique && <span className="unique-mark" title="Única"> ◆</span>}</span>
-        <span className="row-sub">{d.classtype} · nível {d.level}</span>
+        <span className="row-sub">{t.classtype(d.classtype)} · nível {d.level}</span>
       </button>
       <span className="row-cost num">{d.cost}</span>
       <button className="btn btn-add" onClick={add} aria-label={`Adicionar ${d.name} à legião`} title="Adicionar à legião">+</button>
@@ -215,6 +227,7 @@ const CreatureRow = memo(function CreatureRow({ d, active, onPreview }: { d: Cre
 
 const UpgradeRow = memo(function UpgradeRow({ d, active, onPreview }: { d: UpgradeData; v: number; active: boolean; onPreview(s: Selection, open?: boolean): void }) {
   const { legion, mutate } = useStore();
+  const t = useCardLang();
   const probe = new Upgrade(d);
   const targets = legion.creatures.map((c, i) => ({ c, i })).filter(({ c }) => legion.canCreatureEquipUpgrade(c, probe));
   return (
@@ -233,7 +246,7 @@ const UpgradeRow = memo(function UpgradeRow({ d, active, onPreview }: { d: Upgra
       <GameIcon type={d.upgrade} size={20} title={SLOT_LABEL[d.upgrade]} />
       <button className="row-main" onClick={() => onPreview({ kind: 'upgrade', uid: d.uid }, true)} onFocus={() => onPreview({ kind: 'upgrade', uid: d.uid })}>
         <span className="row-name">{d.name}{d.unique && <span className="unique-mark" title="Única"> ◆</span>}</span>
-        <span className="row-sub">{d.classtype}</span>
+        <span className="row-sub">{t.classtype(d.classtype)}</span>
       </button>
       <span className="row-cost num">{d.cost}</span>
       {targets.length > 0 && (

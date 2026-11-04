@@ -40,6 +40,13 @@ export function SettingsDialog({ onClose }: { onClose(): void }) {
             </select>
           </label>
         </div>
+        <label className="field">
+          <span>Texto das cartas</span>
+          <select value={settings.lang ?? 'en'} onChange={(e) => setSettings({ lang: e.target.value as 'en' | 'pt' })}>
+            <option value="en">Original em inglês</option>
+            <option value="pt">Tradução em português</option>
+          </select>
+        </label>
         <label className="check">
           <input type="checkbox" checked={settings.equippableOnly} onChange={(e) => setSettings({ equippableOnly: e.target.checked })} />
           <span>Abrir os upgrades mostrando só o que cabe na legião</span>

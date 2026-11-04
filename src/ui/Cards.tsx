@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useCardImage, type CardKind } from '../cardImages';
+import { useCardLang } from '../i18n/cards';
 import { Upgrade } from '../engine/engine';
 import type { CreatureData, UpgradeData } from '../engine/types';
 import { useStore } from '../store';
@@ -27,28 +28,53 @@ function LevelBadge({ value, plus }: { value: number; plus?: boolean }) {
   );
 }
 
+/* Alterna o texto das cartas entre o original em inglês e a tradução. A escolha vale para todas as cartas. */
+export function LangToggle() {
+  const { lang, setLang } = useCardLang();
+  return (
+    <div className="card-lang" role="group" aria-label="Idioma do texto das cartas">
+      <button className={lang === 'en' ? 'is-on' : ''} aria-pressed={lang === 'en'} onClick={() => setLang('en')}>Inglês</button>
+      <button className={lang === 'pt' ? 'is-on' : ''} aria-pressed={lang === 'pt'} onClick={() => setLang('pt')}>Português</button>
+    </div>
+  );
+}
+
 /* Mostra a foto da carta original quando existe, com opção de ver a ficha do sistema. */
-function CardFace({ kind, uid, name, children }: { kind: CardKind; uid: number; name: string; children: ReactNode }) {
+function CardFace({ kind, uid, name, text, children }: { kind: CardKind; uid: number; name: string; text?: string | null; children: ReactNode }) {
   const url = useCardImage(kind, uid);
   const [view, setView] = useState<'original' | 'sistema'>('original');
+  const { lang, creatureText, upgradeText } = useCardLang();
   if (!url) {
     return (
       <>
+        <div className="card-bar"><LangToggle /></div>
         {children}
         <Link className="card-photo-link" to={`/leitor?tipo=${kind}&uid=${uid}`}>Adicionar foto da carta original</Link>
       </>
     );
   }
+  const translated = kind === 'creature' ? creatureText(uid, text) : upgradeText(uid, text);
   return (
     <>
-      <div className="card-view" role="tablist" aria-label="Versão da carta">
-        <button role="tab" aria-selected={view === 'original'} className={view === 'original' ? 'is-on' : ''} onClick={() => setView('original')}>Carta original</button>
-        <button role="tab" aria-selected={view === 'sistema'} className={view === 'sistema' ? 'is-on' : ''} onClick={() => setView('sistema')}>Ficha do sistema</button>
+      <div className="card-bar">
+        <div className="card-view" role="tablist" aria-label="Versão da carta">
+          <button role="tab" aria-selected={view === 'original'} className={view === 'original' ? 'is-on' : ''} onClick={() => setView('original')}>Carta original</button>
+          <button role="tab" aria-selected={view === 'sistema'} className={view === 'sistema' ? 'is-on' : ''} onClick={() => setView('sistema')}>Ficha do sistema</button>
+        </div>
+        <LangToggle />
       </div>
       {view === 'original' ? (
-        <figure className="card-photo">
-          <img src={url} alt={`Carta original de ${name}`} />
-        </figure>
+        <>
+          <figure className="card-photo">
+            <img src={url} alt={`Carta original de ${name}`} />
+          </figure>
+          {lang === 'pt' && translated && translated !== text && (
+            <div className="card-photo-tr">
+              <p className="card-photo-tr-title">Texto da carta em português</p>
+              <CardText text={translated} iconSize={15} />
+            </div>
+          )}
+        </>
       ) : (
         children
       )}
@@ -64,10 +90,11 @@ const STAT_DEFS = [
 ] as const;
 
 export function CreatureCard({ data, full = false }: { data: CreatureData; full?: boolean }) {
+  const t = useCardLang();
   const elements = [data.element, ...(data.elements ?? [])].filter(Boolean) as string[];
   return (
     <div className={`card-wrap${full ? ' is-full' : ''}`}>
-      <CardFace kind="creature" uid={data.uid} name={data.name}>
+      <CardFace kind="creature" uid={data.uid} name={data.name} text={data.special}>
       <article className="gcard gcard-creature" aria-label={`Carta ${data.name}`}>
         <div className="gc-rail">
           <CostSeal value={data.cost} unique={data.unique} />
@@ -97,12 +124,12 @@ export function CreatureCard({ data, full = false }: { data: CreatureData; full?
 
           <div className="gc-banner">
             <h2 className="gc-name">{data.name}</h2>
-            <p className="gc-class">{data.classtype}</p>
+            <p className="gc-class">{t.classtype(data.classtype)}</p>
           </div>
 
           <div className="gc-body">
             <div className="gc-text">
-              {data.special ? <CardText text={data.special} iconSize={16} /> : <p className="gc-none">Sem habilidade especial.</p>}
+              {data.special ? <CardText text={t.creatureText(data.uid, data.special)} iconSize={16} /> : <p className="gc-none">Sem habilidade especial.</p>}
               <div className="gc-actions" aria-label="Barra de ações">
                 {data.actions.map((a) => <GameIcon key={a} type={a} size={24} />)}
               </div>
@@ -136,6 +163,7 @@ export function CreatureCard({ data, full = false }: { data: CreatureData; full?
 const yes = (v: unknown) => v === true;
 
 export function UpgradeCard({ data, full = false }: { data: UpgradeData; full?: boolean }) {
+  const t = useCardLang();
   const area = data.area && data.area !== 'false' ? data.area : null;
   const hasRange = data.range !== null && data.range !== undefined && data.range !== '';
   const flags = [
@@ -149,7 +177,7 @@ export function UpgradeCard({ data, full = false }: { data: UpgradeData; full?: 
 
   return (
     <div className={`card-wrap${full ? ' is-full' : ''}`}>
-      <CardFace kind="upgrade" uid={data.uid} name={data.name}>
+      <CardFace kind="upgrade" uid={data.uid} name={data.name} text={data.text}>
       <article className={`gcard gcard-upgrade slot-${data.upgrade.toLowerCase()}`} aria-label={`Carta ${data.name}`}>
         <div className="gu-art">
           <CostSeal value={data.cost} unique={data.unique} />
@@ -165,10 +193,10 @@ export function UpgradeCard({ data, full = false }: { data: UpgradeData; full?: 
         </div>
         <div className="gc-banner">
           <h2 className="gc-name">{data.name}</h2>
-          <p className="gc-class">{data.classtype}</p>
+          <p className="gc-class">{t.classtype(data.classtype)}</p>
         </div>
         <div className="gu-body">
-          <CardText text={data.text} iconSize={16} />
+          <CardText text={t.upgradeText(data.uid, data.text)} iconSize={16} />
         </div>
         <p className="gc-foot">
           {SLOT_LABEL[data.upgrade] ?? data.upgrade}

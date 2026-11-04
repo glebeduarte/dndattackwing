@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { PRINT_SLOT_ABBR, type Creature, type Legion, type Upgrade } from '../engine/engine';
 import { ALIGN_LABEL, ARC_LABEL, BASE_LABEL, CardText, GameIcon, ManeuverDial, SLOT_LABEL } from './bits';
 import { useStore } from '../store';
+import { useCardLang } from '../i18n/cards';
 
 type Mode = 'simples' | 'completa';
 interface Player {
@@ -162,6 +163,7 @@ function FullReference({ legion }: { legion: Legion }) {
 }
 
 function PrintCreatureFull({ c, n, legion }: { c: Creature; n: number; legion: Legion }) {
+  const tr = useCardLang();
   const d = c.data;
   const elements = c.elementsList();
   return (
@@ -170,7 +172,7 @@ function PrintCreatureFull({ c, n, legion }: { c: Creature; n: number; legion: L
         <span className="ps-n">{n}</span>
         <div>
           <h3>{c.name}{c.unique ? ' ◆' : ''}</h3>
-          <p>{c.classtype} · {d.set}, {d.wave}</p>
+          <p>{tr.classtype(c.classtype)} · {d.set}, {d.wave}</p>
         </div>
         <div className="ps-c-cost">
           <strong>{c.totalCost(legion)}</strong>
@@ -204,7 +206,7 @@ function PrintCreatureFull({ c, n, legion }: { c: Creature; n: number; legion: L
           <p className="ps-line ps-icons">
             <b>Slots:</b> {c.upgrades.map((s, k) => <span key={k}><GameIcon type={s} size={14} /> {SLOT_LABEL[s] ?? s}</span>)}
           </p>
-          {d.special && <div className="ps-text"><CardText text={d.special} iconSize={13} /></div>}
+          {d.special && <div className="ps-text"><CardText text={tr.creatureText(c.uid, d.special)} iconSize={13} /></div>}
         </div>
         <div className="ps-dials">
           <ManeuverDial grid={c.movement?.flight} label="Voo" />
@@ -224,6 +226,7 @@ function PrintCreatureFull({ c, n, legion }: { c: Creature; n: number; legion: L
 }
 
 function PrintUpgradeFull({ u, c, legion }: { u: Upgrade; c: Creature; legion: Legion }) {
+  const tr = useCardLang();
   const d = u.data;
   const slot = c.upgrades[c.equipped.indexOf(u)];
   const facts = [
@@ -241,11 +244,11 @@ function PrintUpgradeFull({ u, c, legion }: { u: Upgrade; c: Creature; legion: L
       <div className="ps-up-head">
         <GameIcon type={slot} size={18} title={SLOT_LABEL[slot] ?? slot} />
         <h4>{u.name}</h4>
-        <span className="ps-up-class">{u.classtype}</span>
+        <span className="ps-up-class">{tr.classtype(u.classtype)}</span>
         <strong className="ps-up-cost">{u.costForCreature(c, legion)}</strong>
       </div>
       {facts.length > 0 && <p className="ps-up-facts">{facts.join(' · ')}</p>}
-      <div className="ps-text"><CardText text={d.text} iconSize={13} /></div>
+      <div className="ps-text"><CardText text={tr.upgradeText(u.uid, d.text)} iconSize={13} /></div>
     </div>
   );
 }

@@ -40,6 +40,7 @@ export interface Settings {
   equippableOnly: boolean;
   sets: Record<string, boolean>;
   target: number | null;
+  lang?: 'en' | 'pt';
 }
 
 const defaultSettings: Settings = {
@@ -48,6 +49,7 @@ const defaultSettings: Settings = {
   equippableOnly: false,
   sets: Object.fromEntries(ALL_SETS.map((s) => [s, true])),
   target: 200,
+  lang: 'en',
 };
 
 export interface SavedLegion {
