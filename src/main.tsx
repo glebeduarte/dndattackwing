@@ -10,6 +10,7 @@ import { Generator } from './pages/Generator';
 import { AdventurePage, AdventuresPage } from './pages/Adventures';
 import { CardPage, LinkRoute, SavedPage } from './pages/Other';
 import './styles.css';
+import { CompanionPage } from './pages/Companion';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/upgrades" element={<Builder />} />
           <Route path="/gerador" element={<Generator />} />
           <Route path="/leitor" element={<CardReaderPage />} />
+          <Route path="/jogar" element={<CompanionPage />} />
           <Route path="/regras" element={<RulesPage />} />
           <Route path="/aventuras" element={<AdventuresPage />} />
           <Route path="/aventuras/:slug" element={<AdventurePage />} />
