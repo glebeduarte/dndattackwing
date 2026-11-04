@@ -85,6 +85,18 @@ export const CAMPAIGNS: Campaign[] = [
     planned: [
     ],
   },
+  {
+    slug: 'mal-elemental',
+    title: 'O Mal Elemental',
+    original: 'Elemental Evil',
+    source: 'Livretos de aventura das expansões da Onda 6',
+    summary: 'A segunda campanha. Os quatro cultos elementais, servos dos príncipes do Mal Elemental, se escondem em fortalezas disfarçadas, e as facções do bem (Ordem da Manopla, Enclave Esmeralda, Aliança dos Lordes e Harpistas) atacam uma por uma, enquanto Quelindritar junta os heróis para um golpe decisivo.',
+    status: '4 capítulos, 3 com guia completo',
+    pending: 'O capítulo 10 ainda não foi enviado. O guia entra aqui assim que o livreto estiver disponível.',
+    planned: [
+      { code: '10', title: 'Aventura #10', expansion: 'Onda 6', wave: 'Onda 6', artifacts: [], premise: 'Pela ordem dos cultos atacados (água, terra e fogo), o capítulo que falta deve ser o ataque à fortaleza do culto do ar.' },
+    ],
+  },
 ];
 
 export const CAMPAIGN_RULES = {
@@ -1293,6 +1305,214 @@ export const ADVENTURES: Adventure[] = [
     theme: 'A batalha final de 200 pontos: os dragões bons precisam ativar as sete proteções antes que Maurghoros os destrua.',
   },
   {
+    slug: 'fortaleza-rivergard',
+    number: 8,
+    title: 'A fortaleza Rivergard',
+    original: 'Rivergard Keep',
+    source: 'Livreto de aventura #8 (Onda 6, Mal Elemental)',
+    players: 2,
+    playArea: '90 x 90 cm, a areia da praia em volta da fortaleza Rivergard, à beira do rio',
+    components: ['Nenhum componente especial', 'Prêmio à escolha: Hammer of Thunderbolts, Frost Brand ou Brooch of Shielding'],
+    sides: [
+      { id: 'defensores', name: 'Defensores da fortaleza', points: 120, color: '#3a56b0', requires: 'Criaturas Neutras e Malignas, com pelo menos uma criatura terrestre' },
+      { id: 'ulfgar', name: 'Companhia de Ulfgar', creatureUid: 3101, points: 150, color: '#6b4a32', requires: 'Criaturas Neutras e Boas, incluindo Ulfgar; Quelindritar não pode entrar' },
+    ],
+    synopsis: [
+      'Ulfgar Ironfist é um anão de ambição modesta. Há décadas ele serve à Ordem da Manopla com distinção e quase sem pensar em subir de posto: o tempo está do lado dele, ele gosta de ser uma engrenagem que faz o bem quando precisam, e faz isso bem.',
+      'Hoje o destino dele muda. A Ordem o encarregou de reunir uma força e ir até a fortaleza Rivergard, uma tarefa que parece simples e não é. Ao chegar ao forte da margem do rio, eles encontram um castelo velho em reforma. Ele diz pertencer a um grupo que protege o tráfego do rio, mas o disfarce caiu: o lugar é ocupado em segredo pelo Culto da Onda Esmagadora, servo de Olhydra, a princesa da água maligna. Os cultistas contrataram um bando variado para guardar a fortaleza, e a Ordem da Manopla espera estar à altura.',
+    ],
+    setup: [
+      'Os Defensores da fortaleza montam a legião com 120 pontos, com criaturas Neutras e Malignas, incluindo pelo menos uma criatura terrestre.',
+      'A Companhia de Ulfgar monta a legião com 150 pontos, com criaturas Neutras e Boas, incluindo Ulfgar. Quelindritar não pode entrar nesta força.',
+      'Os jogadores posicionam as criaturas pela preparação padrão para 2 jogadores: os Defensores ao norte e Ulfgar ao sul.',
+      'Um dos Defensores é uma criatura terrestre que acabou de trancar o portão principal. Ela começa a no máximo 15 cm (6") do centro da borda norte.',
+    ],
+    specialRules: [
+      { title: 'Areia da praia', text: 'A fortaleza é cercada de areia, e andar por ela é difícil. Toda manobra no solo com velocidade maior que 1 conta como manobra vermelha.' },
+      { title: 'Flechas de gelo', text: 'Defensores invisíveis no alto da fortaleza atiram flechas de gelo nos invasores. No começo de cada Fase Final, cada criatura da Companhia de Ulfgar se defende de uma flecha de arma primária que causa 1 de dano de gelo. Ela rola os dados de defesa normalmente, mas não pode usar a Armadura contra esse ataque. Para o texto das cartas, as flechas vêm da direção da borda norte.' },
+      { title: 'Medo de acertar os seus', text: 'Quem da Companhia de Ulfgar estiver a alcance 1 de pelo menos uma criatura inimiga não é alvo das flechas: os arqueiros têm medo de acertar os próprios aliados.' },
+    ],
+    objectives: [
+      { side: 'Defensores da fortaleza', text: ['Vencem se eliminarem a Companhia de Ulfgar (depois da batalha 1).'] },
+      { side: 'Companhia de Ulfgar', text: ['Vence se eliminar os Defensores da fortaleza (depois da batalha 2).'] },
+      { side: 'Empate', text: ['Se os dois lados forem eliminados na mesma rodada, joguem a aventura de novo.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'A fortaleza resiste', summary: 'Algum tempo depois, no domínio dele sob as Colinas Sumber, Gar Shatterkeel ouve um mensageiro da fortaleza: Rivergard foi defendida, mas outras legiões vão ser mandadas contra eles, e é preciso dinheiro para contratar mais defensores. Gar concorda e sorri sombrio enquanto revira os objetos de poder tomados dos inimigos.', rewards: ['Jogador vencedor: 2 XP', 'Escolha um artefato: Hammer of Thunderbolts, Frost Brand (expansão Water Cult Warrior) ou Brooch of Shielding (expansão White Dragon)'] },
+      { id: '2', title: 'A fortaleza cai', summary: 'A dragoa de bronze Quelindritar, aliada da Ordem da Manopla, chega depois da batalha para cumprimentar Ulfgar. Ela diz que ele provou o valor dele mais uma vez, mas que a batalha só começou: os cultos elementais devem estar protegendo algo de grande poder, e é preciso impedi-los a qualquer custo. Ela oferece prêmios para a próxima luta.', rewards: ['Jogador vencedor: 2 XP', 'Escolha um artefato: Hammer of Thunderbolts, Frost Brand (expansão Water Cult Warrior) ou Brooch of Shielding (expansão White Dragon)'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'defensores', label: 'Defensores da fortaleza' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'ulfgar', label: 'Companhia de Ulfgar' },
+      ],
+      tokens: [{ x: 45, y: 4, label: 'portão' }],
+      note: 'A fortaleza fica além da borda norte. Uma criatura terrestre dos Defensores começa a até 15 cm do centro dessa borda, junto ao portão.',
+    },
+    origin: 'livro',
+    campaign: 'mal-elemental',
+    chapter: 8,
+    theme: 'Assalto à fortaleza do culto da água, debaixo de flechas de gelo e sobre areia fofa.',
+  },
+  {
+    slug: 'mosteiro-da-pedra-sagrada',
+    number: 9,
+    title: 'O mosteiro da Pedra Sagrada',
+    original: 'Monastery of the Sacred Stone',
+    source: 'Livreto de aventura #9 (Onda 6, Mal Elemental)',
+    players: 2,
+    playArea: '90 x 90 cm, a frente do mosteiro da Pedra Sagrada, com a muralha elevada ao norte',
+    components: ['4 fichas de parapeito', '6 fichas de objetivo (formações de rocha)', 'Prêmio à escolha: Deep Red Ioun Stone, Exploding Gem ou Necklace of Adaptation'],
+    sides: [
+      { id: 'terra', name: 'Cultistas da Terra', points: 100, color: '#3a2f8a', requires: 'Só criaturas Malignas' },
+      { id: 'enclave', name: 'Enclave Esmeralda', creatureUid: 3501, points: 120, color: '#3f8a4a', requires: 'Bellatoris com a melhoria Milo Timberheart e aliados' },
+    ],
+    synopsis: [
+      'Milo Timberheart, patrulheiro humano, é um aliado de confiança do Enclave Esmeralda. Ele é respeitado pela pontaria, e enquanto ouve o ancião explicar a próxima missão, não para quieto esperando a "parte boa". Na semana anterior, uma das videntes mais talentosas do Enclave, Lijanne, foi ao mosteiro da Pedra Sagrada consultar os monges sobre um assunto pessoal e não voltou. Os monges garantem que ela foi e voltou sem problemas, mas a égua dela foi vista nos estábulos, e ela nunca trocaria nem deixaria a montaria lá. Algo sinistro acontece no mosteiro, e Milo deve reunir uma força e arrancar a verdade.',
+      'No fim, o ancião acrescenta que sim, Milo pode montar o pégaso Bellatoris até lá, desde que o devolva inteiro. Quando chegam ao mosteiro, descobrem que eram esperados: os mestres do lugar são, em segredo, membros do Culto da Terra Negra, que serve a Ogrémoch, o príncipe elemental da terra.',
+    ],
+    setup: [
+      'Os Cultistas da Terra montam a legião com 100 pontos, só com criaturas Malignas. O Enclave Esmeralda monta a legião com 120 pontos: Bellatoris com a melhoria Milo Timberheart e aliados.',
+      'Coloquem as 4 fichas de parapeito ponta com ponta formando um semicírculo encostado na borda norte, começando a 27 cm (10,5") da borda oeste, como no mapa. Elas são a frente da muralha elevada do mosteiro.',
+      'Criaturas terrestres dentro do semicírculo estão sobre a muralha e contam como "no ar" para o nível de jogo.',
+      'Depois, começando pelos Cultistas, os jogadores se alternam colocando as 6 fichas de objetivo, cada uma a pelo menos 15 cm (alcance 2) das outras, dos parapeitos e das bordas.',
+      'Os jogadores posicionam as criaturas pela preparação padrão para 2 jogadores: os Cultistas ao norte e o Enclave ao sul.',
+    ],
+    specialRules: [
+      { title: 'A muralha do mosteiro', text: 'Criaturas terrestres de fora não entram no mosteiro: se terminarem o movimento passando pelos parapeitos ou sobre eles, recuam. Uma criatura terrestre está sobre a muralha enquanto pelo menos parte da base estiver dentro dos parapeitos ou encostada neles.' },
+      { title: 'A queda', text: 'Uma criatura terrestre, ou uma voadora que pousou, que sai inteira da muralha rola 3 dados de ataque e sofre dano por acerto e por crítico, sem rolar defesa nem usar a Armadura. Depois disso ela fica no solo, do lado de fora do mosteiro. Por isso as criaturas que andam pelo solo levam dano de queda se saírem da borda da muralha.' },
+      { title: 'Parede dos fundos', text: 'A parte da borda norte dentro do semicírculo é uma parede. Uma criatura que fosse terminar o movimento fora da área por ali não é derrotada: recua até ficar inteira dentro da área. Uma criatura voadora nessa situação precisa pousar sobre a muralha.' },
+      { title: 'Corpo a corpo e distância', text: 'Criaturas terrestres de fora não fazem ataques corpo a corpo contra inimigos sobre a muralha, nem o contrário. Ataques à distância entre os dois níveis valem normalmente.' },
+      { title: 'Espelhos dos monges', text: 'Os servos do culto da terra usam espelhos e lentes para ofuscar os invasores. Uma criatura voadora do Enclave que termina o movimento a alcance 2 a 4 do parapeito mais próximo, virada para o mosteiro (com algum parapeito no arco frontal), precisa pousar ou fica sem atacar pelo resto da rodada; ponham uma ficha de "sem ataque" ao lado dela. Se qualquer parte dela estiver a alcance 1 dos parapeitos, ou se ela passar por cima deles, os servos não conseguem mirar e ela ataca normalmente.' },
+      { title: 'Formações de rocha', text: 'As fichas de objetivo são formações de rocha altas: obstáculos para criaturas no solo e para as que estão em rasante, e o dano de atravessá-las não penetra a Armadura. Criaturas voadoras que não estão em rasante não são afetadas, a menos que pousem ou deem rasante encostadas nelas.' },
+    ],
+    objectives: [
+      { side: 'Cultistas da Terra', text: ['Vencem se eliminarem o Enclave Esmeralda (depois da batalha 1).'] },
+      { side: 'Enclave Esmeralda', text: ['Vence se eliminar os Cultistas da Terra (depois da batalha 2).'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'O mosteiro resiste', summary: 'Marlos Urnrayle, Profeta da Terra do Olho Elemental Ancião, ouve com preocupação crescente a notícia do ataque ao mosteiro. Primeiro foi a fortaleza do culto da água, e agora uma das deles foi sitiada. A medusa enlouquecida decide que quem conspira contra eles deve ser esmagado como todos que se opõem a ela, e então se consola examinando os despojos trazidos pelas forças vitoriosas.', rewards: ['Jogador vencedor: 2 XP', 'Escolha um artefato: Deep Red Ioun Stone, Exploding Gem (expansão Earth Cult Warrior) ou Necklace of Adaptation (expansão Young Blue Dragon)'] },
+      { id: '2', title: 'O mosteiro cai', summary: 'Milo acha os restos da pobre Lijanne e a enterra nas colinas próximas. Quando vai descansar sobre a muralha tomada, um bufo nervoso de Bellatoris avisa que um dragão se aproxima. Contra o sol poente, ele vê o brilho de um dragão de bronze, com um anão robusto montado nas costas. É Ulfgar Ironfist, que desce do ombro do dragão e apresenta a nova companheira, Quelindritar, que está reunindo aliados para um golpe decisivo contra os cultos elementais. Milo aceita, e Quelindritar recompensa a coragem dele com um presente.', rewards: ['Jogador vencedor: 2 XP', 'Escolha um artefato: Deep Red Ioun Stone, Exploding Gem (expansão Earth Cult Warrior) ou Necklace of Adaptation (expansão Young Blue Dragon)'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 10, side: 'terra', label: 'Cultistas da Terra (muralha ao norte)' },
+        { x: 0, y: 78, w: 90, h: 12, side: 'enclave', label: 'Enclave Esmeralda' },
+      ],
+      tokens: [
+        { x: 30, y: 9, label: 'parapeito' }, { x: 38, y: 17, label: 'parapeito' }, { x: 52, y: 17, label: 'parapeito' }, { x: 60, y: 9, label: 'parapeito' },
+        { x: 18, y: 32 }, { x: 52, y: 37 }, { x: 74, y: 30 }, { x: 33, y: 52 }, { x: 68, y: 55 }, { x: 15, y: 68 },
+      ],
+      note: 'Os 4 parapeitos formam um semicírculo encostado na borda norte, começando a 27 cm da borda oeste. As 6 formações de rocha ficam a 15 cm umas das outras, dos parapeitos e das bordas; o mapa mostra uma distribuição possível.',
+    },
+    origin: 'livro',
+    campaign: 'mal-elemental',
+    chapter: 9,
+    theme: 'Ataque a um mosteiro murado onde espelhos ofuscam quem voa e cair da muralha machuca.',
+  },
+  {
+    slug: 'fortaleza-da-lua-escarlate',
+    number: 11,
+    title: 'A fortaleza da Lua Escarlate',
+    original: 'The Scarlet Moon Keep',
+    source: 'Livreto de aventura #11 (Onda 6, Mal Elemental)',
+    players: 2,
+    playArea: '90 x 90 cm, as ruínas da fortaleza da Lua Escarlate, nas Colinas Sumber',
+    components: ['6 fichas de objetivo, numeradas de 1 a 6 (as armadilhas de fogo)', '6 fichas de aventura', '3 fichas de duração', '1 copo ou algo parecido', 'Prêmio à escolha: Pale Green Ioun Stone, Flame Tongue ou Amulet of Health'],
+    sides: [
+      { id: 'chama', name: 'Chama Eterna', points: 170, color: '#8a2b22', requires: 'Criaturas Malignas; +5 pontos por cultista elemental único' },
+      { id: 'alianca', name: 'Aliança dos Lordes', creatureUid: 4301, points: 200, color: '#3f8a4a', requires: 'Criaturas Neutras e Boas, incluindo Borion com a melhoria Ahnah Crimson' },
+    ],
+    synopsis: [
+      'Nas Colinas Sumber fica a fortaleza da Lua Escarlate. Ninguém se perguntou de início por que um grupo de ascetas iria morar naquelas ruínas, mas a desconfiança cresceu, e hoje é um segredo aberto que o lugar serve de base para ataques do Culto da Chama Eterna. A Aliança dos Lordes pouco se importa com ameaças ao próprio poder, mas ameaças às suas cidades e ao seu povo são úteis: dão a chance de consolidar o poder e, de quebra, mandar alguns encrenqueiros para o perigo.',
+      'Uma dessas "anarquistas" é a cavaleira meio-elfa Ahnah Crimson, famosa por montar o majestoso grifo Borion e por caçar corrupção pela Costa da Espada. Ela virou um incômodo e uma possível recruta, se aprender como o mundo funciona de verdade, e não vai recusar a chance de liderar as forças da Aliança contra o culto do fogo. Morra ela heroicamente ou vença, a Aliança ganha. Os cultistas do fogo, avisados dos ataques a outras fortalezas elementais, contrataram mais gente e espalharam armadilhas de fogo pelo campo. A grande dragoa de bronze Quelindritar preparou um feitiço que reduz por pouco tempo o dano de fogo dos atacantes e chamou aliados das outras facções: Ulfgar Ironfist, da Ordem da Manopla; Milo Timbershaft e o pégaso Bellatoris, do Enclave Esmeralda; e o dragão de latão Janic, aliado dos Harpistas. Mesmo assim, ela teme que não baste.',
+    ],
+    setup: [
+      'A Chama Eterna monta a legião com 170 pontos, só com criaturas Malignas, e ganha +5 pontos para cada cultista elemental único.',
+      'A Aliança dos Lordes monta a legião com 200 pontos, com criaturas Neutras e Boas, incluindo Borion com a melhoria Ahnah Crimson. Ela ganha +5 pontos para cada um destes personagens: Quelindritar, Bellatoris com a melhoria Milo Timbershaft, Janic e Ulfgar Ironfist.',
+      'A Chama Eterna coloca as fichas de objetivo 1 a 6 viradas para baixo, fora das duas áreas iniciais e a mais de alcance 2 umas das outras. O jogador pode fazer um mapa para lembrar qual é qual.',
+      'Em segredo, a Chama Eterna põe de 1 a 6 fichas de aventura debaixo de um copo, para o adversário não ver quantas são. Esse número indica qual das seis armadilhas é a especial.',
+      'Coloquem as 3 fichas de duração ao lado da área para marcar quanto dura o feitiço de resistência a fogo de Quelindritar.',
+      'Os jogadores posicionam as criaturas pela preparação padrão para 2 jogadores: a Chama Eterna ao norte e a Aliança ao sul.',
+    ],
+    specialRules: [
+      { title: 'Armadilhas de fogo', text: 'Cada ficha de objetivo é uma armadilha de fogo que a Chama Eterna pode disparar quando uma criatura no solo ou no ar termina o movimento a alcance 1 dela. A Chama Eterna pode usar a régua de alcance para conferir. A armadilha atinge todas as criaturas a alcance 1 da ficha que estejam no mesmo nível de jogo de quem a disparou (solo ou ar). A Chama Eterna sempre pode escolher não disparar.' },
+      { title: 'Disparar a armadilha', text: 'Ao disparar, a Chama Eterna vira a ficha com o número para cima e faz um ataque de fogo de 3 dados contra cada criatura atingida, que penetra a Armadura. Criaturas de fogo recebem 1 resultado de esquiva pela regra normal de resistência a energia. Cada armadilha normalmente dispara uma vez por jogo, mas a ficha fica virada para cima na área, porque ninguém sabe se ela é a armadilha especial.' },
+      { title: 'O feitiço de Quelindritar', text: 'Nas três primeiras rodadas, toda criatura da Aliança na área conta como se tivesse resistência a fogo, graças a Quelindritar. Enquanto o efeito durar, sempre que uma criatura da Aliança sofrer dano de fogo, ela recebe 1 resultado de esquiva grátis, como se fosse uma criatura de fogo. Uma criatura que já é de fogo não ganha proteção extra. Tirem 1 ficha de duração na Fase Final de cada rodada; depois da terceira rodada a proteção acaba.' },
+      { title: 'O unguento da Chama Eterna', text: 'Todas as criaturas da Chama Eterna foram cobertas por um unguento grosso com resistência a fogo parecida, que dura a aventura inteira. Depois das três primeiras rodadas, só elas têm essa proteção.' },
+      { title: 'A armadilha especial', text: 'Uma das armadilhas tem uma segunda carga, mais forte, embaixo da primeira, e pode disparar uma segunda vez. O número dela é o número de fichas de aventura debaixo do copo. A Chama Eterna só pode disparar a segunda explosão depois da primeira, numa rodada seguinte. Ao disparar, ela revela as fichas debaixo do copo para provar qual é a armadilha e faz um ataque de fogo de 5 dados contra cada criatura a alcance 1 a 2 da ficha, no solo e no ar, que penetra a Armadura.' },
+    ],
+    objectives: [
+      { side: 'Chama Eterna', text: ['Vence se eliminar a Aliança dos Lordes (depois da batalha 1).'] },
+      { side: 'Aliança dos Lordes', text: ['Vence se eliminar a Chama Eterna (depois da batalha 2).'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'A Chama Eterna vence', summary: 'Vanifer, Profetisa da Chama Eterna, acha adequado que a Aliança dos Lordes tenha vindo contra eles: agora ficou provado que as riquezas deles não servem para nada. Ela gira numa dança de fogo e diz que o mundo inteiro vai queimar, começando por eles e suas cidades douradas. Mas este prêmio, segundo ela, merece até alguém como ela.', rewards: ['Jogador vencedor: 2 XP', 'Escolha um artefato: Pale Green Ioun Stone, Flame Tongue (expansão Human Barbarian, Fire Cult) ou Amulet of Health (expansão Young Black Dragon)'] },
+      { id: '2', title: 'A Aliança vence', summary: 'Depois de cuidar dos ferimentos e conferir que não há mais armadilhas, os comandantes dispensam as tropas para comemorar. Milo tenta tirar a fuligem da crina de Bellatoris, com medo de que o Enclave não empreste mais o pégaso, e Ulfgar bebe demais e dá tapinhas nas costas de Ahnah Crimson até levar um empurrão merecido. Quelindritar diz a Janic que teme que essas fortalezas sejam só uma peça do problema; o dragão de latão responde que eles fizeram a parte deles e que ela precisa aprender a relaxar. Ela admite que faz muito tempo que não descansa. Um representante da Aliança chega com um presente para "a Lady Crimson", cujo futuro nas fileiras da Aliança parece garantido.', rewards: ['Jogador vencedor: 2 XP', 'Escolha um artefato: Pale Green Ioun Stone, Flame Tongue (expansão Human Barbarian, Fire Cult) ou Amulet of Health (expansão Young Black Dragon)'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'chama', label: 'Chama Eterna' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'alianca', label: 'Aliança dos Lordes' },
+      ],
+      tokens: [{ x: 26, y: 28 }, { x: 64, y: 28 }, { x: 44, y: 38 }, { x: 18, y: 52 }, { x: 70, y: 52 }, { x: 34, y: 60 }],
+      note: 'A Chama Eterna escolhe onde ficam as 6 armadilhas, fora das áreas iniciais e a mais de alcance 2 umas das outras. O mapa mostra uma distribuição possível.',
+    },
+    origin: 'livro',
+    campaign: 'mal-elemental',
+    chapter: 11,
+    theme: 'Batalha grande contra o culto do fogo num campo cheio de armadilhas, uma delas com carga dupla.',
+  },
+  {
+    slug: 'covil-do-gelo-antigo',
+    number: 101,
+    title: 'O covil do gelo antigo',
+    original: 'Lair of Ancient Frost',
+    source: 'Cenário especial #1',
+    players: 2,
+    playArea: '90 x 90 cm, o covil de Ossalur, cheio de armadilhas mágicas',
+    components: ['6 fichas de objetivo, numeradas de 1 a 6 (as armadilhas)'],
+    sides: [
+      { id: 'ossalur', name: 'Ossalur', creatureUid: 4601, points: 100, color: '#3a56b0', requires: 'Ossalur e melhorias' },
+      { id: 'intrusos', name: 'Intrusos', points: 120, color: '#c0282d', requires: 'Só criaturas Malignas' },
+    ],
+    synopsis: [
+      'Há mais de mil anos o dragão de prata Ossalur percorre o mundo espalhando a sua sabedoria. Mas a cada cem anos, mais ou menos, ele escolhe descansar por um longo tempo, e nesse período o dragão normalmente gentil perde a paciência rápido quando o acordam. Hoje essa paciência vai ser testada.',
+      'Mal fecha as pálpebras brilhantes, Ossalur se assusta com o barulho de intrusos malignos. Ele sabe que as armadilhas mágicas espalhadas pelo covil vão machucar bastante os invasores, mas se surpreende com a vontade de enfrentá-los pessoalmente. Faz mais de setenta anos desde a última batalha, e até um dragão bondoso quer testar a força de vez em quando.',
+    ],
+    setup: [
+      'Ossalur monta a legião com 100 pontos, com ele e melhorias. Os Intrusos montam a legião com 120 pontos, só com criaturas Malignas.',
+      'Os jogadores posicionam as criaturas pela preparação padrão para 2 jogadores: Ossalur ao norte e os Intrusos ao sul.',
+      'Depois Ossalur embaralha as 6 fichas de objetivo e as coloca viradas para baixo na área, sem olhar os números. Nenhuma ficha pode ficar a alcance 1 a 2 de qualquer borda ou de qualquer criatura inimiga, nem a alcance 1 de outra ficha.',
+    ],
+    specialRules: [
+      { title: 'Armadilhas mágicas', text: 'Depois de fazer uma Ação normal, Ossalur pode disparar uma (e só uma) das armadilhas como ação grátis. Ele vira uma ficha de objetivo e aplica o efeito do número revelado a todas as criaturas inimigas a alcance 1 a 2 dela, no solo e no ar. Ossalur é imune aos efeitos das armadilhas; só os inimigos dele são afetados.' },
+      { title: 'Fim do efeito', text: 'No começo da Fase Final, tirem da área para sempre a ficha virada para cima na rodada.' },
+      { title: 'Ficha 1: armadilha de lentidão', text: 'Os inimigos a alcance 1 a 2 rolam -2 dados de defesa sempre que se defendem pelo resto da rodada.' },
+      { title: 'Ficha 2: ventos cortantes', text: 'Os inimigos a alcance 1 a 2 sofrem 1 de dano de gelo, sem rolar defesa, usar fichas de combate nem a Armadura. Além disso, rolam -2 dados de ataque sempre que atacam pelo resto da rodada.' },
+      { title: 'Ficha 3: estilhaços de gelo', text: 'Façam um ataque de 5 dados contra cada inimigo a alcance 1 a 2. As criaturas se defendem normalmente.' },
+      { title: 'Ficha 4: raio polar', text: 'Façam um ataque de gelo de 6 dados contra 1 inimigo à escolha a alcance 1 a 2. O ataque penetra a Armadura.' },
+      { title: 'Ficha 5: vórtice', text: 'Os inimigos voadores a alcance 1 a 2 recebem uma ficha de solo e não podem mudar de altitude pelo resto da rodada. Além disso, os inimigos a alcance 1 a 2 não podem fazer ataques de arma primária pelo resto da rodada.' },
+      { title: 'Ficha 6: nuvem de névoa', text: 'Todos os inimigos a alcance 1 a 2 precisam escolher e descartar 1 melhoria.' },
+    ],
+    objectives: [
+      { side: 'Ossalur', text: ['Vence se eliminar todos os intrusos.'] },
+      { side: 'Intrusos', text: ['Vencem se eliminarem Ossalur.'] },
+      { side: 'Empate', text: ['Se todas as criaturas forem derrotadas na mesma Fase Final, Ossalur vence.'] },
+    ],
+    outcomes: [],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'ossalur', label: 'Ossalur' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'intrusos', label: 'Intrusos' },
+      ],
+      tokens: [{ x: 28, y: 26 }, { x: 64, y: 30 }, { x: 46, y: 39 }, { x: 22, y: 50 }, { x: 62, y: 52 }, { x: 38, y: 60 }],
+      note: 'Ossalur põe as 6 armadilhas depois de todas as criaturas, sem olhar os números, longe das bordas e dos inimigos. O mapa mostra uma distribuição possível.',
+    },
+    origin: 'livro',
+    theme: 'Um dragão de prata acordado do descanso enfrenta invasores com seis armadilhas mágicas.',
+  },
+  {
     slug: 'ninho-na-tempestade',
     number: 3,
     title: 'O ninho na tempestade',
@@ -1509,6 +1729,13 @@ export const STAGES: Record<string, Stage[]> = {
       codes: ['7.1', '7.2', '7.3'],
     },
   ],
+  'mal-elemental': [
+    {
+      id: 'fortalezas', title: 'As fortalezas dos cultos', wave: 'Onda 6',
+      summary: 'Cada capítulo é o ataque a uma fortaleza de um culto elemental, e cada vitória junta mais heróis. Ulfgar Ironfist, da Ordem da Manopla, toma a fortaleza Rivergard do culto da água e conhece Quelindritar. Milo Timberheart e o pégaso Bellatoris, do Enclave Esmeralda, descobrem que o mosteiro da Pedra Sagrada pertence ao culto da terra, e Ulfgar chega montado em Quelindritar para recrutá-lo. Na fortaleza da Lua Escarlate, Ahnah Crimson lidera a Aliança dos Lordes contra o culto do fogo, com todos os aliados reunidos, e Quelindritar suspeita que as fortalezas são só uma parte do problema.',
+      codes: ['8', '9', '10', '11'],
+    },
+  ],
 };
 
 /* O que cada capítulo revela ou entrega para o capítulo seguinte. */
@@ -1534,6 +1761,9 @@ export const CHAPTER_HOOKS: Record<string, string> = {
   '7.1': 'As portas não abrem, mas há uma passagem secreta pequena.',
   '7.2': 'Luminos abre o portal para o Cemitério Primordial.',
   '7.3': 'Maurghoros é banido ou toma o cemitério. Fim da campanha.',
+  '8': 'Ulfgar conhece Quelindritar, que reúne aliados contra os cultos.',
+  '9': 'Milo e Bellatoris entram para o grupo de Quelindritar.',
+  '11': 'Quelindritar teme que as fortalezas sejam só uma parte do problema.',
 };
 
 /* Criatura que representa cada capítulo das expansões (para a imagem da trilha). */
