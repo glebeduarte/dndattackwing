@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useCardImage, type CardKind } from '../cardImages';
 import { useCardLang } from '../i18n/cards';
+import { translateArea } from '../i18n/classtypes';
 import { Upgrade } from '../engine/engine';
 import type { CreatureData, UpgradeData } from '../engine/types';
 import { useStore } from '../store';
@@ -187,7 +188,7 @@ export function UpgradeCard({ data, full = false }: { data: UpgradeData; full?: 
           {(hasRange || area) && (
             <span className="gu-scroll" title={[area, hasRange && `alcance ${data.range}`].filter(Boolean).join(', ')}>
               {hasRange && <span className="gu-range">{data.range}</span>}
-              <span className="gu-scroll-label">{area ?? (data.arc ? ARC_LABEL[data.arc] ?? data.arc : 'Alcance')}</span>
+              <span className="gu-scroll-label">{area ? (t.lang === 'pt' ? translateArea(area) : area) : (data.arc ? ARC_LABEL[data.arc] ?? data.arc : 'Alcance')}</span>
             </span>
           )}
         </div>

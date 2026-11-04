@@ -33,7 +33,7 @@ const PHRASES: [string, string][] = [
   ['Helmet', 'Elmo'], ['Shield', 'Escudo'], ['Saddle', 'Sela'], ['Potion', 'Poção'], ['Relic', 'Relíquia'], ['Ring', 'Anel'],
   ['Stone', 'Pedra'], ['Wand', 'Varinha'], ['Figurine', 'Estatueta'], ['Mount', 'Montaria'], ['Resistance', 'Resistência'],
   ['Augment', 'Aprimoramento'], ['Combat', 'Combate'], ['Special', 'Especial'], ['Immortal', 'Imortal'],
-  ['Ranged', 'Distância'], ['Melee', 'Corpo a corpo'], ['Range', 'Alcance'], ['Burst', 'Estouro'], ['Line', 'Linha'], [' or ', ' ou '],
+  ['Ranged ', 'À distância, '], ['Ranged', 'À distância'], ['Melee ', 'Corpo a corpo, '], ['Melee', 'Corpo a corpo'], [', ->', ' ->'], [', >', ' >'], ['Range', 'Alcance'], ['Burst', 'Estouro'], ['Line', 'Linha'], [' or ', ' ou '],
 ];
 
 export function translateClasstype(s: string | null | undefined): string {
@@ -57,3 +57,6 @@ function translateParen(p: string) {
   for (const [en, pt] of PHRASES) out = out.split(en).join(pt);
   return out;
 }
+
+const AREAS: Record<string, string> = { Line: 'Linha', Cone: 'Cone', Burst: 'Estouro' };
+export const translateArea = (s: string) => AREAS[s] ?? s;
