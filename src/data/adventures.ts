@@ -91,10 +91,8 @@ export const CAMPAIGNS: Campaign[] = [
     original: 'Elemental Evil',
     source: 'Livretos de aventura das expansões da Onda 6',
     summary: 'A segunda campanha. Os quatro cultos elementais, servos dos príncipes do Mal Elemental, se escondem em fortalezas disfarçadas, e as facções do bem (Ordem da Manopla, Enclave Esmeralda, Aliança dos Lordes e Harpistas) atacam uma por uma, enquanto Quelindritar junta os heróis para um golpe decisivo.',
-    status: '4 capítulos, 3 com guia completo',
-    pending: 'O capítulo 10 ainda não foi enviado. O guia entra aqui assim que o livreto estiver disponível.',
+    status: '4 capítulos, todos com guia completo',
     planned: [
-      { code: '10', title: 'Aventura #10', expansion: 'Onda 6', wave: 'Onda 6', artifacts: [], premise: 'Pela ordem dos cultos atacados (água, terra e fogo), o capítulo que falta deve ser o ataque à fortaleza do culto do ar.' },
     ],
   },
 ];
@@ -1411,6 +1409,57 @@ export const ADVENTURES: Adventure[] = [
     theme: 'Ataque a um mosteiro murado onde espelhos ofuscam quem voa e cair da muralha machuca.',
   },
   {
+    slug: 'sociedade-feathergale',
+    number: 10,
+    title: 'A Sociedade Feathergale',
+    original: 'The Feathergale Society',
+    source: 'Livreto de aventura #10 (Onda 6, Mal Elemental)',
+    players: 2,
+    playArea: '90 x 90 cm, o céu em volta da Torre Feathergale, nas Colinas Sumber',
+    components: ['3 fichas de cavaleiro de hipogrifo (5 x 5 cm)', '3 fichas de dano de hipogrifo (2,5 x 2,5 cm)', 'Prêmio à escolha: Gem of Seeing, Dagger of Venom ou Cloak of Resistance'],
+    sides: [
+      { id: 'feathergale', name: 'Sociedade Feathergale', points: 90, color: '#c0282d', requires: 'Criaturas Neutras e Malignas; +5 pontos se incluir pelo menos 1 guerreiro do culto do ar' },
+      { id: 'harpistas', name: 'Harpistas', creatureUid: 3951, points: 120, color: '#3a2f8a', requires: 'Criaturas Neutras e Boas, sem Quelindritar' },
+    ],
+    synopsis: [
+      'Os ataques recentes aos cultos elementais não passaram despercebidos pelos Harpistas. Investigando um pouco mais, eles concluíram que uma força enorme e sinistra se reúne em algum ponto das Colinas Sumber. Ainda não juntaram todas as peças, mas descobriram onde fica uma fortaleza elemental, que seria usada por um clube rico de voo de hipogrifos chamado Sociedade Feathergale.',
+      'Reunir aliados para derrubar a operação inteira leva tempo, mas dá para ir tomando as bases do inimigo agora. Por isso os Harpistas chamaram uma das aliadas mais próximas, a dragoa de latão Janic, para derrubar a Torre Feathergale. Janic vive ocupada com os próprios interesses, mas ajuda de bom grado quando os Harpistas sabem aproveitar a sabedoria dela, e o emissário sempre lembra o quanto ela é esperta; ela reconhece a bajulação, mas nunca reclama. Ao chegar perto da torre, Janic vê proteções mágicas escondidas no chão e avisa os seguidores para ficarem no ar: são armadilhas de elementais do ar, e eles enfrentam o Culto do Ódio Uivante. Os moradores da torre têm dois planos: derrotar a dragoa e os companheiros, ou mandar cavaleiros de hipogrifo buscarem reforços.',
+    ],
+    setup: [
+      'A Sociedade Feathergale monta a legião com 90 pontos, com criaturas Neutras e Malignas, e ganha +5 pontos se incluir pelo menos 1 guerreiro do culto do ar.',
+      'Os Harpistas montam a legião com 120 pontos, com criaturas Neutras e Boas, sem Quelindritar.',
+      'Os jogadores posicionam as criaturas pela preparação padrão para 2 jogadores: os Harpistas ao norte e a Sociedade ao sul.',
+      'Depois a Sociedade coloca 1 ficha de cavaleiro de hipogrifo com a traseira encostada na borda inicial dela, virada para a borda do adversário. As outras 2 ficam ao lado da área.',
+    ],
+    specialRules: [
+      { title: 'Ventos das proteções', text: 'A batalha acontece no alto. Quem pousa ou dá rasante, por escolha ou à força, é atingido por tempestades de vento disparadas pelas proteções mágicas. Criaturas no solo ou em rasante não fazem Ações nem atacam, e ainda sofrem dano na Fase Final.' },
+      { title: 'Os cavaleiros de hipogrifo', text: 'As fichas de cavaleiro de hipogrifo são criaturas voadoras malignas que só querem fugir. Não fazem Ações nem atacam, e só mudam de altitude para voltar a voar se uma habilidade especial as forçou a pousar ou dar rasante. Têm Valor da Arma Primária 0, Agilidade 2, Vida 2 e Armadura 1. Críticos passam pela Armadura normalmente, mas elas são imunes a efeitos críticos. Marquem o dano com as fichas de dano de hipogrifo. Um cavaleiro que recebe dano letal sai do jogo na hora, sem esperar a Fase Final.' },
+      { title: 'A fuga', text: 'No começo da Fase de Ativação, antes de qualquer outra criatura se mover, a Sociedade move cada cavaleiro na área para a frente com o gabarito reto 1, 2 ou 3, esteja ele no ar ou forçado ao solo. Um cavaleiro que sai só em parte pela borda oposta continua em jogo, e a parte da base ainda na área pode ser atacada normalmente. Se um cavaleiro sair inteiro pela área inicial dos Harpistas, a Sociedade vence na hora.' },
+      { title: 'Fase Final, passo 1', text: 'Todas as criaturas no solo ou em rasante sofrem 1 de dano normal, sem rolar defesa nem usar a Armadura.' },
+      { title: 'Fase Final, passo 2', text: 'A Sociedade põe um novo cavaleiro de hipogrifo com a traseira encostada na borda inicial dela, virado para a borda do adversário. Quando os 3 cavaleiros já tiverem entrado, este passo é pulado. Cavaleiros eliminados saem do jogo para sempre. Se alguma criatura lançou o feitiço Time Stop, este passo também é pulado.' },
+    ],
+    objectives: [
+      { side: 'Sociedade Feathergale', text: ['Vence se eliminar os Harpistas ou se pelo menos 1 cavaleiro de hipogrifo sair da área pela borda inicial dos Harpistas (depois da batalha 1).'] },
+      { side: 'Harpistas', text: ['Vencem se eliminarem a Sociedade Feathergale e os 3 cavaleiros de hipogrifo (depois da batalha 2).'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'O culto do ar resiste', summary: 'A líder do Culto do Ódio Uivante, a elfa alada Aerisi Kalinoth, lê o relatório da batalha furiosa por ter sido atacada, mas orgulhosa da vitória. Ela conclui que os cultos da água e da terra podem ter entregado o jogo, mas que os Harpistas sabem o que eles pretendem, e manda avisar o culto do fogo. Quando o mensageiro pergunta se o culto do fogo vai ouvir, ela dá um tapa nele: eles vão obedecer porque sabem que o culto do ar é o mais forte, servo de Yan-C-Bin, o mais poderoso dos príncipes elementais, e do Olho. Talvez até se separem de algo bonito como agradecimento.', rewards: ['Jogador vencedor: 2 XP', 'Escolha um artefato: Gem of Seeing, Dagger of Venom (expansão Air Cult Warrior) ou Cloak of Resistance (expansão Mind Flayer)'] },
+      { id: '2', title: 'A torre cai', summary: 'Pouco depois da vitória, Janic recebe a visita da famosa dragoa de bronze Quelindritar, com o anão Ulfgar Ironfist, o patrulheiro Milo Timberheart e o pégaso Bellatoris. Eles ficam felizes de ver Janic inteira. Quelindritar não esconde muito bem a irritação por ter perdido a batalha de novo, mas tenta distrair Janic com uma boa escolha de recompensas.', rewards: ['Jogador vencedor: 2 XP', 'Escolha um artefato: Gem of Seeing, Dagger of Venom (expansão Air Cult Warrior) ou Cloak of Resistance (expansão Mind Flayer)'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'harpistas', label: 'Harpistas' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'feathergale', label: 'Sociedade Feathergale' },
+      ],
+      tokens: [{ x: 45, y: 87, label: 'hipogrifo' }],
+      note: 'Os cavaleiros de hipogrifo entram um por vez pela borda sul e tentam atravessar a área até sair pela borda norte.',
+    },
+    origin: 'livro',
+    campaign: 'mal-elemental',
+    chapter: 10,
+    theme: 'Batalha no ar contra o culto do ar, que tenta fazer cavaleiros de hipogrifo furarem o bloqueio.',
+  },
+  {
     slug: 'fortaleza-da-lua-escarlate',
     number: 11,
     title: 'A fortaleza da Lua Escarlate',
@@ -1732,7 +1781,7 @@ export const STAGES: Record<string, Stage[]> = {
   'mal-elemental': [
     {
       id: 'fortalezas', title: 'As fortalezas dos cultos', wave: 'Onda 6',
-      summary: 'Cada capítulo é o ataque a uma fortaleza de um culto elemental, e cada vitória junta mais heróis. Ulfgar Ironfist, da Ordem da Manopla, toma a fortaleza Rivergard do culto da água e conhece Quelindritar. Milo Timberheart e o pégaso Bellatoris, do Enclave Esmeralda, descobrem que o mosteiro da Pedra Sagrada pertence ao culto da terra, e Ulfgar chega montado em Quelindritar para recrutá-lo. Na fortaleza da Lua Escarlate, Ahnah Crimson lidera a Aliança dos Lordes contra o culto do fogo, com todos os aliados reunidos, e Quelindritar suspeita que as fortalezas são só uma parte do problema.',
+      summary: 'Cada capítulo é o ataque a uma fortaleza de um culto elemental, e cada vitória junta mais heróis. Ulfgar Ironfist, da Ordem da Manopla, toma a fortaleza Rivergard do culto da água e conhece Quelindritar. Milo Timberheart e o pégaso Bellatoris, do Enclave Esmeralda, descobrem que o mosteiro da Pedra Sagrada pertence ao culto da terra, e Ulfgar chega montado em Quelindritar para recrutá-lo. A dragoa de latão Janic, aliada dos Harpistas, ataca a Torre Feathergale do culto do ar. Na fortaleza da Lua Escarlate, Ahnah Crimson lidera a Aliança dos Lordes contra o culto do fogo, com todos os aliados reunidos, e Quelindritar suspeita que as fortalezas são só uma parte do problema.',
       codes: ['8', '9', '10', '11'],
     },
   ],
@@ -1763,6 +1812,7 @@ export const CHAPTER_HOOKS: Record<string, string> = {
   '7.3': 'Maurghoros é banido ou toma o cemitério. Fim da campanha.',
   '8': 'Ulfgar conhece Quelindritar, que reúne aliados contra os cultos.',
   '9': 'Milo e Bellatoris entram para o grupo de Quelindritar.',
+  '10': 'Janic entra para o grupo; o culto do ar avisa o culto do fogo.',
   '11': 'Quelindritar teme que as fortalezas sejam só uma parte do problema.',
 };
 
