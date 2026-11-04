@@ -41,6 +41,7 @@ export interface Unit {
   sit?: Situation;
   element?: string | null;
   specials?: Special[];
+  base?: string;
 }
 
 const COL_NAME = ['Curva à esquerda', 'Inclinação à esquerda', 'Reta', 'Inclinação à direita', 'Curva à direita', 'Manobra especial'];
@@ -178,7 +179,7 @@ export function resolveDamage(hits: number, crits: number, dodges: number, armor
   return { normal: h, crit: c, cancelled: ch + cc, blocked };
 }
 
-export interface ArcAnswer { range: Dist | 0; arc: 'F' | 'B' } // range 0 = fora do arco
+export interface ArcAnswer { range: Dist | 0; arc: 'F' | 'B' | 'S' } // range 0 = fora do arco
 
 /** Escolhe alvo e arma: inimigo mais ferido ao alcance, depois o mais perto. */
 export function chooseTarget(u: Unit, enemies: Unit[], answers: Record<string, ArcAnswer>) {

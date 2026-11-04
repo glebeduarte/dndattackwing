@@ -10,6 +10,8 @@ import {
 import { catalog, useStore } from '../store';
 import { getLoadedTranslations, loadTranslations, type Translations } from '../i18n/cards';
 import { Shell } from '../ui/Shell';
+import { TableBoard } from '../ui/TableBoard';
+import { applyManeuver, arcsFromTable, deploy, loadTable, saveTable, situationFromTable, sizeOf, type Pose } from '../engine/table';
 
 /* ---------- estado da partida ---------- */
 
@@ -27,13 +29,14 @@ const KEY = 'aw:match';
 const load = (): Match | null => { try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch { return null; } };
 const save = (m: Match | null) => { try { if (m) localStorage.setItem(KEY, JSON.stringify(m)); else localStorage.removeItem(KEY); } catch { /* sem armazenamento */ } };
 
-function unitsFrom(legion: Legion, side: 'ai' | 'me'): Unit[] {
+export function unitsFrom(legion: Legion, side: 'ai' | 'me'): Unit[] {
   return legion.creatures.map((c, i) => ({
     id: `${side}${i}`, side, uid: c.uid, name: c.name, level: c.level, attack: c.attack, agility: c.agility,
     health: c.health, armor: c.armor, flyer: c.flyer, movement: c.movement, attacks: c.data.primary_attacks,
     actions: c.actions, upgrades: c.equipped.filter(Boolean).map((u) => u!.name),
     dmg: 0, crit: 0, alive: true, air: c.flyer, tokens: {},
     element: c.element,
+    base: c.base,
     specials: c.equipped.filter(Boolean).map((x) => parseSpecial(x!.data as never)).filter(Boolean) as NonNullable<ReturnType<typeof parseSpecial>>[],
   }));
 }
@@ -232,6 +235,7 @@ function SituationStep({ m, update }: { m: Match; update(fn: (m: Match) => void)
         {EDGES.map((e) => <Tile key={e.e} on={edge === e.e} onClick={() => setEdge(e.e)}><span className="ai-big">{e.g}</span>{e.t}</Tile>)}
       </div>
       <div className="ai-actions">
+        {hasTable() && <button className="btn btn-ghost" onClick={() => { const r = situationFromTable(u, m.units.filter((x) => x.side === 'me' && x.alive), loadTable().poses); if (r) { setDir(r.dir); setDist(r.dist); setEdge(r.edge); } }}>Ler da mesa</button>}
         <button className="btn btn-primary" disabled={!dir || !dist} onClick={confirm}>{m.step + 1 < ais.length ? 'Próxima criatura' : 'A IA escolhe as manobras'}</button>
       </div>
     </section>
@@ -291,6 +295,16 @@ function ActivationStep({ m, update }: { m: Match; update(fn: (m: Match) => void
         </div>
       ) : <p>Ela fica parada nesta rodada.</p>}
       <p className="muted">Mova a miniatura da IA com o gabarito indicado.</p>
+      {hasTable() && plan && (
+        <div className="ai-actions ai-actions-left">
+          <button className="btn btn-ghost" onClick={() => {
+            const t = loadTable(); const p = t.poses[u.id];
+            if (p) { t.poses[u.id] = applyManeuver(p, plan, sizeOf(u)).pose; saveTable(t); window.dispatchEvent(new Event('aw-table')); }
+            const a = arcsFromTable(u, m.units.filter((x) => x.side === 'me' && x.alive), t.poses);
+            setAhead(Object.values(a).some((x) => x.arc === 'F' && x.range && x.range <= 3));
+          }}>Mover na mesa e ler</button>
+        </div>
+      )}
       <h3>Depois do movimento, há um inimigo no arco frontal dela, a Alcance 1 a 3?</h3>
       <div className="ai-tiles ai-tiles-sm">
         <Tile on={ahead === true} onClick={() => setAhead(true)}><span className="ai-big">✓</span>Sim</Tile>
@@ -414,7 +428,10 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
               );
             })}
           </div>
-          <div className="ai-actions"><button className="btn btn-primary" onClick={decide}>A IA decide e rola</button></div>
+          <div className="ai-actions">
+            {hasTable() && <button className="btn btn-ghost" onClick={() => setAnswers(arcsFromTable(u, enemies, loadTable().poses))}>Ler da mesa</button>}
+            <button className="btn btn-primary" onClick={decide}>A IA decide e rola</button>
+          </div>
         </section>
       );
     }
@@ -486,7 +503,7 @@ function CombatStep({ m, update }: { m: Match; update(fn: (m: Match) => void): v
         <h2>Sua vez de atacar: <span className="ai-name is-me">{u.name}</span></h2>
         <h3>Qual criatura da IA ela ataca?</h3>
         <div className="ai-tiles">
-          {enemies.map((e) => <Tile key={e.id} on={target === e.id} onClick={() => setTarget(e.id)} sub={`${left(e)} de vida · Agilidade ${e.agility} · Armadura ${e.armor}`}>{e.name}</Tile>)}
+          {enemies.map((e) => <Tile key={e.id} on={target === e.id} onClick={() => { setTarget(e.id); const a = arcsFromTable(u, [e], loadTable().poses)[e.id]; if (a?.range) setRange(a.range); }} sub={`${left(e)} de vida · Agilidade ${e.agility} · Armadura ${e.armor}`}>{e.name}</Tile>)}
         </div>
         {tgt && (
           <>
@@ -546,6 +563,32 @@ function EndStep({ m, update }: { m: Match; update(fn: (m: Match) => void): void
   );
 }
 
+const hasTable = () => { try { return localStorage.getItem('aw:showTable') === '1' && Object.keys(loadTable().poses).length > 0; } catch { return false; } };
+
+function MatchTable({ m, update }: { m: Match; update(fn: (m: Match) => void): void }) {
+  const [poses, setPosesState] = useState<Record<string, Pose>>(() => {
+    const t = loadTable();
+    const missing = m.units.some((u) => u.alive && !t.poses[u.id]);
+    if (missing) { const d = deploy(m.units); t.poses = { ...d, ...t.poses }; saveTable(t); }
+    return t.poses;
+  });
+  useEffect(() => {
+    const on = () => setPosesState(loadTable().poses);
+    window.addEventListener('aw-table', on);
+    return () => window.removeEventListener('aw-table', on);
+  }, []);
+  const setPoses = (p: Record<string, Pose>) => { setPosesState(p); saveTable({ poses: p }); };
+  return (
+    <section className="ai-card">
+      <div className="ai-table-head">
+        <h2>Mesa</h2>
+        <button className="btn btn-ghost btn-sm" onClick={() => setPoses(deploy(m.units))}>Reposicionar nas áreas iniciais</button>
+      </div>
+      <TableBoard units={m.units} poses={poses} setPoses={setPoses} onAltitude={(id, air) => update((mm) => { mm.units.find((x) => x.id === id)!.air = air; })} />
+    </section>
+  );
+}
+
 /* ---------- página ---------- */
 
 export function CompanionPage() {
@@ -553,6 +596,8 @@ export function CompanionPage() {
   useEffect(() => { document.title = 'Jogar contra a IA · Attack Wing'; }, []);
   useEffect(() => save(m), [m]);
   const [history, setHistory] = useState<Match[]>([]);
+  const [showTable, setShowTable] = useState<boolean>(() => { try { return localStorage.getItem('aw:showTable') === '1'; } catch { return false; } });
+  
   const update = (fn: (mm: Match) => void) => setM((cur) => {
     if (!cur) return cur;
     setHistory((h) => [...h.slice(-19), cur]);
@@ -572,13 +617,14 @@ export function CompanionPage() {
           </div>
           {m && (
             <div className="ai-head-btns">
+              <button className={`btn ${showTable ? 'btn-primary' : 'btn-ghost'}`} onClick={() => { const t = loadTable(); if (m.units.some((u) => u.alive && !t.poses[u.id])) saveTable({ poses: { ...deploy(m.units), ...t.poses } }); setShowTable((v) => { try { localStorage.setItem('aw:showTable', v ? '0' : '1'); } catch { /* */ } return !v; }); }}>{showTable ? 'Esconder a mesa' : 'Usar a mesa virtual'}</button>
               <button className="btn btn-ghost" disabled={!history.length} onClick={undo}>Desfazer</button>
-              <button className="btn btn-ghost" onClick={() => { if (confirm('Encerrar esta partida?')) { setM(null); setHistory([]); } }}>Nova partida</button>
+              <button className="btn btn-ghost" onClick={() => { if (confirm('Encerrar esta partida?')) { setM(null); setHistory([]); saveTable({ poses: {} }); } }}>Nova partida</button>
             </div>
           )}
         </header>
 
-        {!m && <Setup onStart={setM} />}
+        {!m && <Setup onStart={(mm) => { saveTable({ poses: {} }); setM(mm); }} />}
 
         {m && (
           <div className="ai-board">
@@ -617,6 +663,7 @@ export function CompanionPage() {
                   <div className="ai-actions"><button className="btn btn-primary" onClick={() => setM(null)}>Jogar de novo</button></div>
                 </section>
               )}
+              {showTable && <MatchTable m={m} update={update} />}
               <details className="ai-log">
                 <summary>Histórico da partida</summary>
                 <ol>{m.log.map((l, i) => <li key={i}>{l}</li>)}</ol>

@@ -1288,3 +1288,24 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
 .ai-specials li { font-size: 11px; padding: 2px 7px; border-radius: 6px; background: #f6e3df; color: #8c2b22; }
 .ai-specials li.is-wait { background: #ece7e0; color: var(--muted); }
 .ai-specials li.is-spent { background: #ece7e0; color: var(--muted); text-decoration: line-through; }
+
+/* ---------- mesa virtual ---------- */
+.tb { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; align-items: start; }
+.tb-board svg { width: 100%; height: auto; display: block; border-radius: 10px; background: #f3eee5; touch-action: none; user-select: none; }
+.tb-side { display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+.tb-name { font-size: 18px; }
+.tb-name.side-ai { color: #8c2b22; } .tb-name.side-me { color: #2f6b3a; }
+.tb-side h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: 4px; }
+.tb-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tb-dial { border-collapse: separate; border-spacing: 3px; }
+.tb-dial th { font-size: 12px; color: var(--muted); width: 16px; }
+.tb-dial td { width: 34px; height: 34px; padding: 0; }
+.tb-mv { width: 34px; height: 34px; border-radius: 8px; border: 2px solid transparent; background: #1d1815; color: #fff; font-size: 18px; cursor: pointer; }
+.tb-mv.mv-g { color: #6fcf7a; } .tb-mv.mv-r { color: #ff6a5a; }
+.tb-mv.is-on { border-color: var(--gold, #b9a57b); box-shadow: 0 0 0 2px #fff inset; }
+.tb-prev { font-weight: 600; }
+.tb-meas { padding: 12px; border-radius: 12px; background: #f6efe3; }
+.tb-big { font-size: 20px; font-weight: 600; }
+.ai-table-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ai-actions-left { justify-content: flex-start; }
+@media (max-width: 1100px) { .tb { grid-template-columns: 1fr; } }
