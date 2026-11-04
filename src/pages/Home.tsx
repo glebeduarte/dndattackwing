@@ -98,6 +98,7 @@ export function Home() {
           <a href="#memoria">Memória</a>
           <a href="#upgrades">Upgrades</a>
           <Link to="/gerador">Gerador</Link>
+          <Link to="/aventuras">Aventuras</Link>
           <a href="#manual">Manual</a>
           <Link to="/legioes">Legiões salvas</Link>
         </nav>
@@ -212,6 +213,7 @@ export function Home() {
           <div className="h-cta">
             <a className="h-btn" href={MANUAL} download>Baixar o livro de regras</a>
             <a className="h-link h-link-dark" href={MANUAL} target="_blank" rel="noopener">Abrir no navegador</a>
+            <Link className="h-link h-link-dark" to="/aventuras">Jogar as aventuras do livro</Link>
           </div>
           <p className="h-manual-meta">PDF, 1,2 MB, gratuito.</p>
         </div>
