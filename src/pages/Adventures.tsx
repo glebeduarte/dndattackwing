@@ -209,8 +209,9 @@ export function AdventurePage() {
 
   const camp = campaignBySlug(a.campaign);
   const chapters = camp ? campaignChapters(camp.slug) : [];
-  const next = camp ? chapters.find((x) => (x.chapter ?? 0) === (a.chapter ?? 0) + 1) : undefined;
-  const prev = camp ? chapters.find((x) => (x.chapter ?? 0) === (a.chapter ?? 0) - 1) : undefined;
+  const idx = chapters.findIndex((x) => x.slug === a.slug);
+  const next = camp ? chapters[idx + 1] : undefined;
+  const prev = camp && idx > 0 ? chapters[idx - 1] : undefined;
 
   return (
     <Shell>
