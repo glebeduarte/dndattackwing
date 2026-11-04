@@ -81,6 +81,7 @@ export function Home() {
           <a href="#jogo">O jogo</a>
           <a href="#memoria">Memória</a>
           <a href="#upgrades">Upgrades</a>
+          <Link to="/gerador">Gerador</Link>
           <Link to="/legioes">Legiões salvas</Link>
         </nav>
         <Link className="h-btn h-btn-sm" to="/construtor">{hasLegion ? 'Voltar à legião' : 'Construir'}</Link>
@@ -96,7 +97,7 @@ export function Home() {
           </p>
           <div className="h-cta">
             <Link className="h-btn" to="/construtor">{hasLegion ? `Continuar ${legion.creatures.length === 1 ? 'a legião' : `a legião de ${legion.creatures.length} criaturas`}` : 'Construir minha legião'}</Link>
-            <a className="h-link" href="#jogo">Como funciona o jogo</a>
+            <Link className="h-link" to="/gerador">Gerar uma legião pronta</Link>
           </div>
         </div>
       </section>
@@ -189,7 +190,7 @@ export function Home() {
           <p>Escolha um dragão, preencha os slots, acompanhe os pontos e leve a lista para a mesa: salve no navegador, compartilhe por link ou imprima a folha para o torneio.</p>
           <div className="h-cta">
             <Link className="h-btn h-btn-light" to="/construtor">Construir minha legião</Link>
-            <Link className="h-link h-link-light" to="/legioes">Ver legiões salvas</Link>
+            <Link className="h-link h-link-light" to="/gerador">Gerar uma legião pelas regras</Link>
           </div>
         </div>
       </section>

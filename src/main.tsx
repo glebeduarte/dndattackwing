@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { StoreProvider } from './store';
 import { Builder } from './pages/Builder';
 import { Home } from './pages/Home';
+import { Generator } from './pages/Generator';
 import { CardPage, LinkRoute, SavedPage } from './pages/Other';
 import './styles.css';
 
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/construtor" element={<Builder />} />
           <Route path="/creatures" element={<Builder />} />
           <Route path="/upgrades" element={<Builder />} />
+          <Route path="/gerador" element={<Generator />} />
           <Route path="/legioes" element={<SavedPage />} />
           <Route path="/link/:code" element={<LinkRoute />} />
           <Route path="/card/creature/:id" element={<CardPage kind="creature" />} />

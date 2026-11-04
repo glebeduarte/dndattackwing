@@ -18,7 +18,7 @@ export function Shell({ children, topbar }: { children: ReactNode; topbar?: Reac
   const nav = (
     <>
       <Link to="/" className="brand" aria-label="Início">
-        <Mark />
+        <Mark light />
         <div>
           <span className="brand-name">Attack Wing</span>
           <span className="brand-sub">Construtor de legião</span>
@@ -30,6 +30,9 @@ export function Shell({ children, topbar }: { children: ReactNode; topbar?: Reac
         </NavLink>
         <NavLink to="/construtor" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
           <NavIcon d="M4 6h16M4 12h16M4 18h10" /> Construtor
+        </NavLink>
+        <NavLink to="/gerador" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
+          <NavIcon d="M12 3v3m0 12v3M3 12h3m12 0h3M6 6l2 2m8 8 2 2M6 18l2-2m8-8 2-2" /> Gerador de legião
         </NavLink>
         <NavLink to="/legioes" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
           <NavIcon d="M5 4h14v16l-7-4-7 4Z" /> Legiões salvas
@@ -52,7 +55,7 @@ export function Shell({ children, topbar }: { children: ReactNode; topbar?: Reac
         <button className="menu-btn" aria-label="Abrir menu" onClick={() => setMenuOpen(true)}>
           <NavIcon d="M4 7h16M4 12h16M4 17h16" />
         </button>
-        <Link to="/" className="topbar-brand"><Mark size={22} /> Attack Wing</Link>
+        <Link to="/" className="topbar-brand"><Mark size={22} light /> Attack Wing</Link>
         <div className="topbar-slot">{topbar}</div>
       </header>
       <main className="sheet">{children}</main>

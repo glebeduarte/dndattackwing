@@ -964,22 +964,29 @@ export function loadLegionFromCode(code: string, catalog: Catalog): LoadResult {
     pending.push({ creature, uids: slots.filter((s) => s && s !== '0').map(Number) });
   }
 
-  // Equipa em passadas, para que upgrades que dependem de outros (slots extras) encontrem espaço.
+  // Equipa em passadas pela legião inteira: um upgrade pode depender de outro em outra criatura
+  // (Wealth of the Ancients libera um segundo artefato) ou de um slot que outro upgrade cria.
   for (const p of pending) {
-    let queue = [...p.uids];
-    for (let pass = 0; pass < 4 && queue.length; pass++) {
+    p.uids = p.uids.filter((uid) => {
+      if (catalog.upgradeByUid.has(uid)) return true;
+      problems.push(`Upgrade ${uid} não encontrado.`);
+      return false;
+    });
+  }
+  for (let pass = 0; pass < 5; pass++) {
+    let progress = false;
+    for (const p of pending) {
       const left: number[] = [];
-      for (const uid of queue) {
-        const data = catalog.upgradeByUid.get(uid);
-        if (!data) {
-          problems.push(`Upgrade ${uid} não encontrado.`);
-          continue;
-        }
-        if (legion.equip(p.creature, data)) left.push(uid);
+      for (const uid of p.uids) {
+        if (legion.equip(p.creature, catalog.upgradeByUid.get(uid)!)) left.push(uid);
+        else progress = true;
       }
-      queue = left;
+      p.uids = left;
     }
-    for (const uid of queue) problems.push(`${catalog.upgradeByUid.get(uid)?.name ?? uid} não coube em ${p.creature.name}.`);
+    if (!progress) break;
+  }
+  for (const p of pending) {
+    for (const uid of p.uids) problems.push(`${catalog.upgradeByUid.get(uid)?.name ?? uid} não coube em ${p.creature.name}.`);
   }
   for (const a of alignments) legion.tokens[a] = (legion.tokens[a] ?? 0) - 1;
   return { legion, problems };
