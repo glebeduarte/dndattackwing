@@ -37,6 +37,9 @@ export function Shell({ children, topbar }: { children: ReactNode; topbar?: Reac
         <NavLink to="/aventuras" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
           <NavIcon d="M4 5l5-2 6 2 5-2v16l-5 2-6-2-5 2Zm5-2v16m6-14v16" /> Aventuras
         </NavLink>
+        <NavLink to="/colecoes" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
+          <NavIcon d="M4 7h16v13H4Zm2-3h12M8 11h8M8 15h5" /> Coleções
+        </NavLink>
         <NavLink to="/jogar" className={({ isActive }) => (isActive ? 'nav-item is-active' : 'nav-item')}>
           <NavIcon d="M7 4h10l3 6-8 10-8-10Zm-3 6h16M9 4l3 16 3-16" /> Jogar contra a IA
         </NavLink>

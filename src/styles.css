@@ -1323,3 +1323,52 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
 .ai-weapon.is-special { border-style: dashed; }
 .ai-weapon:disabled { opacity: .5; cursor: not-allowed; }
 .ai-tile-note { font-size: 11px; font-weight: 600; color: #8c2b22; }
+
+/* ---------- coleções ---------- */
+.col-page { margin: 0 var(--pad); display: flex; flex-direction: column; gap: 18px; padding: 24px 0 48px; }
+.col-head { display: flex; justify-content: space-between; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+.col-head h1 { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 8px; }
+.col-head p { max-width: 46em; color: var(--muted); font-size: 15px; line-height: 23px; }
+.col-stats { display: flex; gap: 6px 14px; align-items: baseline; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.col-stats .num { font-size: 22px; color: var(--ink, #1d1815); font-weight: 600; margin-left: 8px; }
+.col-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.col-search { flex: 1 1 260px; min-height: 44px; border-radius: 999px; border: 1px solid var(--control); padding: 0 16px; font: inherit; background: var(--surface, #fff); }
+.col-seg { display: inline-flex; border: 1px solid var(--control); border-radius: 999px; overflow: hidden; }
+.col-seg button { border: 0; background: transparent; padding: 10px 14px; font: inherit; font-size: 14px; cursor: pointer; color: inherit; }
+.col-seg button.is-on { background: var(--seal); color: #fff; }
+.col-jump { display: flex; gap: 6px; flex-wrap: wrap; }
+.col-jump a { font-size: 13px; padding: 6px 12px; border-radius: 999px; background: #ece7e0; color: inherit; text-decoration: none; }
+.col-jump a:hover { background: var(--seal); color: #fff; }
+.col-group { display: flex; flex-direction: column; gap: 10px; scroll-margin-top: 16px; }
+.col-group h2 { font-size: 22px; letter-spacing: -0.01em; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.col-group h2 small { font-size: 13px; font-weight: 400; color: var(--muted); }
+.col-boxes { display: flex; flex-direction: column; gap: 8px; }
+.col-box { border: 1px solid var(--control); border-radius: 14px; background: var(--surface, #fff); overflow: hidden; }
+.col-box.is-done { border-color: #2f6b3a; }
+.col-box-head { display: flex; justify-content: space-between; gap: 16px; padding: 14px 16px; cursor: pointer; align-items: center; }
+.col-box-head h3 { font-size: 17px; }
+.col-box-head .muted { font-size: 13px; }
+.col-minis { font-size: 13px; margin-top: 4px; }
+.col-box-side { display: flex; align-items: center; gap: 10px; flex: none; }
+.col-progress { width: 90px; height: 6px; border-radius: 3px; background: #e8e1d8; overflow: hidden; }
+.col-progress span { display: block; height: 100%; background: #2f6b3a; }
+.col-caret { font-size: 16px; color: var(--muted); width: 14px; }
+.col-box-body { padding: 0 16px 16px; border-top: 1px solid var(--control); }
+.col-box-body h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 0 6px; }
+.col-row-tools { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; padding-top: 12px; font-size: 14px; }
+.col-cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.col-cards li { display: grid; grid-template-columns: 22px 22px minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid #efe9e0; font-size: 14px; }
+.col-cards li.is-sorted .col-name { text-decoration: line-through; color: var(--muted); }
+.col-cards input { width: 18px; height: 18px; accent-color: #2f6b3a; }
+.col-name { font-weight: 600; color: inherit; }
+.col-type { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col-meta { font-size: 12px; color: var(--muted); white-space: nowrap; }
+@media (max-width: 640px) {
+  .col-cards li { grid-template-columns: 22px 22px minmax(0, 1fr); }
+  .col-type, .col-meta { grid-column: 3; }
+  .col-progress { width: 50px; }
+}
+@media print {
+  .no-print, .shell-nav, nav.col-jump { display: none !important; }
+  .col-box { break-inside: avoid; }
+}
