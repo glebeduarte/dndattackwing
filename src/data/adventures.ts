@@ -25,6 +25,7 @@ export interface MapSpec {
   tokens: { x: number; y: number; label?: string }[];
   center?: boolean;
   walls?: { edge: 'N' | 'S' | 'E' | 'W' | 'all'; label: string; color: string; except?: string }[];
+  terrain?: { kind: 'lava' | 'bridge' | 'pillar' | 'ash'; x: number; y: number; w: number; h: number; label: string }[];
   note?: string;
 }
 
@@ -49,6 +50,7 @@ export interface Adventure {
   campaign?: string; // slug da campanha; ausente = aventura avulsa
   chapter?: number;
   theme?: string; // uma linha sobre o clima da aventura
+  tokenSheet?: string; // PDF com os terrenos para imprimir
 }
 
 /* Capítulo listado na campanha cujo guia ainda não foi escrito. */
@@ -1560,6 +1562,84 @@ export const ADVENTURES: Adventure[] = [
     },
     origin: 'livro',
     theme: 'Um dragão de prata acordado do descanso enfrenta invasores com seis armadilhas mágicas.',
+  },
+  {
+    slug: 'altares-do-vale-das-cinzas',
+    number: 5,
+    title: 'Os altares do Vale das Cinzas',
+    original: 'Aventura original do portal',
+    source: 'Criada para este portal com as miniaturas da caixa básica e das expansões de dragões',
+    theme: 'Dragões bons e malignos disputam três altares rúnicos que amplificam o sopro de quem os controla, num vale cortado por um rio de lava.',
+    players: 2,
+    playArea: '90 x 90 cm, um vale vulcânico cortado de leste a oeste por um rio de lava com duas pontes de obsidiana',
+    components: [
+      '3 segmentos de rio de lava (cerca de 25 x 9 cm) e 2 pontes de obsidiana de 7 cm',
+      '4 pilares de basalto (4 cm de diâmetro)',
+      '2 nuvens de cinzas (10 cm de diâmetro)',
+      '3 altares rúnicos (fichas hexagonais de 3 cm), numerados de 1 a 3',
+      '12 fichas de ponto (6 para cada lado) e fichas de duração para contar as rodadas',
+      'A folha de terrenos desta aventura, para imprimir em A4 na escala real',
+    ],
+    sides: [
+      { id: 'bem', name: 'Conselho Metálico', points: 120, color: '#c8803e', requires: 'Criaturas Boas e Neutras, com pelo menos um dragão Bom (Galadaeros, Vakka, Pacatus, Janic, Eyruaad ou outro)' },
+      { id: 'mal', name: 'Revoada de Tiamat', points: 120, color: '#c0282d', requires: 'Criaturas Malignas e Neutras, com pelo menos um dragão Maligno (Balagos, Eshaedra, Claugiyliamatar, Umberlis ou outro)' },
+    ],
+    synopsis: [
+      'No sul das Montanhas Nether existe um vale onde a terra nunca esfria. Os anões o chamam de Vale das Cinzas, e os dragões o chamam de Primeiro Fôlego. Segundo as histórias, foi ali que os primeiros dragões aprenderam a soprar, e três altares de pedra rúnica guardam até hoje um pouco daquele poder: um dragão que respira sobre eles sai com o sopro mais forte do que entrou.',
+      'Há séculos os altares dormem sob a cinza. Esta semana, um tremor rachou a crosta do vale, o rio de lava mudou de curso e as runas voltaram a brilhar. Balagos sentiu o calor do próprio covil e chamou a Revoada de Tiamat para tomar os altares antes de qualquer outro. O dragão de cobre Galadaeros viu a coluna de fumaça do alto e avisou o Conselho Metálico. As duas revoadas chegam ao mesmo tempo, cada uma pela sua encosta, e entre elas só há o rio de lava, duas pontes de obsidiana e três pedras que brilham no escuro.',
+    ],
+    setup: [
+      'Cada lado monta a legião com 120 pontos. O Conselho Metálico usa criaturas Boas e Neutras e precisa ter pelo menos um dragão Bom. A Revoada de Tiamat usa criaturas Malignas e Neutras e precisa ter pelo menos um dragão Maligno.',
+      'Coloquem o rio de lava atravessando a área de leste a oeste, com 9 cm de largura e a borda de cima a 40 cm da borda norte. Deixem duas pontes de 7 cm de largura: uma entre 25 e 32 cm da borda oeste e outra entre 58 e 65 cm. Use os 3 segmentos da folha de terrenos.',
+      'Coloquem os altares: o altar 1 no centro exato do rio, sobre uma pequena ilha (ele flutua acima da lava), o altar 2 a 22 cm da borda oeste e a 20 cm da borda norte, e o altar 3 a 22 cm da borda leste e a 20 cm da borda sul.',
+      'Os jogadores se revezam colocando os 4 pilares de basalto, começando por quem tem a iniciativa, cada um a pelo menos 15 cm das bordas, dos altares e dos outros pilares. Depois cada lado coloca 1 nuvem de cinzas na metade do adversário, a pelo menos 15 cm de qualquer altar.',
+      'O Conselho Metálico começa a até 15 cm da borda sul e a Revoada de Tiamat a até 15 cm da borda norte, pela preparação padrão para 2 jogadores.',
+    ],
+    specialRules: [
+      { title: 'Rio de lava', text: 'O rio é um obstáculo só para criaturas no solo, que não podem atravessá-lo nem terminar o movimento sobre ele, a não ser pelas pontes. Uma criatura no solo que passaria por cima do rio para antes dele, encostada na borda, e sofre 1 de dano normal. Criaturas voadoras passam por cima livremente, mas se pousarem, derem rasante ou forem forçadas ao solo sobre o rio, sofrem 1 de dano crítico e vão para o lado mais próximo. Criaturas de Fogo ignoram o dano do rio.' },
+      { title: 'Pontes de obsidiana', text: 'As pontes contam como solo comum. Uma criatura terrestre só cruza o rio por elas, e nenhuma criatura pode ser empurrada para fora de uma ponte.' },
+      { title: 'Pilares de basalto', text: 'Os pilares são obstáculos para o solo e para o ar. O dano por passar por eles é normal e não penetra a Armadura.' },
+      { title: 'Nuvens de cinzas', text: 'A fumaça quente esconde quem está dentro. Uma criatura com qualquer parte da base dentro de uma nuvem rola +1 dado de defesa contra ataques à distância, e quem está dentro dela não pode fazer a ação Adquirir alvo.' },
+      { title: 'Controlar um altar', text: 'No começo da Fase Final, um lado controla um altar se tiver pelo menos uma criatura a Alcance 1 dele e o adversário não tiver nenhuma. O altar 1, sobre a lava, também pode ser controlado por criaturas no ar sobre ele. Para cada altar controlado, o lado ganha 1 ficha de ponto.' },
+      { title: 'Sopro amplificado', text: 'Um dragão a Alcance 1 de um altar que o seu lado controlou na rodada anterior rola +1 dado de ataque em ataques de Arma de Sopro.' },
+      { title: 'O vale treme', text: 'No começo da rodada 4 e da rodada 7, o vale treme: cada criatura no solo a Alcance 1 do rio de lava sofre 1 de dano normal, sem defesa, e as nuvens de cinzas se deslocam 5 cm para o leste (para o oeste se encostarem na borda leste).' },
+      { title: 'Duração', text: 'A batalha dura no máximo 8 rodadas. Usem fichas de duração para contar.' },
+    ],
+    objectives: [
+      { side: 'Os dois lados', text: [
+        'Vence na hora quem chegar a 6 fichas de ponto.',
+        'Também vence quem eliminar todas as criaturas do adversário.',
+        'Se ninguém vencer até o fim da rodada 8, vence quem tiver mais fichas de ponto; com empate, vence quem tiver mais pontos de legião em criaturas ainda vivas.',
+      ] },
+      { side: 'Depois da batalha', text: ['Se o Conselho Metálico vencer, leiam o final 1. Se a Revoada de Tiamat vencer, leiam o final 2.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'O Conselho Metálico guarda os altares', summary: 'Quando a última fumaça baixa, Galadaeros pousa sobre o altar do rio e sente o calor das runas subir pelas garras. Os dragões metálicos decidem enterrar dois dos altares sob basalto, para que ninguém volte a usá-los, e levam a pedra do terceiro para Quelindritar estudar. Pelas runas, ela descobre que o Primeiro Fôlego não é só uma lenda: as pedras foram talhadas por alguém que conhecia o Cemitério Primordial.', rewards: ['Lado vencedor: 1 XP', '+1 XP se a vitória veio pelas fichas de ponto antes da rodada 6'] },
+      { id: '2', title: 'A Revoada de Tiamat toma o vale', summary: 'Balagos respira fogo sobre os três altares, um após o outro, e o vale responde com um rugido que se ouve até as Montanhas Nether. A Revoada passa a noite revezando quem respira sobre as pedras, e quando o sol nasce o rio de lava corre na direção dos vales dos anões. Eshaedra já planeja vender o acesso ao Primeiro Fôlego para os outros servos de Tiamat, pelo preço certo.', rewards: ['Lado vencedor: 1 XP', '+1 XP se a vitória veio pelas fichas de ponto antes da rodada 6'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'mal', label: 'Revoada de Tiamat' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'bem', label: 'Conselho Metálico' },
+      ],
+      tokens: [{ x: 45, y: 44.5, label: '1' }, { x: 22, y: 20, label: '2' }, { x: 68, y: 70, label: '3' }],
+      terrain: [
+        { kind: 'lava', x: 0, y: 40, w: 25, h: 9, label: 'Rio de lava' },
+        { kind: 'lava', x: 32, y: 40, w: 26, h: 9, label: 'Rio de lava' },
+        { kind: 'lava', x: 65, y: 40, w: 25, h: 9, label: 'Rio de lava' },
+        { kind: 'bridge', x: 25, y: 40, w: 7, h: 9, label: 'Ponte' },
+        { kind: 'bridge', x: 58, y: 40, w: 7, h: 9, label: 'Ponte' },
+        { kind: 'pillar', x: 16, y: 58, w: 4, h: 4, label: 'Pilar' },
+        { kind: 'pillar', x: 72, y: 28, w: 4, h: 4, label: 'Pilar' },
+        { kind: 'pillar', x: 40, y: 26, w: 4, h: 4, label: 'Pilar' },
+        { kind: 'pillar', x: 48, y: 62, w: 4, h: 4, label: 'Pilar' },
+        { kind: 'ash', x: 62, y: 18, w: 10, h: 10, label: 'Cinzas' },
+        { kind: 'ash', x: 22, y: 64, w: 10, h: 10, label: 'Cinzas' },
+      ],
+      note: 'Os altares 1, 2 e 3 têm posição fixa. Os pilares e as nuvens de cinzas são colocados pelos jogadores; o mapa mostra uma distribuição possível.',
+    },
+    origin: 'portal',
+    tokenSheet: '/aventuras/terrenos-vale-das-cinzas.pdf',
   },
   {
     slug: 'ninho-na-tempestade',

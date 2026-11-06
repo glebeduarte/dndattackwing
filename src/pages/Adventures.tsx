@@ -16,6 +16,9 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
   return (
     <figure className="adv-map">
       <svg viewBox="-8 -8 106 106" role="img" aria-label="Mapa da área de jogo">
+        <defs>
+          <linearGradient id="lava" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff9a2e" /><stop offset="0.5" stopColor="#e2461d" /><stop offset="1" stopColor="#ff9a2e" /></linearGradient>
+        </defs>
         <rect x="0" y="0" width="90" height="90" fill="#efe7da" />
         {wall?.edge === 'all' && (
           <path
@@ -31,7 +34,21 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
             <rect x={a.x} y={a.y} width={a.w} height={a.h} fill={color(a.side)} opacity="0.9" />
           </g>
         ))}
-        {map.tokens.map((t, i) => (
+        {map.terrain?.map((t, i) => t.kind === 'lava' ? (
+          <rect key={`t${i}`} x={t.x} y={t.y} width={t.w} height={t.h} fill="url(#lava)" />
+        ) : t.kind === 'bridge' ? (
+          <rect key={`t${i}`} x={t.x} y={t.y - 0.6} width={t.w} height={t.h + 1.2} fill="#2b2622" stroke="#5d554c" strokeWidth="0.4" />
+        ) : t.kind === 'pillar' ? (
+          <circle key={`t${i}`} cx={t.x + t.w / 2} cy={t.y + t.h / 2} r={t.w / 2} fill="#4a4540" stroke="#2b2622" strokeWidth="0.5" />
+        ) : (
+          <circle key={`t${i}`} cx={t.x + t.w / 2} cy={t.y + t.h / 2} r={t.w / 2} fill="#8c8580" opacity="0.45" stroke="#6c645b" strokeDasharray="1.2 1" strokeWidth="0.4" />
+        ))}
+        {map.tokens.map((t, i) => map.terrain ? (
+          <g key={i}>
+            <path d={`M${t.x} ${t.y - 2.6} l2.25 1.3 v2.6 l-2.25 1.3 l-2.25 -1.3 v-2.6 Z`} fill="#b9a57b" stroke="#5d554c" strokeWidth="0.4" />
+            {t.label && <text x={t.x} y={t.y + 1.1} textAnchor="middle" fontSize="2.8" fontWeight="700" fill="#1d1815">{t.label}</text>}
+          </g>
+        ) : (
           <circle key={i} cx={t.x} cy={t.y} r="2.2" fill="#9a8f80" />
         ))}
         {map.center && <path d="M45 42.5 L47.5 45 L45 47.5 L42.5 45 Z" fill="#c0282d" />}
@@ -45,7 +62,15 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
           {map.areas.map((a) => (
             <li key={a.side}><span className="sw" style={{ background: color(a.side) }} /> Área inicial: {a.label}</li>
           ))}
-          <li><span className="sw sw-dot" /> Fichas de objetivo</li>
+          {map.terrain ? (
+            <>
+              <li><span className="sw" style={{ background: '#b9a57b' }} /> Altares rúnicos (1 a 3)</li>
+              {map.terrain.some((t) => t.kind === 'lava') && <li><span className="sw" style={{ background: '#e2461d' }} /> Rio de lava</li>}
+              {map.terrain.some((t) => t.kind === 'bridge') && <li><span className="sw" style={{ background: '#2b2622' }} /> Pontes de obsidiana</li>}
+              {map.terrain.some((t) => t.kind === 'pillar') && <li><span className="sw sw-dot" style={{ background: '#4a4540' }} /> Pilares de basalto</li>}
+              {map.terrain.some((t) => t.kind === 'ash') && <li><span className="sw sw-dot" style={{ background: '#b3aca6' }} /> Nuvens de cinzas</li>}
+            </>
+          ) : <li><span className="sw sw-dot" /> Fichas de objetivo</li>}
           {map.center && <li><span className="sw sw-center" /> Centro da área</li>}
           {map.walls?.map((w) => (
             <li key={w.label}><span className="sw sw-line" style={{ background: w.color }} /> {w.label}</li>
@@ -261,7 +286,7 @@ export function AdventurePage() {
               <dl>
                 <div><dt>Jogadores</dt><dd>{a.players}</dd></div>
                 <div><dt>Área</dt><dd>{a.playArea}</dd></div>
-                <div><dt>Componentes</dt><dd>{a.components.join('; ')}</dd></div>
+                <div><dt>Componentes</dt><dd>{a.components.join('; ')}{a.tokenSheet && <> <a className="text-link" href={a.tokenSheet} download>Baixar a folha de terrenos (PDF)</a></>}</dd></div>
               </dl>
             </section>
             <section className="adv-build">
