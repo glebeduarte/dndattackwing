@@ -52,6 +52,8 @@ export interface Adventure {
   chapter?: number;
   theme?: string; // uma linha sobre o clima da aventura
   tokenSheet?: string; // PDF com os terrenos para imprimir
+  hero?: string; // imagem do topo da página (proporção 16:5)
+  heroPosition?: string;
 }
 
 /* Capítulo listado na campanha cujo guia ainda não foi escrito. */
@@ -1818,6 +1820,8 @@ export const ADVENTURES: Adventure[] = [
     },
     origin: 'portal',
     tokenSheet: '/aventuras/terrenos-poco-dos-dragoes.pdf',
+    hero: '/aventuras/hero-poco-dos-dragoes.webp',
+    heroPosition: '62% 30%',
   },
   {
     slug: 'ninho-na-tempestade',

@@ -818,7 +818,8 @@ button.icon-btn-sm { display: inline-grid; place-items: center; }
 .adv-hero-copy { position: relative; z-index: 1; padding: 40px var(--pad) 30px; max-width: 760px; display: flex; flex-direction: column; gap: 10px; }
 .adv-hero h1 { font-size: clamp(32px, 4vw, 48px); line-height: 1.02; letter-spacing: -0.03em; font-weight: 600; }
 .adv-hero p { color: #ece6df; font-size: 16px; line-height: 24px; max-width: 40em; }
-.adv-hero-sm { min-height: 180px; }
+.adv-hero-sm { min-height: 0; aspect-ratio: 16 / 5; }
+@media (max-width: 720px) { .adv-hero-sm { aspect-ratio: auto; min-height: 240px; } }
 .adv-crumbs { font-size: 13px; color: #d8cfc5; }
 .adv-crumbs a { color: #fff; }
 .adv-orig-light { font-size: 14px !important; color: #cfc5ba !important; font-style: italic; }
