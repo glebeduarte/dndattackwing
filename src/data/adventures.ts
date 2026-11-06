@@ -10,6 +10,7 @@ export interface Side {
   points: number;
   color: string; // cor no mapa
   requires?: string; // o que a legião deste lado precisa ter
+  suggested?: { code: string; total: number; list: string[]; note?: string };
 }
 
 export interface Outcome {
@@ -25,7 +26,7 @@ export interface MapSpec {
   tokens: { x: number; y: number; label?: string }[];
   center?: boolean;
   walls?: { edge: 'N' | 'S' | 'E' | 'W' | 'all'; label: string; color: string; except?: string }[];
-  terrain?: { kind: 'lava' | 'bridge' | 'pillar' | 'ash'; x: number; y: number; w: number; h: number; label: string }[];
+  terrain?: { kind: 'lava' | 'bridge' | 'pillar' | 'ash' | 'river' | 'road' | 'wagon' | 'grove' | 'ruin'; x: number; y: number; w: number; h: number; label: string }[];
   note?: string;
 }
 
@@ -1581,8 +1582,19 @@ export const ADVENTURES: Adventure[] = [
       'A folha de terrenos desta aventura, para imprimir em A4 na escala real',
     ],
     sides: [
-      { id: 'bem', name: 'Conselho Metálico', points: 120, color: '#c8803e', requires: 'Criaturas Boas e Neutras, com pelo menos um dragão Bom (Galadaeros, Vakka, Pacatus, Janic, Eyruaad ou outro)' },
-      { id: 'mal', name: 'Revoada de Tiamat', points: 120, color: '#c0282d', requires: 'Criaturas Malignas e Neutras, com pelo menos um dragão Maligno (Balagos, Eshaedra, Claugiyliamatar, Umberlis ou outro)' },
+      { id: 'bem', name: 'Conselho Metálico', points: 120, color: '#c8803e', requires: 'Criaturas Boas e Neutras, com pelo menos um dragão Bom (Galadaeros, Vakka, Pacatus, Janic, Eyruaad ou outro)',
+        suggested: { code: 'MTA1OjEwNzoxMTU6MDoxMTg6MTE5LDI4MDE6MTA5OjExNjowOjAsNjAyOjA6MDowOjAsNjA3OjA6MA', total: 117, list: [
+          'Galadaeros (37), dragão de cobre, com Acid Breath, Hidecarved Scales, Shield e Magic Missile',
+          'Eyruaad (30), jovem dragão de bronze, com Lightning Breath e Legendary Resistance',
+          'Harper Legion Elves 2 (25), tropa de elfos que segura os altares no solo',
+          'Sun Elf Archers (10), arqueiros para disputar o altar do outro lado da ponte',
+        ], note: 'Dois sopros em linha para varrer as pontes e duas tropas para ficar a Alcance 1 dos altares 2 e 3.' } },
+      { id: 'mal', name: 'Revoada de Tiamat', points: 120, color: '#c0282d', requires: 'Criaturas Malignas e Neutras, com pelo menos um dragão Maligno (Balagos, Eshaedra, Claugiyliamatar, Umberlis ou outro)',
+        suggested: { code: 'MTAxOjEwODowOjA6MTE4LDEwMzoxMDk6MTE2OjExNDowOjAsNTA5OjA6MA', total: 117, list: [
+          'Balagos (42), dragão vermelho, com Fire Breath e Shield; como é de Fogo, ignora o dano do rio de lava',
+          'Eshaedra (39), dragoa azul, com Lightning Breath, Legendary Resistance e Devotrix of Tiamat',
+          'Hobgoblin Band 3 (18), bando hobgoblin para ocupar o altar do seu lado do rio',
+        ], note: 'Dois dragões fortes para dominar o altar 1, sobre a lava, e um bando para segurar o altar 2.' } },
     ],
     synopsis: [
       'No sul das Montanhas Nether existe um vale onde a terra nunca esfria. Os anões o chamam de Vale das Cinzas, e os dragões o chamam de Primeiro Fôlego. Segundo as histórias, foi ali que os primeiros dragões aprenderam a soprar, e três altares de pedra rúnica guardam até hoje um pouco daquele poder: um dragão que respira sobre eles sai com o sopro mais forte do que entrou.',
@@ -1640,6 +1652,90 @@ export const ADVENTURES: Adventure[] = [
     },
     origin: 'portal',
     tokenSheet: '/aventuras/terrenos-vale-das-cinzas.pdf',
+  },
+  {
+    slug: 'emboscada-na-ponte-de-boareskyr',
+    number: 6,
+    title: 'Emboscada na Ponte de Boareskyr',
+    original: 'Aventura original do portal',
+    source: 'Criada para este portal, ambientada na Costa da Espada de Forgotten Realms, durante a Tirania dos Dragões',
+    theme: 'Os Harpistas e uma dragoa de latão tentam roubar as carroças do tesouro do Culto do Dragão antes que elas cruzem a Ponte de Boareskyr rumo ao Poço dos Dragões.',
+    players: 2,
+    playArea: '90 x 90 cm, a Estrada do Comércio onde ela cruza o rio Winding Water pela Ponte de Boareskyr',
+    components: [
+      '4 segmentos de rio (20 x 9 cm) e 1 ponte de pedra (10 x 9 cm)',
+      '3 carroças do tesouro (fichas de 6,5 x 4 cm), numeradas de 1 a 3',
+      '2 bosques (10 cm de diâmetro) e 1 ruína da estalagem (6 x 4 cm)',
+      '6 fichas de saque e fichas de dano para as carroças',
+      'A folha de terrenos desta aventura, para imprimir em A4 na escala real',
+    ],
+    sides: [
+      { id: 'bem', name: 'Harpistas e aliados', points: 120, color: '#3f8a4a', requires: 'Criaturas Boas e Neutras, com pelo menos um dragão Bom',
+        suggested: { code: 'Mzk1MToxMDg6MTE2OjA6MTE4LDI4MDE6MTA5OjExNTowOjAsNjAyOjA6MDowOjAsNjA3OjA6MA', total: 119, list: [
+          'Janic (39), dragoa de latão aliada dos Harpistas, com Fire Breath, Legendary Resistance e Shield',
+          'Eyruaad (30), jovem dragão de bronze, com Lightning Breath e Hidecarved Scales',
+          'Harper Legion Elves 2 (25), a tropa harpista que saqueia as carroças no solo',
+          'Sun Elf Archers (10), arqueiros escondidos nos bosques',
+        ], note: 'Os dragões atacam a escolta do alto, e as duas tropas chegam às carroças para saquear.' } },
+      { id: 'mal', name: 'Culto do Dragão', points: 120, color: '#7a3a9a', requires: 'Criaturas Malignas e Neutras, com pelo menos um dragão Maligno',
+        suggested: { code: 'NDAxOjQwMzoxMTY6MTE4OjAsMTAzOjEwOToxMTQ6MDowOjAsNTAxOjA6MDowOjAsNTA3OjA6MA', total: 119, list: [
+          'Claugiyliamatar (35), a dragoa verde da Floresta de Kryptgarden, com Poison Breath, Legendary Resistance e Shield',
+          'Eshaedra (39), dragoa azul devota de Tiamat, com Lightning Breath e Devotrix of Tiamat',
+          'Zhentarim Warband (19), mercenários contratados para escoltar as carroças',
+          'Hobgoblin Band (10), bando que segura a ponte',
+        ], note: 'As duas dragoas protegem o céu enquanto as tropas escoltam as carroças pela estrada.' } },
+    ],
+    synopsis: [
+      'Por toda a Costa da Espada, o Culto do Dragão rouba aldeias e caravanas para encher o tesouro que vai libertar Tiamat dos Nove Infernos. O ouro segue em carroças pela Estrada do Comércio até o Poço dos Dragões, e o caminho mais curto passa pela Ponte de Boareskyr, a velha ponte de pedra sobre o rio Winding Water, onde há séculos os deuses Bhaal e Tyr se enfrentaram durante o Tempo das Perturbações.',
+      'Os Harpistas souberam por um espião que três carroças vão cruzar a ponte ao entardecer. A escolta é pequena, mas o Wyrmspeaker Rezmir comprou a proteção de Claugiyliamatar, a velha dragoa verde de Kryptgarden, com uma parte do tesouro, e Eshaedra voa com ela. Do outro lado, a dragoa de latão Janic aceitou ajudar os Harpistas, desde que alguém lembre bem alto o quanto ela é esperta. O jovem Eyruaad, filho de Quelindritar, veio provar que já tem idade para estas missões. Se as carroças cruzarem o rio, o ouro some no deserto. Se forem saqueadas, a Rainha dos Dragões fica um pouco mais longe de casa.',
+    ],
+    setup: [
+      'Cada lado monta a legião com 120 pontos. Os Harpistas e aliados usam criaturas Boas e Neutras, com pelo menos um dragão Bom. O Culto do Dragão usa criaturas Malignas e Neutras, com pelo menos um dragão Maligno. Há uma legião sugerida para cada lado; troquem o que quiserem dentro desses requisitos.',
+      'Coloquem o rio Winding Water atravessando a área de norte a sul, com 9 cm de largura, a 40 cm da borda oeste. A Ponte de Boareskyr fica no meio do rio, com a borda de cima a 40 cm da borda norte e 10 cm de comprimento.',
+      'A Estrada do Comércio corre de leste a oeste pelo centro da área e passa pela ponte. Coloquem as 3 carroças em fila sobre a estrada, viradas para oeste, com a frente da primeira a 8 cm do rio e 2 cm entre uma carroça e outra.',
+      'O Culto coloca a ruína da estalagem a pelo menos 10 cm da estrada. Os Harpistas colocam os 2 bosques, cada um a pelo menos 10 cm da estrada, do rio e das bordas.',
+      'Os Harpistas começam a até 15 cm da borda oeste. O Culto começa a até 15 cm da borda leste. As criaturas são posicionadas pela preparação padrão para 2 jogadores.',
+    ],
+    specialRules: [
+      { title: 'O rio Winding Water', text: 'O rio é um obstáculo só para criaturas no solo, que só o atravessam pela ponte. Uma criatura no solo que passaria por cima da água para encostada na margem. Criaturas voadoras que pousam, dão rasante ou são forçadas ao solo sobre o rio vão para a margem mais próxima e recebem uma ficha de Exaustão.' },
+      { title: 'A Ponte de Boareskyr', text: 'A ponte conta como solo comum. Uma criatura no solo sobre a ponte rola +1 dado de defesa contra ataques à distância, pela proteção das muretas de pedra.' },
+      { title: 'Bosques e ruína', text: 'Os bosques são obstáculos só para o solo e dão +1 dado de defesa contra ataques à distância a quem está dentro deles. A ruína da estalagem é um obstáculo para o solo e para o ar.' },
+      { title: 'As carroças do tesouro', text: 'Cada carroça é uma criatura terrestre do Culto que não ataca, não faz ações e não pode ser alvo de efeitos críticos. Ela tem Agilidade 0, Armadura 1 e 4 de Vida. Quem passa por cima dela é tratado como se passasse por um obstáculo.' },
+      { title: 'A carroça anda', text: 'No começo de cada Fase Final, cada carroça avança pela estrada com o gabarito de reta 2, na ordem 1, 2 e 3. Se uma carroça fosse terminar sobre outra base ou um obstáculo, ela para antes. Uma carroça que sai pela borda oeste escapou com o tesouro.' },
+      { title: 'Ação: saquear', text: 'Uma criatura dos Harpistas no solo, a Alcance 1 de uma carroça e sem nenhuma criatura do Culto a Alcance 1 dela, pode usar a Ação para colocar 1 ficha de saque na carroça. Com 2 fichas de saque, a carroça foi esvaziada e sai do jogo. Uma carroça destruída por dano também sai do jogo, mas o ouro se perde no rio.' },
+      { title: 'Ao entardecer', text: 'A batalha dura no máximo 8 rodadas. Usem fichas de duração para contar.' },
+    ],
+    objectives: [
+      { side: 'Culto do Dragão', text: ['Vence se 2 carroças escaparem pela borda oeste (depois da batalha 1).', 'Também vence se eliminar todas as criaturas dos Harpistas (depois da batalha 1).'] },
+      { side: 'Harpistas e aliados', text: ['Vencem se 2 carroças saírem do jogo, saqueadas ou destruídas (depois da batalha 2).', 'Também vencem se eliminarem todas as criaturas do Culto.'] },
+      { side: 'No fim da rodada 8', text: ['Se ninguém venceu, vence o Culto se tiver alguma carroça em jogo a oeste do rio; senão, vencem os Harpistas.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'O ouro segue para o Poço dos Dragões', summary: 'As carroças somem na poeira da Estrada do Comércio, e Claugiyliamatar conta de cabeça a parte que lhe cabe. Rezmir recebe a notícia com um sorriso e manda pregar no portão de Boareskyr o estandarte dos Harpistas que caiu no rio. Ninguém precisava saber que uma das carroças levava só pedras: era a isca para descobrir quem anda vendendo as rotas do Culto.', rewards: ['Culto do Dragão: 1 XP', '+1 XP se as 3 carroças escaparam'] },
+      { id: '2', title: 'O tesouro volta para a Costa da Espada', summary: 'Os Harpistas dividem o ouro em sacos pequenos para devolver às aldeias saqueadas, e Janic insiste em contar as moedas ela mesma, para garantir que ninguém a chame de distraída depois. Entre o ouro, eles acham uma lista com os nomes das próximas cidades que o Culto pretende atacar. Eyruaad voa na mesma noite para levá-la à mãe.', rewards: ['Harpistas e aliados: 1 XP', '+1 XP se as 3 carroças foram saqueadas ou destruídas'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 15, h: 90, side: 'bem', label: 'Harpistas e aliados' },
+        { x: 75, y: 0, w: 15, h: 90, side: 'mal', label: 'Culto do Dragão' },
+      ],
+      tokens: [],
+      terrain: [
+        { kind: 'road', x: 0, y: 42.5, w: 90, h: 5, label: 'Estrada do Comércio' },
+        { kind: 'river', x: 40, y: 0, w: 9, h: 40, label: 'Winding Water' },
+        { kind: 'river', x: 40, y: 50, w: 9, h: 40, label: 'Winding Water' },
+        { kind: 'bridge', x: 40, y: 40, w: 9, h: 10, label: 'Ponte de Boareskyr' },
+        { kind: 'wagon', x: 57, y: 43, w: 6.5, h: 4, label: '1' },
+        { kind: 'wagon', x: 65.5, y: 43, w: 6.5, h: 4, label: '2' },
+        { kind: 'wagon', x: 74, y: 43, w: 6.5, h: 4, label: '3' },
+        { kind: 'grove', x: 18, y: 18, w: 10, h: 10, label: 'Bosque' },
+        { kind: 'grove', x: 22, y: 62, w: 10, h: 10, label: 'Bosque' },
+        { kind: 'ruin', x: 60, y: 62, w: 6, h: 4, label: 'Ruína' },
+      ],
+      note: 'O rio e a ponte têm posição fixa, e as carroças começam em fila na estrada, a leste do rio. Os bosques e a ruína são colocados pelos jogadores; o mapa mostra uma distribuição possível.',
+    },
+    origin: 'portal',
+    tokenSheet: '/aventuras/terrenos-ponte-de-boareskyr.pdf',
   },
   {
     slug: 'ninho-na-tempestade',

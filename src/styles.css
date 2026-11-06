@@ -1388,3 +1388,8 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
 .col-cover-empty { display: grid; place-items: center; }
 .col-cover-empty img { opacity: .55; }
 @media (max-width: 640px) { .col-cover { width: 72px; height: 48px; } }
+.adv-suggest { margin-top: 8px; padding: 10px 12px; border-radius: 12px; background: #f6efe3; display: flex; flex-direction: column; gap: 6px; }
+.adv-suggest-title { font-weight: 600; font-size: 14px; }
+.adv-suggest ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 19px; }
+.adv-suggest .muted { font-size: 13px; }
+.adv-suggest .btn { align-self: flex-start; }

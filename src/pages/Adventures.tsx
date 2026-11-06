@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { CAMPAIGNS, CAMPAIGN_RULES, coverFor, adventureBySlug, campaignBySlug, campaignChapters, standaloneAdventures, type Adventure, type MapSpec } from '../data/adventures';
-import { Legion } from '../engine/engine';
+import { Legion, loadLegionFromCode } from '../engine/engine';
 import { catalog, useStore } from '../store';
 import { Shell } from '../ui/Shell';
 import { CampaignTrail } from './CampaignTrail';
@@ -17,6 +17,7 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
     <figure className="adv-map">
       <svg viewBox="-8 -8 106 106" role="img" aria-label="Mapa da área de jogo">
         <defs>
+          <linearGradient id="river" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#7fb6d8" /><stop offset="0.5" stopColor="#3a7cb0" /><stop offset="1" stopColor="#7fb6d8" /></linearGradient>
           <linearGradient id="lava" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff9a2e" /><stop offset="0.5" stopColor="#e2461d" /><stop offset="1" stopColor="#ff9a2e" /></linearGradient>
         </defs>
         <rect x="0" y="0" width="90" height="90" fill="#efe7da" />
@@ -34,7 +35,17 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
             <rect x={a.x} y={a.y} width={a.w} height={a.h} fill={color(a.side)} opacity="0.9" />
           </g>
         ))}
-        {map.terrain?.map((t, i) => t.kind === 'lava' ? (
+        {map.terrain?.map((t, i) => t.kind === 'road' ? (
+          <rect key={`t${i}`} x={t.x} y={t.y} width={t.w} height={t.h} fill="#d9c9a8" />
+        ) : t.kind === 'river' ? (
+          <rect key={`t${i}`} x={t.x} y={t.y} width={t.w} height={t.h} fill="url(#river)" />
+        ) : t.kind === 'wagon' ? (
+          <g key={`t${i}`}><rect x={t.x} y={t.y} width={t.w} height={t.h} rx="0.6" fill="#7a5532" stroke="#3b2814" strokeWidth="0.4" /><text x={t.x + t.w / 2} y={t.y + t.h / 2 + 1.1} textAnchor="middle" fontSize="2.8" fontWeight="700" fill="#fff">{t.label}</text></g>
+        ) : t.kind === 'grove' ? (
+          <circle key={`t${i}`} cx={t.x + t.w / 2} cy={t.y + t.h / 2} r={t.w / 2} fill="#3f7a44" opacity="0.75" stroke="#24502a" strokeWidth="0.4" />
+        ) : t.kind === 'ruin' ? (
+          <rect key={`t${i}`} x={t.x} y={t.y} width={t.w} height={t.h} fill="#8a8178" stroke="#4a4540" strokeWidth="0.4" strokeDasharray="1 0.6" />
+        ) : t.kind === 'lava' ? (
           <rect key={`t${i}`} x={t.x} y={t.y} width={t.w} height={t.h} fill="url(#lava)" />
         ) : t.kind === 'bridge' ? (
           <rect key={`t${i}`} x={t.x} y={t.y - 0.6} width={t.w} height={t.h + 1.2} fill="#2b2622" stroke="#5d554c" strokeWidth="0.4" />
@@ -64,9 +75,14 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
           ))}
           {map.terrain ? (
             <>
-              <li><span className="sw" style={{ background: '#b9a57b' }} /> Altares rúnicos (1 a 3)</li>
+              {map.tokens.length > 0 && <li><span className="sw" style={{ background: '#b9a57b' }} /> Altares rúnicos (1 a 3)</li>}
+              {map.terrain.some((t) => t.kind === 'river') && <li><span className="sw" style={{ background: '#3a7cb0' }} /> Rio</li>}
+              {map.terrain.some((t) => t.kind === 'road') && <li><span className="sw" style={{ background: '#d9c9a8' }} /> Estrada</li>}
+              {map.terrain.some((t) => t.kind === 'wagon') && <li><span className="sw" style={{ background: '#7a5532' }} /> Carroças do tesouro (1 a 3)</li>}
+              {map.terrain.some((t) => t.kind === 'grove') && <li><span className="sw sw-dot" style={{ background: '#3f7a44' }} /> Bosques</li>}
+              {map.terrain.some((t) => t.kind === 'ruin') && <li><span className="sw" style={{ background: '#8a8178' }} /> Ruína da estalagem</li>}
               {map.terrain.some((t) => t.kind === 'lava') && <li><span className="sw" style={{ background: '#e2461d' }} /> Rio de lava</li>}
-              {map.terrain.some((t) => t.kind === 'bridge') && <li><span className="sw" style={{ background: '#2b2622' }} /> Pontes de obsidiana</li>}
+              {map.terrain.some((t) => t.kind === 'bridge') && <li><span className="sw" style={{ background: '#2b2622' }} /> {map.terrain.find((t) => t.kind === 'bridge')!.label.startsWith('Ponte de B') ? 'Ponte de Boareskyr' : 'Pontes de obsidiana'}</li>}
               {map.terrain.some((t) => t.kind === 'pillar') && <li><span className="sw sw-dot" style={{ background: '#4a4540' }} /> Pilares de basalto</li>}
               {map.terrain.some((t) => t.kind === 'ash') && <li><span className="sw sw-dot" style={{ background: '#b3aca6' }} /> Nuvens de cinzas</li>}
             </>
@@ -291,7 +307,7 @@ export function AdventurePage() {
             </section>
             <section className="adv-build">
               <h2>Montar a legião</h2>
-              <p className="muted">Abre o construtor com o dragão do lado escolhido e o limite de pontos da aventura.</p>
+              <p className="muted">Abre o construtor com o dragão do lado escolhido e o limite de pontos da aventura. Quando há uma legião sugerida, você pode abrir a sugestão e trocar criaturas e melhorias, desde que respeite os requisitos e o limite de pontos.</p>
               {a.sides.map((s) => (
                 <div key={s.id} className="adv-side-opt">
                   <button className="adv-side-btn" onClick={() => build(s)}>
@@ -300,6 +316,20 @@ export function AdventurePage() {
                     <span className="num">{s.points} pts</span>
                   </button>
                   {s.requires && <p className="adv-requires">{s.requires}</p>}
+                  {s.suggested && (
+                    <div className="adv-suggest">
+                      <p className="adv-suggest-title">Legião sugerida · <span className="num">{s.suggested.total} pts</span></p>
+                      <ul>{s.suggested.list.map((x) => <li key={x}>{x}</li>)}</ul>
+                      {s.suggested.note && <p className="muted">{s.suggested.note}</p>}
+                      <button className="btn btn-ghost btn-sm" onClick={() => {
+                        const { legion } = loadLegionFromCode(s.suggested!.code, catalog);
+                        replace(legion, `${a.title}: ${s.name}`);
+                        setSettings({ target: s.points });
+                        notify('ok', `Legião sugerida de ${s.name} aberta. Troque o que quiser, sem passar de ${s.points} pontos e mantendo os requisitos.`);
+                        navigate('/construtor');
+                      }}>Abrir a sugestão no construtor</button>
+                    </div>
+                  )}
                 </div>
               ))}
             </section>
