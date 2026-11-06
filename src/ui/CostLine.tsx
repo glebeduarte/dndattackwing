@@ -1,6 +1,6 @@
 import { useStore } from '../store';
 
-const TARGETS = [100, 150, 200, 250, 300];
+const TARGETS = [60, 90, 120, 150, 180, 200, 240, 300];
 
 /* Linha de custo compacta: total, a barra (cada criatura um trecho: base cheia, upgrades no tom claro), contagens e limite. */
 export function CostLine() {

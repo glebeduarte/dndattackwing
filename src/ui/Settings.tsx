@@ -31,7 +31,7 @@ export function SettingsDialog({ onClose }: { onClose(): void }) {
           <label className="field">
             <span>Limite de pontos da legião</span>
             <select value={settings.target ?? 0} onChange={(e) => setSettings({ target: Number(e.target.value) || null })}>
-              {[0, 50, 75, 100, 120, 150, 160, 200, 250, 300].map((v) => <option key={v} value={v}>{v ? `${v} pontos` : 'Sem limite'}</option>)}
+              {[0, 60, 90, 120, 150, 180, 200, 240, 300].map((v) => <option key={v} value={v}>{v ? `${v} pontos` : 'Sem limite'}</option>)}
             </select>
           </label>
           <label className="field">

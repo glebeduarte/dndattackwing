@@ -6,7 +6,7 @@ import { catalog, useStore } from '../store';
 import { ALIGN_LABEL, GameIcon, SLOT_LABEL } from '../ui/bits';
 import { Shell } from '../ui/Shell';
 
-const POINTS = [60, 120, 200];
+const POINTS = [60, 90, 120, 150, 180, 200, 240, 300];
 const STYLES: [Style, string, string][] = [
   ['elite', 'Poucos e fortes', '2 ou 3 criaturas grandes, bem equipadas'],
   ['equilibrada', 'Equilibrada', '3 a 6 criaturas, pontos divididos'],
