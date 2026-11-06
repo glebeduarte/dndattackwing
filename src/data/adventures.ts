@@ -1827,6 +1827,8 @@ export const ADVENTURES: Adventure[] = [
   },
   {
     slug: 'ninho-na-tempestade',
+    hero: '/aventuras/hero-ninho-na-tempestade.webp',
+    heroPosition: '55% 40%',
     number: 3,
     title: 'O ninho na tempestade',
     original: 'Aventura original do portal',
