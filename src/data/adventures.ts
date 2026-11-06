@@ -1738,6 +1738,8 @@ export const ADVENTURES: Adventure[] = [
     },
     origin: 'portal',
     tokenSheet: '/aventuras/terrenos-ponte-de-boareskyr.pdf',
+    hero: '/aventuras/hero-ponte-de-boareskyr.webp',
+    heroPosition: '55% 45%',
   },
   {
     slug: 'o-poco-dos-dragoes',
