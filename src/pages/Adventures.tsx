@@ -17,6 +17,7 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
     <figure className="adv-map">
       <svg viewBox="-8 -8 106 106" role="img" aria-label="Mapa da área de jogo">
         <defs>
+          <radialGradient id="portal"><stop offset="0" stopColor="#ffb347" /><stop offset="0.55" stopColor="#c0282d" /><stop offset="1" stopColor="#3a0d0d" /></radialGradient>
           <linearGradient id="river" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#7fb6d8" /><stop offset="0.5" stopColor="#3a7cb0" /><stop offset="1" stopColor="#7fb6d8" /></linearGradient>
           <linearGradient id="lava" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff9a2e" /><stop offset="0.5" stopColor="#e2461d" /><stop offset="1" stopColor="#ff9a2e" /></linearGradient>
         </defs>
@@ -35,7 +36,13 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
             <rect x={a.x} y={a.y} width={a.w} height={a.h} fill={color(a.side)} opacity="0.9" />
           </g>
         ))}
-        {map.terrain?.map((t, i) => t.kind === 'road' ? (
+        {map.terrain?.map((t, i) => t.kind === 'portal' ? (
+          <g key={`t${i}`}><circle cx={t.x + t.w / 2} cy={t.y + t.h / 2} r={t.w / 2} fill="url(#portal)" stroke="#5a0f0f" strokeWidth="0.6" /><text x={t.x + t.w / 2} y={t.y + t.h / 2 + 1} textAnchor="middle" fontSize="2.6" fontWeight="700" fill="#fff">Tiamat</text></g>
+        ) : t.kind === 'mask' ? (
+          <g key={`t${i}`}>
+            <path d={`M${t.x} ${t.y - 2.6} l2.25 1.3 v2.6 l-2.25 1.3 l-2.25 -1.3 v-2.6 Z`} fill={({ N: '#1d1815', A: '#2f5fb0', V: '#c0282d', B: '#e8e8ea', Ve: '#3f8a4a' } as Record<string, string>)[t.label] ?? '#888'} stroke="#000" strokeWidth="0.4" />
+          </g>
+        ) : t.kind === 'road' ? (
           <rect key={`t${i}`} x={t.x} y={t.y} width={t.w} height={t.h} fill="#d9c9a8" />
         ) : t.kind === 'river' ? (
           <rect key={`t${i}`} x={t.x} y={t.y} width={t.w} height={t.h} fill="url(#river)" />
@@ -76,6 +83,8 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
           {map.terrain ? (
             <>
               {map.tokens.length > 0 && <li><span className="sw" style={{ background: '#b9a57b' }} /> Altares rúnicos (1 a 3)</li>}
+              {map.terrain.some((t) => t.kind === 'portal') && <li><span className="sw sw-dot" style={{ background: '#c0282d' }} /> Portal de Avernus (Tiamat começa aqui)</li>}
+              {map.terrain.some((t) => t.kind === 'mask') && <li><span className="sw" style={{ background: 'linear-gradient(90deg,#1d1815 20%,#2f5fb0 20% 40%,#3f8a4a 40% 60%,#c0282d 60% 80%,#e8e8ea 80%)' }} /> Máscaras Dracônicas (negra, azul, verde, vermelha e branca)</li>}
               {map.terrain.some((t) => t.kind === 'river') && <li><span className="sw" style={{ background: '#3a7cb0' }} /> Rio</li>}
               {map.terrain.some((t) => t.kind === 'road') && <li><span className="sw" style={{ background: '#d9c9a8' }} /> Estrada</li>}
               {map.terrain.some((t) => t.kind === 'wagon') && <li><span className="sw" style={{ background: '#7a5532' }} /> Carroças do tesouro (1 a 3)</li>}
@@ -83,7 +92,7 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
               {map.terrain.some((t) => t.kind === 'ruin') && <li><span className="sw" style={{ background: '#8a8178' }} /> Ruína da estalagem</li>}
               {map.terrain.some((t) => t.kind === 'lava') && <li><span className="sw" style={{ background: '#e2461d' }} /> Rio de lava</li>}
               {map.terrain.some((t) => t.kind === 'bridge') && <li><span className="sw" style={{ background: '#2b2622' }} /> {map.terrain.find((t) => t.kind === 'bridge')!.label.startsWith('Ponte de B') ? 'Ponte de Boareskyr' : 'Pontes de obsidiana'}</li>}
-              {map.terrain.some((t) => t.kind === 'pillar') && <li><span className="sw sw-dot" style={{ background: '#4a4540' }} /> Pilares de basalto</li>}
+              {map.terrain.some((t) => t.kind === 'pillar') && <li><span className="sw sw-dot" style={{ background: '#4a4540' }} /> {map.terrain.find((t) => t.kind === 'pillar')!.label === 'Rocha' ? 'Rochas de basalto' : 'Pilares de basalto'}</li>}
               {map.terrain.some((t) => t.kind === 'ash') && <li><span className="sw sw-dot" style={{ background: '#b3aca6' }} /> Nuvens de cinzas</li>}
             </>
           ) : <li><span className="sw sw-dot" /> Fichas de objetivo</li>}

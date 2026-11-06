@@ -26,7 +26,7 @@ export interface MapSpec {
   tokens: { x: number; y: number; label?: string }[];
   center?: boolean;
   walls?: { edge: 'N' | 'S' | 'E' | 'W' | 'all'; label: string; color: string; except?: string }[];
-  terrain?: { kind: 'lava' | 'bridge' | 'pillar' | 'ash' | 'river' | 'road' | 'wagon' | 'grove' | 'ruin'; x: number; y: number; w: number; h: number; label: string }[];
+  terrain?: { kind: 'lava' | 'bridge' | 'pillar' | 'ash' | 'river' | 'road' | 'wagon' | 'grove' | 'ruin' | 'portal' | 'mask'; x: number; y: number; w: number; h: number; label: string }[];
   note?: string;
 }
 
@@ -1736,6 +1736,88 @@ export const ADVENTURES: Adventure[] = [
     },
     origin: 'portal',
     tokenSheet: '/aventuras/terrenos-ponte-de-boareskyr.pdf',
+  },
+  {
+    slug: 'o-poco-dos-dragoes',
+    number: 7,
+    title: 'O Poço dos Dragões',
+    original: 'Aventura original do portal',
+    source: 'Criada para este portal, ambientada em Forgotten Realms, no clímax da Tirania dos Dragões',
+    theme: 'O Culto do Dragão abre o portal dos Nove Infernos e Tiamat começa a atravessar. Os dragões metálicos têm poucas rodadas para arrancar as Máscaras Dracônicas e fechar o caminho da Rainha.',
+    players: 2,
+    playArea: '90 x 90 cm, a cratera do Poço dos Dragões, um vulcão extinto ao sul do Bosque Mere dos Pântanos Mortos',
+    components: [
+      '1 portal de Avernus (círculo de 15 cm)',
+      '5 Máscaras Dracônicas (fichas hexagonais de 3,8 cm): negra, azul, verde, vermelha e branca',
+      '3 rochas de basalto (6 cm de diâmetro)',
+      '10 fichas de invocação e fichas de dano para as máscaras',
+      'A folha de terrenos desta aventura, para imprimir em A4 na escala real',
+    ],
+    sides: [
+      { id: 'mal', name: 'Culto do Dragão', creatureUid: 3801, points: 160, color: '#7a3a9a', requires: 'Tiamat e criaturas Malignas e Neutras',
+        suggested: { code: 'MzgwMTozODAyOjM4MDM6MzgwNzozODEwOjM4MTEsNTAxOjA6MDowOjAsNTA5OjA6MCw1MDc6MDow', total: 158, list: [
+          'Tiamat (84), a Rainha dos Dragões, com Fire Breath, Lightning Breath, Queen of the Evil Dragons, Power Word Kill e Regenerate',
+          'Zhentarim Warband (19), mercenários que guardam as máscaras',
+          'Hobgoblin Band 3 (18) e Hobgoblin Band (10), bandos que seguram as máscaras do anel externo',
+        ], note: 'Tiamat segura o centro e sopra em quem se aproxima; as tropas ficam a Alcance 1 das máscaras para alimentar o ritual.' } },
+      { id: 'bem', name: 'Dragões Metálicos', points: 160, color: '#c8803e', requires: 'Criaturas Boas e Neutras, com pelo menos um dragão Bom; Bahamut pode entrar',
+        suggested: { code: 'MjMwMToxMDg6MTE2OjA6MDowLDIxMDE6MDowOjA6MDowLDI4MDE6MTA5OjA6MDowLDYwNzowOjA', total: 159, list: [
+          'Pacatus (52), dragão de ouro, com Fire Breath e Legendary Resistance',
+          'Vakka (57), a anciã de prata que guardava a Agulha da Corrente',
+          'Eyruaad (30), jovem dragão de bronze, com Lightning Breath',
+          'Sun Elf Archers (10), arqueiros que arrancam as máscaras no solo',
+        ], note: 'Três dragões voando rápido para arrancar as máscaras longe de Tiamat, e uma tropa para as que ficam perto do portal.' } },
+    ],
+    synopsis: [
+      'Ao sul do Bosque Mere dos Pântanos Mortos fica um vulcão extinto que os servos de Tiamat chamam de Poço dos Dragões. Ali, depois de meses saqueando a Costa da Espada, o Culto do Dragão reuniu o tesouro, os dragões cromáticos e as cinco Máscaras Dracônicas, uma para cada cor da Rainha. Cada Wyrmspeaker colocou a sua máscara num pedestal em volta da cratera, e Severin, o líder do Culto, começou o ritual que abre um portal até Avernus, a primeira camada dos Nove Infernos.',
+      'O céu da cratera ficou vermelho e cinco cabeças subiram pelo portal: negra, azul, verde, vermelha e branca. Tiamat ainda está presa entre os planos, mas cada máscara que o Culto mantém no lugar a puxa mais um pouco para Faerûn. Os dragões metálicos que lutaram contra o Culto desde o roubo do covil de Balagos chegam pelo sul, junto com os elfos do sol. Se três máscaras forem arrancadas, o portal se fecha e a Rainha volta para os Infernos. Se o ritual terminar, ela pisa em Faerûn pela primeira vez em milênios.',
+    ],
+    setup: [
+      'O Culto do Dragão monta a legião com 160 pontos, com Tiamat e criaturas Malignas e Neutras. Os Dragões Metálicos montam a legião com 160 pontos, com criaturas Boas e Neutras e pelo menos um dragão Bom. Há uma legião sugerida para cada lado; troquem o que quiserem dentro desses requisitos.',
+      'Coloquem o portal de Avernus centralizado entre leste e oeste, com o centro a 30 cm da borda norte. Tiamat começa sobre o portal, virada para o sul.',
+      'Coloquem as 5 Máscaras Dracônicas em arco em volta do portal, todas a 23 cm (alcance 3) do centro dele: uma ao sul, duas a sudeste e sudoeste e duas a leste e oeste, como no mapa.',
+      'Os Dragões Metálicos colocam as 3 rochas de basalto, cada uma a pelo menos 15 cm do portal, das máscaras e das bordas.',
+      'O Culto posiciona as outras criaturas a até 15 cm da borda norte. Os Dragões Metálicos começam a até 15 cm da borda sul.',
+    ],
+    specialRules: [
+      { title: 'Tiamat atravessa o portal', text: 'Enquanto o portal estiver aberto, Tiamat está presa a ele: não planeja manobra, não se move nem gira, mas faz ações e ataca normalmente, inclusive com os sopros. O portal não é obstáculo para ela; para as outras criaturas, é um obstáculo para o solo e para o ar.' },
+      { title: 'A Rainha não morre aqui', text: 'Enquanto houver pelo menos 3 máscaras na mesa, Tiamat não pode ser derrotada: se as Cartas de Dano chegarem à Vida dela, ela fica com 1 de Vida e as cartas que passarem disso são descartadas.' },
+      { title: 'As Máscaras Dracônicas', text: 'Cada máscara é uma criatura terrestre do Culto que não se move, não ataca e não faz ações. Ela tem Agilidade 0, Armadura 2 e 3 de Vida, e é imune a efeitos críticos. Uma máscara destruída por dano sai da mesa.' },
+      { title: 'Ação: arrancar a máscara', text: 'Uma criatura dos Dragões Metálicos, no solo ou em rasante, a Alcance 1 de uma máscara e sem nenhuma criatura do Culto a Alcance 1 dela (Tiamat não conta), pode usar a Ação para arrancar a máscara: ela sai da mesa.' },
+      { title: 'A dor da Rainha', text: 'Cada vez que uma máscara sai da mesa, Tiamat recebe 1 Carta de Dano virada para cima.' },
+      { title: 'O ritual', text: 'No começo de cada Fase Final, o Culto ganha 1 ficha de invocação para cada máscara que tenha uma criatura do Culto a Alcance 1 dela e nenhuma criatura dos Dragões Metálicos a Alcance 1. Tiamat conta para as máscaras ao alcance dela.' },
+      { title: 'A cratera', text: 'As rochas de basalto são obstáculos para o solo e para o ar. A batalha dura no máximo 8 rodadas.' },
+    ],
+    objectives: [
+      { side: 'Culto do Dragão', text: ['Vence na hora ao chegar a 10 fichas de invocação: Tiamat se liberta do portal (depois da batalha 1).', 'Também vence se eliminar todas as criaturas dos Dragões Metálicos.'] },
+      { side: 'Dragões Metálicos', text: ['Vencem na hora quando a terceira máscara sair da mesa: o portal se fecha e Tiamat volta para Avernus (depois da batalha 2).'] },
+      { side: 'No fim da rodada 8', text: ['Se ninguém venceu, vence o Culto se tiver 6 ou mais fichas de invocação; senão, vencem os Dragões Metálicos.'] },
+    ],
+    outcomes: [
+      { id: '1', title: 'A Rainha pisa em Faerûn', summary: 'As cinco cabeças rugem ao mesmo tempo e a cratera inteira treme quando Tiamat arranca as patas do portal. Os dragões metálicos recuam para o sul, levando os feridos, enquanto os Wyrmspeakers se ajoelham na cinza. A notícia vai correr a Costa da Espada em poucos dias, e todas as cidades vão olhar para o céu à procura de cinco sombras.', rewards: ['Culto do Dragão: 2 XP'] },
+      { id: '2', title: 'O portal se fecha', summary: 'Com a terceira máscara arrancada, o portal se dobra sobre si mesmo e puxa a Rainha de volta para Avernus. O último rugido dela derruba metade da parede da cratera. Vakka segura a máscara branca entre as garras e diz, sem tirar os olhos do céu que volta à cor normal, que alguém precisa garantir que essas máscaras nunca mais fiquem juntas no mesmo lugar.', rewards: ['Dragões Metálicos: 2 XP', '+1 XP se o portal se fechou antes da rodada 5'] },
+    ],
+    map: {
+      areas: [
+        { x: 0, y: 0, w: 90, h: 15, side: 'mal', label: 'Culto do Dragão' },
+        { x: 0, y: 75, w: 90, h: 15, side: 'bem', label: 'Dragões Metálicos' },
+      ],
+      tokens: [],
+      terrain: [
+        { kind: 'portal', x: 37.5, y: 22.5, w: 15, h: 15, label: 'Portal de Avernus' },
+        { kind: 'mask', x: 45, y: 53, w: 3.8, h: 3.8, label: 'V' },
+        { kind: 'mask', x: 61.3, y: 46.3, w: 3.8, h: 3.8, label: 'A' },
+        { kind: 'mask', x: 28.7, y: 46.3, w: 3.8, h: 3.8, label: 'N' },
+        { kind: 'mask', x: 68, y: 30, w: 3.8, h: 3.8, label: 'B' },
+        { kind: 'mask', x: 22, y: 30, w: 3.8, h: 3.8, label: 'Ve' },
+        { kind: 'pillar', x: 12, y: 58, w: 6, h: 6, label: 'Rocha' },
+        { kind: 'pillar', x: 72, y: 60, w: 6, h: 6, label: 'Rocha' },
+        { kind: 'pillar', x: 42, y: 64, w: 6, h: 6, label: 'Rocha' },
+      ],
+      note: 'O portal e as cinco máscaras têm posição fixa: todas a 23 cm do centro do portal. As rochas são colocadas pelos Dragões Metálicos; o mapa mostra uma distribuição possível.',
+    },
+    origin: 'portal',
+    tokenSheet: '/aventuras/terrenos-poco-dos-dragoes.pdf',
   },
   {
     slug: 'ninho-na-tempestade',
