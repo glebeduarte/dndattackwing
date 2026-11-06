@@ -67,6 +67,19 @@ function buildBoxes(): Box[] {
 
 const SET_PT: Record<string, string> = { Starter: 'Caixa básica' };
 
+/* Capas que já existem no portal, ligadas à miniatura de cada caixa. */
+const COVER: Record<string, string> = {
+  Starter: '/aventuras/galadaeros.svg', 'Green Dragon': '/aventuras/claugiyliamatar.svg', Wraith: '/aventuras/maximilian.svg',
+  'Sun Elf Wizard': '/aventuras/nymmestra.svg', 'Frost Giant': '/aventuras/jarl-horn.svg', Hobgoblin: '/aventuras/zhentarim.svg',
+  'Sun Elf Troop': '/aventuras/harper-elfo.svg', 'Aarakocra Troop': '/aventuras/aarakocra.svg', 'Black Shadow Dragon': '/aventuras/umberlis.svg',
+  'Movanic Deva': '/aventuras/sarpiel.svg', Wyvern: '/aventuras/blackthorn.svg', Harpy: '/aventuras/sycorax.svg', 'Silver Dragon': '/aventuras/vakka.svg',
+  'Gold Dragon': '/aventuras/pacatus.svg', Gargoyle: '/aventuras/malebolge.svg', 'Stone Giant': '/aventuras/ancoram.svg',
+  'Drow Elf Ranger': '/aventuras/drizzt.svg', 'Young Bronze Dragon': '/aventuras/eyruaad.svg', 'Red Dracolich': '/aventuras/maurghoros.svg',
+  'Red Dracolich 2': '/aventuras/maurghoros.svg', 'Black Shadow Dragon 2': '/aventuras/umberlis.svg',
+  'Adult Brass Dragon': '/aventuras/janic.svg', Griffon: '/aventuras/borion.svg', 'Earth Cult Warrior': '/aventuras/pedra-sagrada.svg',
+  'Young Black Dragon': '/home/vuthala.webp',
+};
+
 export function CollectionsPage() {
   const { settings, setSettings } = useStore();
   const boxes = useMemo(buildBoxes, []);
@@ -123,7 +136,7 @@ export function CollectionsPage() {
           </div>
           <button className="btn btn-ghost btn-sm" onClick={() => setOpen(Object.fromEntries(boxes.map((b) => [boxKey(b), true])))}>Abrir todas</button>
           <button className="btn btn-ghost btn-sm" onClick={() => setOpen({})}>Fechar todas</button>
-          <button className="btn btn-ghost btn-sm" onClick={() => window.print()}>Imprimir lista</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => window.print()}>Imprimir checklist</button>
         </div>
 
         <nav className="col-jump no-print" aria-label="Ir para a onda">
@@ -145,6 +158,8 @@ export function CollectionsPage() {
                 return (
                   <article key={k} className={`col-box${done === ids.length && ids.length ? ' is-done' : ''}`}>
                     <header className="col-box-head" onClick={() => setOpen((o) => ({ ...o, [k]: !isOpen }))}>
+                      <div className="col-head-main">
+                      {COVER[b.set] ? <img className="col-cover" src={COVER[b.set]} alt="" loading="lazy" /> : <span className="col-cover col-cover-empty" aria-hidden><img src="/brand-dragon-light.png" width={28} height={28} alt="" /></span>}
                       <div>
                         <h3>{SET_PT[b.set] ?? b.set}</h3>
                         <p className="muted">
@@ -152,14 +167,15 @@ export function CollectionsPage() {
                         </p>
                         {b.creatures.length > 0 && <p className="col-minis">Miniaturas: {[...new Set((minis.length ? minis : b.creatures).map((c) => c.name.replace(/\s+\d+$/, '')))].join(', ')}</p>}
                       </div>
+                      </div>
                       <div className="col-box-side">
                         <div className="col-progress" aria-label={`${done} de ${ids.length} separadas`}><span style={{ width: `${ids.length ? (done / ids.length) * 100 : 0}%` }} /></div>
                         <span className="num muted">{done}/{ids.length}</span>
                         <span className="col-caret" aria-hidden>{isOpen ? '▾' : '▸'}</span>
                       </div>
                     </header>
-                    {isOpen && (
-                      <div className="col-box-body">
+                    {(
+                      <div className={`col-box-body${isOpen ? '' : ' is-collapsed'}`}>
                         <div className="col-row-tools no-print">
                           <label className="check"><input type="checkbox" checked={owned} onChange={(e) => setSettings({ sets: { ...settings.sets, [baseSet]: e.target.checked } })} /> <span>Tenho esta coleção</span></label>
                           <button className="text-btn" onClick={() => setSorted((s) => ({ ...s, ...Object.fromEntries(ids.map((id) => [id, true])) }))}>Marcar todas como separadas</button>
