@@ -81,9 +81,12 @@ export function PrintDialog({ onClose }: { onClose(): void }) {
 }
 
 /* A folha em si: só aparece na impressão. */
-export function PrintSheet() {
-  const { legion, name } = useStore();
-  const [p, setP] = useState<Player>(readPlayer);
+export function PrintSheet(props: { legion?: import('../engine/engine').Legion; name?: string; subtitle?: string; mode?: Mode } = {}) {
+  const store = useStore();
+  const legion = props.legion ?? store.legion;
+  const name = props.name ?? store.name;
+  const [pp, setP] = useState<Player>(readPlayer);
+  const p = props.mode ? { ...pp, mode: props.mode } : pp;
   useEffect(() => {
     const on = () => setP((window as any).__awPlayer ?? readPlayer());
     window.addEventListener('aw-player', on);
@@ -96,7 +99,7 @@ export function PrintSheet() {
     <div className="print-sheet" aria-hidden>
       <header>
         <h1>{name}</h1>
-        <p>D&D Attack Wing · folha de legião</p>
+        <p>{props.subtitle ?? 'D&D Attack Wing · folha de legião'}</p>
         <dl>
           <div><dt>Jogador</dt><dd>{p.name || ' '}</dd></div>
           <div><dt>E-mail</dt><dd>{p.email || ' '}</dd></div>
@@ -110,7 +113,7 @@ export function PrintSheet() {
         </thead>
         <tbody>
           {legion.creatures.map((c, i) => (
-            <PrintCreature key={c.key} i={i} c={c} />
+            <PrintCreature key={c.key} i={i} c={c} legion={legion} />
           ))}
         </tbody>
         <tfoot>
@@ -126,8 +129,7 @@ export function PrintSheet() {
   );
 }
 
-function PrintCreature({ c, i }: { c: import('../engine/engine').Creature; i: number }) {
-  const { legion } = useStore();
+function PrintCreature({ c, i, legion }: { c: import('../engine/engine').Creature; i: number; legion: import('../engine/engine').Legion }) {
   return (
     <>
       <tr className="pc">

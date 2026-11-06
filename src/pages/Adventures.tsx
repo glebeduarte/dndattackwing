@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { PrintSheet } from '../ui/Print';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { CAMPAIGNS, CAMPAIGN_RULES, coverFor, adventureBySlug, campaignBySlug, campaignChapters, standaloneAdventures, type Adventure, type MapSpec } from '../data/adventures';
 import { Legion, loadLegionFromCode } from '../engine/engine';
@@ -197,6 +198,7 @@ export function AdventurePage() {
   const a = adventureBySlug(slug);
   const { replace, notify, setSettings } = useStore();
   const navigate = useNavigate();
+  const [printing, setPrinting] = useState<{ legion: Legion; name: string; subtitle: string } | null>(null);
 
   useEffect(() => {
     document.title = a ? `${a.title} · Aventuras · Attack Wing` : 'Aventura não encontrada · Attack Wing';
@@ -232,6 +234,7 @@ export function AdventurePage() {
 
   return (
     <Shell>
+      {printing && <PrintSheet legion={printing.legion} name={printing.name} subtitle={printing.subtitle} mode="completa" />}
       <article className="adv adv-detail">
         <header className={`adv-hero adv-hero-sm${coverFor(a.chapter) ? ' has-cover' : ''}`}>
           <img src={coverFor(a.chapter) ?? '/home/keyart.webp'} alt="" aria-hidden />
@@ -337,6 +340,13 @@ export function AdventurePage() {
                         notify('ok', `Legião sugerida de ${s.name} aberta. Troque o que quiser, sem passar de ${s.points} pontos e mantendo os requisitos.`);
                         navigate('/construtor');
                       }}>Abrir a sugestão no construtor</button>
+                      <button className="btn btn-ghost btn-sm adv-print-btn" onClick={() => {
+                        setPrinting({ legion: loadLegionFromCode(s.suggested!.code, catalog).legion, name: `${s.name} · ${s.suggested!.total} pontos`, subtitle: `${a.title} · legião sugerida` });
+                        setTimeout(() => window.print(), 80);
+                      }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6Z" /></svg>
+                        Imprimir a lista
+                      </button>
                     </div>
                   )}
                 </div>

@@ -1393,3 +1393,4 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
 .adv-suggest ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 19px; }
 .adv-suggest .muted { font-size: 13px; }
 .adv-suggest .btn { align-self: flex-start; }
+.adv-suggest .btn-row, .adv-print-btn { display: inline-flex; gap: 6px; align-items: center; }
