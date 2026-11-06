@@ -57,7 +57,7 @@ export function Shell({ children, topbar }: { children: ReactNode; topbar?: Reac
           {saved.length > 0 && <span className="nav-count num">{saved.length}</span>}
         </NavLink>
         <button className="nav-item" onClick={() => setSettingsOpen(true)}>
-          <NavIcon d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0-5v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1" /> Coleções e ordem
+          <NavIcon d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0-5v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1" /> Configurações
         </button>
       </nav>
       <p className="nav-note">

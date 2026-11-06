@@ -1395,3 +1395,6 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
 .adv-suggest .muted { font-size: 13px; }
 .adv-suggest .btn { align-self: flex-start; }
 .adv-suggest .btn-row, .adv-print-btn { display: inline-flex; gap: 6px; align-items: center; }
+.settings-h { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 0 6px; }
+.settings-data { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.settings-data-btns { display: flex; gap: 8px; flex-wrap: wrap; }
