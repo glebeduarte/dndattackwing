@@ -1905,6 +1905,8 @@ export const ADVENTURES: Adventure[] = [
   },
   {
     slug: 'cerco-a-forja',
+    hero: '/aventuras/hero-cerco-a-forja.webp',
+    heroPosition: '60% 50%',
     number: 4,
     title: 'O cerco à forja de Ulfgar',
     original: 'Aventura original do portal',
