@@ -1,3 +1,4 @@
+import { AnalyzerDialog } from '../ui/Analyzer';
 import { download, legionText, parseLegionText, pickFile } from '../legionFile';
 import { loadLegionFromCode } from '../engine/engine';
 import { useEffect, useState } from 'react';
@@ -23,6 +24,7 @@ export function Builder() {
   const [selection, setSelection] = useState<Selection>(null);
   const [pane, setPane] = useState<Pane>(() => (legion.creatures.length ? 'roster' : 'catalog'));
   const [printing, setPrinting] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const list = useFiltered(tab, filters);
 
   useEffect(() => {
@@ -104,16 +106,23 @@ export function Builder() {
             <button className="btn btn-text" onClick={() => {
               if (!legion.creatures.length || window.confirm('Começar uma legião nova? A atual continua nas salvas se você a salvou.')) reset();
             }}>Nova</button>
-            <button className="btn btn-secondary" onClick={copyLink}>Copiar link</button>
+            
             <button className="btn btn-secondary" onClick={() => (legion.creatures.length ? setPrinting(true) : notify('info', 'Não há o que imprimir ainda.'))}>Imprimir</button>
-            <button className="btn btn-secondary" title="Abrir uma legião de um arquivo .txt" onClick={async () => {
+            <button className="btn btn-secondary" onClick={() => setAnalyzing(true)}>Analisar</button>
+            <details className="file-menu">
+              <summary className="btn btn-secondary">Arquivo</summary>
+              <div className="file-menu-pop">
+                <button className="menu-item" onClick={copyLink}>Copiar link</button>
+            <button className="menu-item" title="Abrir uma legião de um arquivo .txt" onClick={async () => {
               const t = await pickFile(); if (t == null) return;
               const [first] = parseLegionText(t);
               if (!first) return notify('error', 'Nenhuma legião encontrada no arquivo.');
               replace(loadLegionFromCode(first.code, catalog).legion, first.name);
               notify('ok', `${first.name} aberta do arquivo.`);
             }}>Abrir arquivo</button>
-            <button className="btn btn-secondary" title="Baixar a legião num arquivo .txt" onClick={() => (legion.creatures.length ? download(`${name.replace(/[^\w\- ]+/g, '').trim() || 'legiao'}.txt`, legionText(name, legion) + '\n') : notify('info', 'Adicione criaturas antes de salvar o arquivo.'))}>Salvar arquivo</button>
+            <button className="menu-item" title="Baixar a legião num arquivo .txt" onClick={() => (legion.creatures.length ? download(`${name.replace(/[^\w\- ]+/g, '').trim() || 'legiao'}.txt`, legionText(name, legion) + '\n') : notify('info', 'Adicione criaturas antes de salvar o arquivo.'))}>Salvar arquivo</button>
+              </div>
+            </details>
             <button className="btn btn-primary" onClick={saveCurrent}>Salvar legião</button>
           </div>
         </div>
@@ -141,6 +150,7 @@ export function Builder() {
         ))}
       </nav>
 
+      {analyzing && <AnalyzerDialog onClose={() => setAnalyzing(false)} />}
       {printing && <PrintDialog onClose={() => setPrinting(false)} />}
       <PrintSheet />
     </Shell>
