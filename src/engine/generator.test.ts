@@ -37,3 +37,15 @@ describe('gerador', () => {
     }
   });
 });
+
+describe('perfil', () => {
+  it('a história puxa as criaturas citadas', () => {
+    const out = generateLegions(catalog, { points: 120, style: 'equilibrada', alignment: 'qualquer', element: '', dragonsOnly: false, sets: null, initiative: false, seed: 7, profile: { story: 'mortos-vivos e espectros', focus: [] } }, 40, 1);
+    const names = out[0].legion.creatures.map((c) => c.classtype).join(' ');
+    expect(/Undead|Wraith|Dracolich/.test(names)).toBe(true);
+  });
+  it('foco em tropas traz tropas', () => {
+    const out = generateLegions(catalog, { points: 120, style: 'equilibrada', alignment: 'qualquer', element: '', dragonsOnly: false, sets: null, initiative: false, seed: 3, profile: { focus: ['tropa'] } }, 40, 1);
+    expect(out[0].legion.creatures.filter((c) => c.identifiers.includes('Troop')).length).toBeGreaterThan(0);
+  });
+});

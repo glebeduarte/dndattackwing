@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ENUM_ELEMENTS, encodeLegion } from '../engine/engine';
-import { generateLegions, type AlignmentPick, type GeneratedLegion, type Style } from '../engine/generator';
+import { generateLegions, storyTerms, type AlignmentPick, type Context, type Focus, type GeneratedLegion, type Play, type Style, type Synergy } from '../engine/generator';
 import { catalog, useStore } from '../store';
 import { ALIGN_LABEL, GameIcon, SLOT_LABEL } from '../ui/bits';
 import { Shell } from '../ui/Shell';
@@ -12,6 +12,25 @@ const STYLES: [Style, string, string][] = [
   ['equilibrada', 'Equilibrada', '3 a 6 criaturas, pontos divididos'],
   ['enxame', 'Muitas criaturas', 'tropas e criaturas baratas em número'],
 ];
+const PLAYS: [Play, string, string][] = [
+  ['agressivo', 'Ataque direto', 'criaturas com muitos dados de ataque'],
+  ['defensivo', 'Resistir', 'agilidade, armadura e vida altas'],
+  ['distancia', 'À distância', 'ataques de longe, sem encostar'],
+  ['sopros', 'Sopros em área', 'dragões com sopros que pegam vários alvos'],
+  ['magia', 'Magia', 'slots de feitiços arcanos e divinos'],
+];
+const FOCUS: [Focus, string][] = [['dragao', 'Dragões'], ['tropa', 'Tropas'], ['heroi', 'Heróis e montarias'], ['monstro', 'Monstros']];
+const SYN: [Synergy, string, string][] = [
+  ['livre', 'Sem regra', 'qualquer combinação'],
+  ['elemento', 'Mesmo elemento', 'criaturas do elemento da primeira escolhida'],
+  ['alinhamento', 'Mesmo alinhamento', 'todas Boas, Más ou Neutras'],
+];
+const CTX: [Context, string, string][] = [
+  ['aberto', 'Campo aberto', 'batalha direta'],
+  ['objetivos', 'Objetivos', 'segurar pontos no solo, muitas ativações'],
+  ['obstaculos', 'Muitos obstáculos', 'voadoras passam por cima'],
+];
+const STORY_EX = ['O Culto do Dragão prepara a volta de Tiamat', 'Anões e dragões metálicos defendem a montanha', 'Mortos-vivos e sombras no pântano', 'Elfos da floresta e um dragão verde'];
 const ALIGNS: [AlignmentPick, string][] = [
   ['qualquer', 'Qualquer'],
   ['Good', 'Bom'],
@@ -34,6 +53,11 @@ export function Generator() {
   const [ownedOnly, setOwnedOnly] = useState(params.get('colecoes') === '1');
   const [initiative, setInitiative] = useState(params.get('iniciativa') === '1');
   const [seed, setSeed] = useState(() => Number(params.get('semente')) || Date.now() % 100000);
+  const [play, setPlay] = useState<Play | ''>((params.get('jogo') as Play) ?? '');
+  const [focus, setFocus] = useState<Focus[]>(params.get('foco') ? (params.get('foco')!.split(',') as Focus[]) : []);
+  const [synergy, setSynergy] = useState<Synergy>((params.get('sinergia') as Synergy) ?? 'livre');
+  const [context, setContext] = useState<Context>((params.get('cenario') as Context) ?? 'aberto');
+  const [story, setStory] = useState(params.get('historia') ?? '');
   const [results, setResults] = useState<GeneratedLegion[] | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -54,6 +78,11 @@ export function Generator() {
     if (dragonsOnly) q.dragoes = '1';
     if (ownedOnly) q.colecoes = '1';
     if (initiative) q.iniciativa = '1';
+    if (play) q.jogo = play;
+    if (focus.length) q.foco = focus.join(',');
+    if (synergy !== 'livre') q.sinergia = synergy;
+    if (context !== 'aberto') q.cenario = context;
+    if (story.trim()) q.historia = story.trim();
     setParams(q, { replace: true });
     // Deixa o navegador pintar o estado "gerando" antes do cálculo.
     window.setTimeout(() => {
@@ -66,6 +95,7 @@ export function Generator() {
         sets: ownedOnly ? settings.sets : null,
         initiative,
         seed: nextSeed,
+        profile: { play: play || undefined, focus, synergy, context, story },
       });
       setResults(out);
       setBusy(false);
@@ -137,6 +167,51 @@ export function Generator() {
                 </label>
               ))}
             </div>
+          </fieldset>
+
+          <fieldset className="gen-field gen-wide">
+            <legend>Como você quer vencer?</legend>
+            <div className="style-cards style-cards-5">
+              {PLAYS.map(([v, l, d]) => (
+                <label key={v} className={play === v ? 'style-card is-on' : 'style-card'}>
+                  <input type="radio" name="play" checked={play === v} onChange={() => setPlay(v)} onClick={() => play === v && setPlay('')} />
+                  <strong>{l}</strong><span>{d}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="gen-field">
+            <legend>Que criaturas você quer ver na mesa?</legend>
+            <div className="seg seg-wrap">
+              {FOCUS.map(([v, l]) => <button type="button" key={v} className={focus.includes(v) ? 'is-on' : ''} aria-pressed={focus.includes(v)} onClick={() => setFocus((f) => (f.includes(v) ? f.filter((x) => x !== v) : [...f, v]))}>{l}</button>)}
+            </div>
+            <p className="gen-hint">Pode marcar mais de um. Sem marcar, vale qualquer tipo.</p>
+          </fieldset>
+
+          <fieldset className="gen-field">
+            <legend>Sinergia</legend>
+            <div className="seg seg-wrap">
+              {SYN.map(([v, l, d]) => <button type="button" key={v} title={d} className={synergy === v ? 'is-on' : ''} aria-pressed={synergy === v} onClick={() => setSynergy(v)}>{l}</button>)}
+            </div>
+            <p className="gen-hint">{SYN.find((x) => x[0] === synergy)![2]}</p>
+          </fieldset>
+
+          <fieldset className="gen-field">
+            <legend>Cenário da partida</legend>
+            <div className="seg seg-wrap">
+              {CTX.map(([v, l, d]) => <button type="button" key={v} title={d} className={context === v ? 'is-on' : ''} aria-pressed={context === v} onClick={() => setContext(v)}>{l}</button>)}
+            </div>
+            <p className="gen-hint">{CTX.find((x) => x[0] === context)![2]}</p>
+          </fieldset>
+
+          <fieldset className="gen-field gen-wide">
+            <legend>A história da sua legião</legend>
+            <textarea className="gen-story" rows={3} value={story} onChange={(e) => setStory(e.target.value)} placeholder="Conte em poucas palavras quem são e o que querem. Ex.: um bando de mortos-vivos servindo um dragão negro no pântano." />
+            <div className="gen-story-ex">
+              {STORY_EX.map((x) => <button type="button" key={x} onClick={() => setStory(x)}>{x}</button>)}
+            </div>
+            {story.trim() && <p className="gen-hint">Termos reconhecidos: {storyTerms(story).slice(0, 10).join(', ') || 'nenhum ainda; tente citar cores de dragão, raças, elementos ou nomes de cartas'}.</p>}
           </fieldset>
 
           <fieldset className="gen-field">

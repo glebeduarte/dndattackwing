@@ -1478,3 +1478,14 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
 .file-menu-pop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 190px; background: var(--panel, #fff); border-radius: 12px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.18); display: flex; flex-direction: column; }
 .menu-item { border: 0; background: none; text-align: left; padding: 9px 12px; border-radius: 8px; font: inherit; font-size: 14px; color: inherit; cursor: pointer; }
 .menu-item:hover { background: var(--raised, #f3eee6); }
+.gen-wide { grid-column: 1 / -1; }
+.style-cards-5 { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important; }
+.seg-wrap { flex-wrap: wrap; }
+.gen-story { width: 100%; border-radius: 12px; border: 1px solid var(--control); padding: 12px 14px; font: inherit; resize: vertical; background: var(--panel, #fff); }
+.gen-story-ex { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.gen-story-ex button { border: 0; border-radius: 999px; padding: 6px 12px; background: var(--raised, #f3eee6); font: inherit; font-size: 13px; cursor: pointer; color: inherit; }
+.gen-story-ex button:hover { background: #e6dccc; }
+.gen-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gen-form > .gen-field, .gen-form > .gen-style, .gen-form > .gen-checks { grid-column: auto !important; grid-row: auto !important; }
+.gen-form > .gen-wide, .gen-form > .gen-style, .gen-form > .gen-go { grid-column: 1 / -1 !important; }
+@media (max-width: 760px) { .gen-form { grid-template-columns: 1fr; } }
