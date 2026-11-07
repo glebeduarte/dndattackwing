@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { PrintSheet } from '../ui/Print';
+import { AdvDrawer, AdvFeature, AdvMural } from './AdventuresMural';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { CAMPAIGNS, CAMPAIGN_RULES, coverFor, adventureBySlug, campaignBySlug, campaignChapters, standaloneAdventures, type Adventure, type MapSpec } from '../data/adventures';
+import { CAMPAIGN_RULES, coverFor, adventureBySlug, campaignBySlug, campaignChapters, type Adventure, type MapSpec } from '../data/adventures';
 import { Legion, loadLegionFromCode } from '../engine/engine';
 import { catalog, useStore } from '../store';
 import { Shell } from '../ui/Shell';
-import { CampaignTrail } from './CampaignTrail';
 
 const MANUAL = '/manual/attack-wing-livro-de-regras.pdf';
 
@@ -108,62 +108,17 @@ function AdventureMap({ map, sides }: { map: MapSpec; sides: Adventure['sides'] 
   );
 }
 
-function AdventureItem({ a, label }: { a: Adventure; label: string }) {
-  return (
-    <Link to={`/aventuras/${a.slug}`} className="adv-item">
-      <span className="adv-num">{a.chapter ?? <img src="/brand-dragon-light.png" width={26} height={26} alt="" />}</span>
-      <div className="adv-item-copy">
-        <h3>{a.title}</h3>
-        <p className="adv-orig">{label} · {a.original}</p>
-        <p>{a.theme ?? a.synopsis[0]}</p>
-        <p className="adv-meta">
-          {a.players} jogadores · {a.sides.map((s) => `${s.name} ${s.points} pts`).join(' · ')}
-        </p>
-      </div>
-      <span className="adv-go" aria-hidden>→</span>
-    </Link>
-  );
-}
 
 export function AdventuresPage() {
+  const [open, setOpen] = useState<Adventure | null>(null);
   useEffect(() => {
     document.title = 'Aventuras · Attack Wing';
   }, []);
   return (
     <Shell>
-      <div className="adv">
-        <header className="adv-hero">
-          <img src="/home/keyart.webp" alt="" aria-hidden />
-          <div className="adv-hero-copy">
-            <h1>Aventuras</h1>
-            <p>Partidas com objetivos próprios, regras especiais e um pedaço de história. Jogue cada uma sozinha ou em sequência, como campanha, acumulando experiência e artefatos.</p>
-          </div>
-        </header>
-
-        {CAMPAIGNS.map((c) => (
-          <section key={c.slug} className="adv-camp-group" aria-labelledby={`camp-${c.slug}`}>
-            <header className="adv-camp-head">
-              <div>
-                <h2 id={`camp-${c.slug}`}>Campanha: {c.title}</h2>
-                <p className="adv-orig">{c.original} · {c.source} · {c.status}</p>
-                <p>{c.summary}</p>
-              </div>
-            </header>
-            <CampaignTrail campaign={c} />
-          </section>
-        ))}
-
-        <section className="adv-camp-group" aria-labelledby="avulsas">
-          <header className="adv-camp-head">
-            <div>
-              <h2 id="avulsas">Aventuras do portal</h2>
-              <p>Aventuras novas, criadas aqui com as peças da caixa básica. Jogam sozinhas ou entre os capítulos de uma campanha.</p>
-            </div>
-          </header>
-          <div className="adv-list">
-            {standaloneAdventures().map((a) => <AdventureItem key={a.slug} a={a} label="Avulsa" />)}
-          </div>
-        </section>
+      <div className="adv mvw">
+        <AdvFeature onOpen={setOpen} />
+        <AdvMural onOpen={setOpen} />
 
         <section className="adv-campaign" aria-labelledby="camp-title">
           <div>
@@ -189,6 +144,7 @@ export function AdventuresPage() {
           <a className="text-link" href={MANUAL} target="_blank" rel="noopener">livro de regras em PDF</a>.
         </p>
       </div>
+      <AdvDrawer a={open} onClose={() => setOpen(null)} onOpen={setOpen} />
     </Shell>
   );
 }
