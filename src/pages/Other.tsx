@@ -1,3 +1,4 @@
+import { download, parseLegionText, pickFile, savedToText } from '../legionFile';
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Legion, loadLegionFromCode, Upgrade } from '../engine/engine';
@@ -26,7 +27,15 @@ export function LinkRoute() {
 }
 
 export function SavedPage() {
-  const { saved, loadSaved, deleteSaved, notify, savedId } = useStore();
+  const { saved, loadSaved, deleteSaved, notify, savedId, importSaved } = useStore();
+  const doImport = async () => {
+    const t = await pickFile();
+    if (t == null) return;
+    const list = parseLegionText(t);
+    if (!list.length) return notify('error', 'Nenhuma legião encontrada no arquivo.');
+    const n = importSaved(list);
+    notify('ok', n ? `${n} legião(ões) importada(s).` : 'Essas legiões já estavam salvas.');
+  };
   const navigate = useNavigate();
   const fmt = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
@@ -36,9 +45,11 @@ export function SavedPage() {
         <div className="title-row">
           <div className="title-block">
             <h1 className="page-title">Legiões salvas</h1>
-            <p className="title-sub">Ficam neste navegador. Para levar a outro aparelho, copie o link da legião.</p>
+            <p className="title-sub">Ficam neste navegador. Exporte um arquivo de texto para guardar uma cópia ou abrir em outro aparelho.</p>
           </div>
           <div className="title-actions">
+            <button className="btn btn-secondary" onClick={doImport}>Importar arquivo</button>
+            <button className="btn btn-secondary" disabled={!saved.length} onClick={() => download(`legioes-attack-wing-${new Date().toISOString().slice(0, 10)}.txt`, savedToText(saved))}>Exportar todas</button>
             <Link className="btn btn-primary" to="/construtor">Abrir o construtor</Link>
           </div>
         </div>

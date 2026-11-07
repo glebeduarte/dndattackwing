@@ -85,6 +85,7 @@ interface Store {
   saved: SavedLegion[];
   saveCurrent(): void;
   deleteSaved(id: string): void;
+  importSaved(list: SavedLegion[]): number;
   loadSaved(s: SavedLegion): void;
   settings: Settings;
   setSettings(patch: Partial<Settings>): void;
@@ -184,6 +185,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (savedId === id) setSavedId(null);
   }, [savedId]);
 
+  const importSaved = useCallback((list: SavedLegion[]) => {
+    let n = 0;
+    setSaved((cur) => {
+      const codes = new Set(cur.map((x) => x.code));
+      const add = list.filter((x) => !codes.has(x.code));
+      n = add.length;
+      const next = [...add, ...cur];
+      write(KEY_SAVED, next);
+      return next;
+    });
+    return n;
+  }, []);
+
   const loadSaved = useCallback(
     (s: SavedLegion) => {
       const { legion: l, problems } = loadLegionFromCode(s.code, catalog);
@@ -215,6 +229,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     saved,
     saveCurrent,
     deleteSaved,
+    importSaved,
     loadSaved,
     settings,
     setSettings,
