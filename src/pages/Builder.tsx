@@ -7,6 +7,8 @@ import { CostLine } from '../ui/CostLine';
 import { PrintDialog, PrintSheet } from '../ui/Print';
 import { Roster } from '../ui/Roster';
 import { Shell } from '../ui/Shell';
+import type { Creature } from '../engine/engine';
+
 
 type Pane = 'catalog' | 'roster' | 'card';
 
@@ -31,11 +33,17 @@ export function Builder() {
     else setFilters((f) => ({ ...f, equippable: f.equippable || settings.equippableOnly }));
   };
 
-  const onSlotClick = (slot: string) => {
+  const onSlotClick = (slot: string, c: Creature) => {
     setTab('upgrades');
-    setFilters((f) => ({ ...f, slot: slot === 'Universal' ? '' : slot, equippable: true }));
+    setFilters((f) => ({ ...f, q: '', slot: slot === 'Universal' ? '' : slot, equippable: true, forKey: c.key }));
     setPane('catalog');
   };
+  // sai do modo "preencher slot" quando a criatura sai da legião ou o slot é preenchido
+  const focusC = filters.forKey != null ? legion.creatures.find((c) => c.key === filters.forKey) : undefined;
+  useEffect(() => {
+    if (filters.forKey == null) return;
+    if (!focusC || !focusC.upgrades.some((s, i) => !focusC.equipped[i] && (!filters.slot || s === filters.slot))) setFilters((f) => ({ ...f, forKey: null, slot: '', equippable: settings.equippableOnly }));
+  }, [version]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const preview: Selection = selection ?? (list[0] ? { kind: tab === 'creatures' ? 'creature' : 'upgrade', uid: list[0].uid } : null);
   const shareUrl = `${window.location.origin}/link/${code}`;
@@ -100,6 +108,7 @@ export function Builder() {
           </div>
         </div>
 
+        <Steps onGo={(t) => { changeTab(t); setPane('catalog'); }} />
         <CostLine />
 
         <div className="workspace">
@@ -107,7 +116,7 @@ export function Builder() {
             <Catalog tab={tab} setTab={changeTab} filters={filters} setFilters={setFilters} selection={preview} onPreview={(s, open) => { setSelection(s); if (open && window.matchMedia('(max-width: 900px)').matches) setPane('card'); }} />
           </div>
           <div className="ws-roster">
-            <Roster onSlotClick={onSlotClick} onPreview={(s) => { setSelection(s); setPane('card'); }} />
+            <Roster focus={focusC && filters.slot ? { key: focusC.key, slot: filters.slot } : null} onSlotClick={onSlotClick} onPreview={(s) => { setSelection(s); setPane('card'); }} />
           </div>
           <aside className="ws-preview panel" aria-label="Carta em destaque">
             {preview?.kind === 'creature' && catalog.creatureByUid.get(preview.uid) && <CreatureCard data={catalog.creatureByUid.get(preview.uid)!} />}
@@ -125,5 +134,35 @@ export function Builder() {
       {printing && <PrintDialog onClose={() => setPrinting(false)} />}
       <PrintSheet />
     </Shell>
+  );
+}
+
+/* Passo a passo: o que já está feito e o que falta para fechar a legião. */
+function Steps({ onGo }: { onGo(t: Tab): void }) {
+  const { legion, settings, savedId, version } = useStore();
+  void version;
+  const n = legion.creatures.length;
+  const empty = legion.creatures.reduce((s, c) => s + c.equipped.filter((e) => !e).length, 0);
+  const slots = legion.creatures.reduce((s, c) => s + c.equipped.length, 0);
+  const total = legion.totalCost();
+  const target = settings.target;
+  const over = target != null && total > target;
+  const steps = [
+    { done: n > 0, title: 'Escolha as criaturas', text: n ? `${n} na legião` : 'Toque em + numa criatura do catálogo', go: () => onGo('creatures') },
+    { done: n > 0 && empty === 0, title: 'Preencha os slots', text: !n ? 'Cada criatura traz seus slots' : empty ? `${empty} de ${slots} slots livres: toque em um na legião` : 'Todos os slots ocupados', go: () => onGo('upgrades') },
+    { done: n > 0 && !over && !!savedId, title: 'Confira e salve', text: over ? `${total - target!} pts acima do limite de ${target}` : target != null ? `${total} de ${target} pts${savedId ? ' · salva' : ''}` : `${total} pts`, warn: over },
+  ];
+  const cur = steps.findIndex((s) => !s.done);
+  return (
+    <ol className="steps" aria-label="Etapas da legião">
+      {steps.map((s, i) => (
+        <li key={s.title} className={`${s.done ? 'is-done' : ''}${i === cur ? ' is-current' : ''}${s.warn ? ' is-warn' : ''}`}>
+          <button type="button" onClick={s.go} disabled={!s.go}>
+            <span className="steps-n num">{s.done ? '✓' : i + 1}</span>
+            <span className="steps-t"><b>{s.title}</b><small>{s.text}</small></span>
+          </button>
+        </li>
+      ))}
+    </ol>
   );
 }

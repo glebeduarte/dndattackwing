@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ENUM_ELEMENTS, ENUM_UPGRADES, Upgrade } from '../engine/engine';
 import type { CreatureData, UpgradeData } from '../engine/types';
 import { ALL_SETS, catalog, useStore, type SortKey } from '../store';
@@ -15,6 +15,8 @@ export interface Filters {
   maxCost: string;
   slot: string;
   equippable: boolean;
+  forKey?: number | null; // criatura da legião cujo slot está sendo preenchido
+  group?: string;
 }
 export type Selection = { kind: 'creature'; uid: number } | { kind: 'upgrade'; uid: number } | null;
 
@@ -48,6 +50,15 @@ function sortBy<T extends { uid: number; name: string; cost: any }>(list: T[], k
   return out;
 }
 
+export const CREATURE_GROUPS: [string, string][] = [['dragao', 'Dragões'], ['tropa', 'Tropas'], ['heroi', 'Heróis e montarias'], ['monstro', 'Monstros']];
+export function creatureGroup(d: CreatureData) {
+  const ids = d.identifiers ?? [];
+  if (ids.includes('Dragon')) return 'dragao';
+  if (ids.includes('Troop')) return 'tropa';
+  if (/Human|Elf|Dwarf|Drow|Genasi|Half|Rider|Pegasus|Griffon|Hippogriff|Angel|Deva/.test(d.classtype)) return 'heroi';
+  return 'monstro';
+}
+
 export function useFiltered(tab: Tab, f: Filters) {
   const { settings, legion, version } = useStore();
   return useMemo(() => {
@@ -65,10 +76,15 @@ export function useFiltered(tab: Tab, f: Filters) {
       if (max !== null && !Number.isNaN(max)) {
         if (d.cost === '*' || Number(d.cost) > max) return false;
       }
+      if (tab === 'creatures' && f.group && creatureGroup(d as CreatureData) !== f.group) return false;
       if (tab === 'upgrades') {
         const u = d as UpgradeData;
         if (f.slot && u.upgrade !== f.slot) return false;
-        if (f.equippable) {
+        if (f.forKey != null) {
+          const c = legion.creatures.find((x) => x.key === f.forKey);
+          if (c && !f.equippable) return true;
+          if (c && !legion.canCreatureEquipUpgrade(c, new Upgrade(u))) return false;
+        } else if (f.equippable) {
           const probe = new Upgrade(u);
           if (!legion.creatures.some((c) => legion.canCreatureEquipUpgrade(c, probe))) return false;
         }
@@ -95,7 +111,11 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
   const [help, setHelp] = useState(false);
   const patch = (p: Partial<Filters>) => setFilters({ ...filters, ...p });
   const sets = ALL_SETS;
-  const hasFilters = !!(filters.q || filters.set || filters.element || filters.maxCost || filters.slot || filters.equippable);
+  const hasFilters = !!(filters.q || filters.set || filters.element || filters.maxCost || filters.slot || filters.equippable || filters.group || filters.forKey != null);
+  const focusC = filters.forKey != null ? legion.creatures.find((c) => c.key === filters.forKey) : undefined;
+  const groups = tab === 'creatures'
+    ? CREATURE_GROUPS.map(([id, label]) => ({ id, label, items: (list as CreatureData[]).filter((d) => creatureGroup(d) === id) }))
+    : [...new Set((list as UpgradeData[]).map((u) => u.upgrade))].sort((a, b) => ENUM_UPGRADES.indexOf(a as never) - ENUM_UPGRADES.indexOf(b as never)).map((slot) => ({ id: slot, label: SLOT_LABEL[slot] ?? slot, items: (list as UpgradeData[]).filter((u) => u.upgrade === slot) }));
 
   return (
     <section className="panel catalog" aria-label="Catálogo de cartas">
@@ -108,6 +128,27 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
         </button>
       </div>
 
+      {focusC && tab === 'upgrades' && (
+        <div className="focus-banner">
+          <p>Escolhendo <b>{SLOT_LABEL[filters.slot] ?? 'melhoria'}</b> para <b>{focusC.name}</b>. Toque em <b>Equipar</b> na carta.</p>
+          <label className="check"><input type="checkbox" checked={!filters.equippable} onChange={(e) => patch({ equippable: !e.target.checked })} /> <span>Mostrar também as que não cabem, com o motivo</span></label>
+          <button className="text-btn" onClick={() => patch({ forKey: null, slot: '', equippable: false })}>Ver o catálogo inteiro</button>
+        </div>
+      )}
+      {tab === 'creatures' && (
+        <div className="group-chips" role="group" aria-label="Categoria">
+          <button className={!filters.group ? 'is-on' : ''} onClick={() => patch({ group: '' })}>Todas</button>
+          {CREATURE_GROUPS.map(([id, label]) => <button key={id} className={filters.group === id ? 'is-on' : ''} onClick={() => patch({ group: filters.group === id ? '' : id })}>{label}</button>)}
+        </div>
+      )}
+      {tab === 'upgrades' && !focusC && (
+        <div className="group-chips" role="group" aria-label="Tipo de slot">
+          <button className={!filters.slot ? 'is-on' : ''} onClick={() => patch({ slot: '' })}>Todos</button>
+          {ENUM_UPGRADES.filter((s) => catalog.upgrades.some((u) => u.upgrade === s)).map((s) => (
+            <button key={s} className={filters.slot === s ? 'is-on' : ''} onClick={() => patch({ slot: filters.slot === s ? '' : s })}><GameIcon type={s} size={16} /> {SLOT_LABEL[s] ?? s}</button>
+          ))}
+        </div>
+      )}
       <div className="filters">
         <div className="qf">
           <label className="qf-input">
@@ -122,11 +163,11 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
             />
           </label>
           <button type="button" className={`qf-help-btn${help ? ' is-on' : ''}`} aria-expanded={help} onClick={() => setHelp(!help)}>
-            Filtros
+            {help ? 'Fechar' : 'Mais filtros'}
           </button>
         </div>
         {help && <QueryHelp tab={tab} onPick={(ex) => patch({ q: ex })} />}
-        <div className="filter-grid">
+        {help && <div className="filter-grid">
           <label className="field">
             <span>Coleção</span>
             <select value={filters.set} onChange={(e) => patch({ set: e.target.value })}>
@@ -141,7 +182,7 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
               {ENUM_ELEMENTS.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </label>
-          {tab === 'upgrades' && (
+          {tab === 'upgrades' && !focusC && (
             <label className="field">
               <span>Slot</span>
               <select value={filters.slot} onChange={(e) => patch({ slot: e.target.value })}>
@@ -165,19 +206,19 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
             <span>Custo até</span>
             <input type="number" inputMode="numeric" min={0} max={200} value={filters.maxCost} onChange={(e) => patch({ maxCost: e.target.value })} />
           </label>
-          {tab === 'upgrades' && (
+          {tab === 'upgrades' && !focusC && (
             <label className="check grid-check">
               <input type="checkbox" checked={filters.equippable} onChange={(e) => patch({ equippable: e.target.checked })} />
               <span>Só o que cabe</span>
             </label>
           )}
-        </div>
+        </div>}
       </div>
 
       <div className="list-meta">
         <span className="num">{list.length}</span> {tab === 'creatures' ? 'criaturas' : 'upgrades'}
         {hasFilters && (
-          <button className="text-btn" onClick={() => setFilters({ q: '', set: '', element: '', maxCost: '', slot: '', equippable: false })}>
+          <button className="text-btn" onClick={() => setFilters({ q: '', set: '', element: '', maxCost: '', slot: '', equippable: false, forKey: null, group: '' })}>
             Limpar filtros
           </button>
         )}
@@ -189,21 +230,26 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
             {filters.equippable && !legion.creatures.length ? 'Adicione uma criatura para ver o que cabe nela.' : 'Nenhuma carta com esses filtros.'}
           </li>
         )}
-        {tab === 'creatures'
-          ? (list as CreatureData[]).map((d) => (
-              <CreatureRow key={d._id} d={d} active={selection?.kind === 'creature' && selection.uid === d.uid} onPreview={onPreview} />
-            ))
-          : (list as UpgradeData[]).map((d) => (
-              <UpgradeRow key={d._id} d={d} v={version} active={selection?.kind === 'upgrade' && selection.uid === d.uid} onPreview={onPreview} />
-            ))}
+        {groups.filter((g) => g.items.length).map((g) => (
+          <li key={g.id} className="group-block">
+            {groups.filter((x) => x.items.length).length > 1 && <p className="group-head">{tab === 'upgrades' && <GameIcon type={g.id} size={16} />} {g.label} <span className="num muted">{g.items.length}</span></p>}
+            <ul role="list" className="group-list">
+              {tab === 'creatures'
+                ? (g.items as CreatureData[]).map((d) => <CreatureRow key={d._id} d={d} active={selection?.kind === 'creature' && selection.uid === d.uid} onPreview={onPreview} />)
+                : (g.items as UpgradeData[]).map((d) => <UpgradeRow key={d._id} d={d} v={version} focusKey={filters.forKey ?? null} active={selection?.kind === 'upgrade' && selection.uid === d.uid} onPreview={onPreview} />)}
+            </ul>
+          </li>
+        ))}
       </ul>
     </section>
   );
 }
 
-const CreatureRow = memo(function CreatureRow({ d, active, onPreview }: { d: CreatureData; active: boolean; onPreview(s: Selection, open?: boolean): void }) {
-  const { mutate } = useStore();
+const CreatureRow = function CreatureRow({ d, active, onPreview }: { d: CreatureData; active: boolean; onPreview(s: Selection, open?: boolean): void }) {
+  const { mutate, legion, settings } = useStore();
   const t = useCardLang();
+  const dup = d.unique && legion.creatures.some((c) => c.unique && (c.name === d.name || c.uniqueName === ((d as any).uniquename || d.name)));
+  const over = settings.target != null && legion.totalCost() + Number(d.cost) > settings.target ? legion.totalCost() + Number(d.cost) - settings.target : 0;
   const add = () => mutate((l) => l.addCreature(d), `${d.name} entrou na legião.`);
   return (
     <li
@@ -218,18 +264,23 @@ const CreatureRow = memo(function CreatureRow({ d, active, onPreview }: { d: Cre
       <button className="row-main" onClick={() => onPreview({ kind: 'creature', uid: d.uid }, true)} onFocus={() => onPreview({ kind: 'creature', uid: d.uid })}>
         <span className="row-name">{d.name}{d.unique && <span className="unique-mark" title="Única"> ◆</span>}</span>
         <span className="row-sub">{t.classtype(d.classtype)} · nível {d.level}</span>
+        {dup && <span className="row-why">Já está na legião: carta única.</span>}
+        {!dup && over > 0 && <span className="row-warn">Passa {over} pts do limite.</span>}
       </button>
       <span className="row-cost num">{d.cost}</span>
-      <button className="btn btn-add" onClick={add} aria-label={`Adicionar ${d.name} à legião`} title="Adicionar à legião">+</button>
+      <button className="btn btn-add" onClick={add} disabled={dup} aria-label={`Adicionar ${d.name} à legião`} title={dup ? 'Carta única já na legião' : 'Adicionar à legião'}>+</button>
     </li>
   );
-});
+};
 
-const UpgradeRow = memo(function UpgradeRow({ d, active, onPreview }: { d: UpgradeData; v: number; active: boolean; onPreview(s: Selection, open?: boolean): void }) {
+const UpgradeRow = function UpgradeRow({ d, active, onPreview, focusKey }: { d: UpgradeData; v: number; active: boolean; onPreview(s: Selection, open?: boolean): void; focusKey: number | null }) {
   const { legion, mutate } = useStore();
   const t = useCardLang();
   const probe = new Upgrade(d);
   const targets = legion.creatures.map((c, i) => ({ c, i })).filter(({ c }) => legion.canCreatureEquipUpgrade(c, probe));
+  const fc = focusKey != null ? legion.creatures.find((c) => c.key === focusKey) : undefined;
+  const fcOk = fc ? legion.canCreatureEquipUpgrade(fc, probe) : false;
+  const why = fc ? (fcOk ? null : legion.whyNot(fc, probe)) : legion.creatures.length && !targets.length ? (legion.creatures.map((c) => legion.whyNot(c, probe)).find(Boolean) ?? null) : null;
   return (
     <li
       className={active ? 'row is-active' : 'row'}
@@ -247,9 +298,10 @@ const UpgradeRow = memo(function UpgradeRow({ d, active, onPreview }: { d: Upgra
       <button className="row-main" onClick={() => onPreview({ kind: 'upgrade', uid: d.uid }, true)} onFocus={() => onPreview({ kind: 'upgrade', uid: d.uid })}>
         <span className="row-name">{d.name}{d.unique && <span className="unique-mark" title="Única"> ◆</span>}</span>
         <span className="row-sub">{t.classtype(d.classtype)}</span>
+        {why && <span className="row-why">{fc ? `Não cabe em ${fc.name}: ` : 'Não cabe na legião: '}{why}</span>}
       </button>
-      <span className="row-cost num">{d.cost}</span>
-      {targets.length > 0 && (
+      <span className="row-cost num">{fc && fcOk ? new Upgrade(d).costForCreature(fc, legion) : d.cost}</span>
+      {fc ? (fcOk && <button className="btn btn-equip" onClick={() => mutate((l) => l.equip(fc, d), `${d.name} equipado em ${fc.name}.`)}>Equipar</button>) : targets.length > 0 && (
         <span className="row-targets">
           {targets.slice(0, 6).map(({ c, i }) => (
             <button
@@ -266,7 +318,7 @@ const UpgradeRow = memo(function UpgradeRow({ d, active, onPreview }: { d: Upgra
       )}
     </li>
   );
-});
+};
 
 function QueryHelp({ tab, onPick }: { tab: Tab; onPick(q: string): void }) {
   return (

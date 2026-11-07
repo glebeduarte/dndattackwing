@@ -17,11 +17,12 @@ function useDragging() {
 }
 
 interface RosterProps {
-  onSlotClick(slot: string): void;
+  onSlotClick(slot: string, c: Creature): void;
+  focus?: { key: number; slot: string } | null;
   onPreview(s: Selection): void;
 }
 
-export function Roster({ onSlotClick, onPreview }: RosterProps) {
+export function Roster({ onSlotClick, onPreview, focus }: RosterProps) {
   const { legion, mutate } = useStore();
   const dragging = useDragging();
   const [over, setOver] = useState(false);
@@ -65,6 +66,7 @@ export function Roster({ onSlotClick, onPreview }: RosterProps) {
             n={i + 1}
             dragState={probe ? (legion.canCreatureEquipUpgrade(c, probe) ? 'yes' : 'no') : null}
             onSlotClick={onSlotClick}
+            focus={focus && focus.key === c.key ? focus.slot : null}
             onPreview={onPreview}
           />
         ))
@@ -90,7 +92,7 @@ function StarterList() {
   );
 }
 
-function RosterCard({ c, n, dragState, onSlotClick, onPreview }: { c: Creature; n: number; dragState: 'yes' | 'no' | null; onSlotClick(s: string): void; onPreview(s: Selection): void }) {
+function RosterCard({ c, n, dragState, onSlotClick, onPreview, focus }: { c: Creature; n: number; dragState: 'yes' | 'no' | null; onSlotClick(s: string, c: Creature): void; onPreview(s: Selection): void; focus?: string | null }) {
   const { legion, mutate } = useStore();
   const [hot, setHot] = useState(false);
   const upgradesCost = c.upgradesCost(legion);
@@ -110,7 +112,7 @@ function RosterCard({ c, n, dragState, onSlotClick, onPreview }: { c: Creature; 
 
   return (
     <article
-      className={`roster-card${dragState === 'yes' ? ' can-drop' : ''}${dragState === 'no' ? ' no-drop' : ''}${hot ? ' is-hot' : ''}`}
+      className={`roster-card${focus ? ' is-focus' : ''}${dragState === 'yes' ? ' can-drop' : ''}${dragState === 'no' ? ' no-drop' : ''}${hot ? ' is-hot' : ''}`}
       aria-label={`${n}. ${c.name}`}
       onDragOver={(e) => {
         if (e.dataTransfer.types.includes('application/x-aw-upgrade')) {
@@ -178,7 +180,7 @@ function RosterCard({ c, n, dragState, onSlotClick, onPreview }: { c: Creature; 
           {c.upgrades.map((slot, i) => {
             const u = c.equipped[i];
             return (
-              <li key={i} className={u ? 'slot is-filled' : 'slot'}>
+              <li key={i} className={`${u ? 'slot is-filled' : 'slot'}${!u && focus === slot ? ' is-focus' : ''}`}>
                 <GameIcon type={slot} size={20} title={SLOT_LABEL[slot] ?? slot} />
                 {u ? (
                   <>
@@ -197,8 +199,9 @@ function RosterCard({ c, n, dragState, onSlotClick, onPreview }: { c: Creature; 
                   </>
                 ) : (
                   <>
-                    <button className="slot-empty" onClick={() => onSlotClick(slot)} title={`Ver upgrades de ${SLOT_LABEL[slot] ?? slot}`}>
-                      {SLOT_LABEL[slot] ?? slot} livre
+                    <button className="slot-empty" onClick={() => onSlotClick(slot, c)} title={`Ver as melhorias de ${SLOT_LABEL[slot] ?? slot} que cabem em ${c.name}`}>
+                      <span>{SLOT_LABEL[slot] ?? slot} livre</span>
+                      <span className="slot-cta">Escolher carta →</span>
                     </button>
                     <span className="slot-cost num muted">–</span>
                     <span className="icon-btn-sm" aria-hidden />
