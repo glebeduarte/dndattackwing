@@ -17,6 +17,12 @@ export interface Filters {
   equippable: boolean;
   forKey?: number | null; // criatura da legião cujo slot está sendo preenchido
   group?: string;
+  align?: string[]; // Good, Evil, Neutral
+  levels?: string[]; // faixas: '1-4', '5-8', '9-12', '13+'
+  base?: string[]; // Small, Large, Huge
+  move?: string; // 'voa' | 'terrestre'
+  only?: string[]; // 'unica', 'ataque', 'acao', 'artefato', 'penetra', 'area'
+  acts?: string[]; // ações da barra
 }
 export type Selection = { kind: 'creature'; uid: number } | { kind: 'upgrade'; uid: number } | null;
 
@@ -77,6 +83,23 @@ export function useFiltered(tab: Tab, f: Filters) {
         if (d.cost === '*' || Number(d.cost) > max) return false;
       }
       if (tab === 'creatures' && f.group && creatureGroup(d as CreatureData) !== f.group) return false;
+      if (f.only?.includes('unica') && !d.unique) return false;
+      if (tab === 'creatures') {
+        const c = d as CreatureData;
+        if (f.align?.length && !f.align.includes(c.alignment)) return false;
+        if (f.base?.length && !f.base.includes(c.base)) return false;
+        if (f.move === 'voa' && !c.flyer) return false;
+        if (f.move === 'terrestre' && c.flyer) return false;
+        if (f.levels?.length && !f.levels.some((r) => { const [a, b] = r === '13+' ? [13, 99] : r.split('-').map(Number); return c.level >= a && c.level <= b; })) return false;
+        if (f.acts?.length && !f.acts.every((a) => c.actions.includes(a))) return false;
+      } else {
+        const u = d as UpgradeData;
+        if (f.only?.includes('ataque') && u.attack !== true) return false;
+        if (f.only?.includes('acao') && u.action !== true) return false;
+        if (f.only?.includes('artefato') && !u.artifact) return false;
+        if (f.only?.includes('penetra') && u.penetrates !== true) return false;
+        if (f.only?.includes('area') && !['Line', 'Cone', 'Burst', 'burst'].includes(String(u.area))) return false;
+      }
       if (tab === 'upgrades') {
         const u = d as UpgradeData;
         if (f.slot && u.upgrade !== f.slot) return false;
@@ -111,9 +134,20 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
   const [help, setHelp] = useState(false);
   const patch = (p: Partial<Filters>) => setFilters({ ...filters, ...p });
   const sets = ALL_SETS;
-  const hasFilters = !!(filters.q || filters.set || filters.element || filters.maxCost || filters.slot || filters.equippable || filters.group || filters.forKey != null);
-  const focusC = filters.forKey != null ? legion.creatures.find((c) => c.key === filters.forKey) : undefined;
-  const groups = tab === 'creatures'
+const focusC = filters.forKey != null ? legion.creatures.find((c) => c.key === filters.forKey) : undefined;
+  const L: Record<string, string> = { Good: 'Bom', Neutral: 'Neutro', Evil: 'Mau', Small: 'Base pequena', Large: 'Base grande', Huge: 'Base enorme', Dodge: 'Esquiva', Target: 'Alvo', Concentrate: 'Concentração', Charge: 'Investida', Feint: 'Finta', unica: 'Única', ataque: 'Ataque', acao: 'Ação', area: 'Em área', penetra: 'Atravessa Armadura', artefato: 'Artefato', voa: 'Voa', terrestre: 'Terrestre' };
+  const without = (k: 'align' | 'levels' | 'base' | 'only' | 'acts', v: string) => () => patch({ [k]: (filters[k] ?? []).filter((x) => x !== v) } as Partial<Filters>);
+  const activeChips: [string, () => void][] = [
+    ...(['align', 'base', 'only', 'acts'] as const).flatMap((k) => (filters[k] ?? []).map((v) => [L[v] ?? v, without(k, v)] as [string, () => void])),
+    ...(filters.levels ?? []).map((v) => [`Nível ${v.replace('-', ' a ')}`, without('levels', v)] as [string, () => void]),
+    ...(filters.move ? [[L[filters.move], () => patch({ move: '' })] as [string, () => void]] : []),
+    ...(filters.element ? [[filters.element, () => patch({ element: '' })] as [string, () => void]] : []),
+    ...(filters.maxCost ? [[`Até ${filters.maxCost} pts`, () => patch({ maxCost: '' })] as [string, () => void]] : []),
+    ...(filters.set ? [[filters.set, () => patch({ set: '' })] as [string, () => void]] : []),
+    ...(filters.equippable && !focusC ? [['Só o que cabe', () => patch({ equippable: false })] as [string, () => void]] : []),
+  ];
+  const hasFilters = !!(filters.q || filters.slot || filters.group || filters.forKey != null || activeChips.length);
+    const groups = tab === 'creatures'
     ? CREATURE_GROUPS.map(([id, label]) => ({ id, label, items: (list as CreatureData[]).filter((d) => creatureGroup(d) === id) }))
     : [...new Set((list as UpgradeData[]).map((u) => u.upgrade))].sort((a, b) => ENUM_UPGRADES.indexOf(a as never) - ENUM_UPGRADES.indexOf(b as never)).map((slot) => ({ id: slot, label: SLOT_LABEL[slot] ?? slot, items: (list as UpgradeData[]).filter((u) => u.upgrade === slot) }));
 
@@ -155,7 +189,7 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
             <span className="sr-only">Filtrar por texto</span>
             <input
               type="search"
-              placeholder={tab === 'creatures' ? 'Ex.: nivel>=8 voa' : 'Ex.: slot:dragao custo<=4'}
+              placeholder={tab === 'creatures' ? 'Nome, tipo ou habilidade' : 'Nome ou texto da carta'}
               value={filters.q}
               onChange={(e) => patch({ q: e.target.value })}
               spellCheck={false}
@@ -163,62 +197,60 @@ export function Catalog({ tab, setTab, filters, setFilters, selection, onPreview
             />
           </label>
           <button type="button" className={`qf-help-btn${help ? ' is-on' : ''}`} aria-expanded={help} onClick={() => setHelp(!help)}>
-            {help ? 'Fechar' : 'Mais filtros'}
+            {help ? 'Fechar' : `Filtros${activeChips.length ? ` (${activeChips.length})` : ''}`}
           </button>
         </div>
-        {help && <QueryHelp tab={tab} onPick={(ex) => patch({ q: ex })} />}
-        {help && <div className="filter-grid">
-          <label className="field">
-            <span>Coleção</span>
-            <select value={filters.set} onChange={(e) => patch({ set: e.target.value })}>
-              <option value="">Todas</option>
-              {sets.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </label>
-          <label className="field">
-            <span>Elemento</span>
-            <select value={filters.element} onChange={(e) => patch({ element: e.target.value })}>
-              <option value="">Todos</option>
-              {ENUM_ELEMENTS.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </label>
-          {tab === 'upgrades' && !focusC && (
-            <label className="field">
-              <span>Slot</span>
-              <select value={filters.slot} onChange={(e) => patch({ slot: e.target.value })}>
-                <option value="">Todos</option>
-                {ENUM_UPGRADES.map((s) => <option key={s} value={s}>{SLOT_LABEL[s]}</option>)}
-              </select>
-            </label>
-          )}
-          <label className="field">
-            <span>Ordem</span>
-            <select
-              value={tab === 'creatures' ? settings.creatureSort : settings.upgradeSort}
-              onChange={(e) => setSettings(tab === 'creatures' ? { creatureSort: e.target.value as SortKey } : { upgradeSort: e.target.value as SortKey })}
-            >
-              <option value="uid">Lançamento</option>
-              <option value="name">Alfabética</option>
-              <option value="cost">Custo</option>
-            </select>
-          </label>
-          <label className="field field-num">
-            <span>Custo até</span>
-            <input type="number" inputMode="numeric" min={0} max={200} value={filters.maxCost} onChange={(e) => patch({ maxCost: e.target.value })} />
-          </label>
-          {tab === 'upgrades' && !focusC && (
-            <label className="check grid-check">
-              <input type="checkbox" checked={filters.equippable} onChange={(e) => patch({ equippable: e.target.checked })} />
-              <span>Só o que cabe</span>
-            </label>
-          )}
-        </div>}
+        {help && (
+          <div className="fpanel">
+            {tab === 'creatures' && (
+              <>
+                <FGroup label="Alinhamento" opts={[['Good', 'Bom'], ['Neutral', 'Neutro'], ['Evil', 'Mau']]} value={filters.align} set={(v) => patch({ align: v })} />
+                <FGroup label="Nível" opts={[['1-4', '1 a 4'], ['5-8', '5 a 8'], ['9-12', '9 a 12'], ['13+', '13 ou mais']]} value={filters.levels} set={(v) => patch({ levels: v })} />
+                <FGroup label="Movimento" single opts={[['voa', 'Voa'], ['terrestre', 'Terrestre']]} value={filters.move ? [filters.move] : []} set={(v) => patch({ move: v[0] ?? '' })} />
+                <FGroup label="Base" opts={[['Small', 'Pequena'], ['Large', 'Grande'], ['Huge', 'Enorme']]} value={filters.base} set={(v) => patch({ base: v })} />
+                <FGroup label="Ações na barra" opts={[['Dodge', 'Esquiva'], ['Target', 'Alvo'], ['Concentrate', 'Concentração'], ['Charge', 'Investida'], ['Feint', 'Finta']]} value={filters.acts} set={(v) => patch({ acts: v })} />
+                <FGroup label="Outros" opts={[['unica', 'Só únicas']]} value={filters.only} set={(v) => patch({ only: v })} />
+              </>
+            )}
+            {tab === 'upgrades' && (
+              <>
+                <FGroup label="Tipo de carta" opts={[['ataque', 'Ataque'], ['acao', 'Ação'], ['area', 'Ataque em área'], ['penetra', 'Atravessa Armadura'], ['artefato', 'Artefato'], ['unica', 'Única']]} value={filters.only} set={(v) => patch({ only: v })} />
+                {!focusC && <FGroup label="Disponibilidade" single opts={[['1', 'Só o que cabe na legião']]} value={filters.equippable ? ['1'] : []} set={(v) => patch({ equippable: !!v.length })} />}
+              </>
+            )}
+            <FGroup label="Elemento" single opts={ENUM_ELEMENTS.map((e) => [e, e] as [string, string])} value={filters.element ? [filters.element] : []} set={(v) => patch({ element: v[0] ?? '' })} icons />
+            <FGroup label="Custo até" single opts={[['5', '5'], ['10', '10'], ['20', '20'], ['30', '30'], ['40', '40'], ['60', '60']]} value={filters.maxCost ? [filters.maxCost] : []} set={(v) => patch({ maxCost: v[0] ?? '' })} />
+            <div className="fpanel-row">
+              <label className="field">
+                <span>Coleção</span>
+                <select value={filters.set} onChange={(e) => patch({ set: e.target.value })}>
+                  <option value="">Todas</option>
+                  {sets.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </label>
+              <label className="field">
+                <span>Ordem</span>
+                <select value={tab === 'creatures' ? settings.creatureSort : settings.upgradeSort} onChange={(e) => setSettings(tab === 'creatures' ? { creatureSort: e.target.value as SortKey } : { upgradeSort: e.target.value as SortKey })}>
+                  <option value="uid">Lançamento</option>
+                  <option value="name">Alfabética</option>
+                  <option value="cost">Custo</option>
+                </select>
+              </label>
+            </div>
+            <button type="button" className="btn btn-primary fpanel-go" onClick={() => setHelp(false)}>Ver {list.length} {tab === 'creatures' ? 'criaturas' : 'upgrades'}</button>
+          </div>
+        )}
+        {!help && activeChips.length > 0 && (
+          <div className="fchips">
+            {activeChips.map(([label, clear]) => <button key={label} type="button" onClick={clear}>{label} <span aria-hidden>×</span></button>)}
+          </div>
+        )}
       </div>
 
       <div className="list-meta">
         <span className="num">{list.length}</span> {tab === 'creatures' ? 'criaturas' : 'upgrades'}
         {hasFilters && (
-          <button className="text-btn" onClick={() => setFilters({ q: '', set: '', element: '', maxCost: '', slot: '', equippable: false, forKey: null, group: '' })}>
+          <button className="text-btn" onClick={() => setFilters({ q: '', set: '', element: '', maxCost: '', slot: '', equippable: false, forKey: null, group: '', align: [], levels: [], base: [], move: '', only: [], acts: [] })}>
             Limpar filtros
           </button>
         )}
@@ -320,7 +352,25 @@ const UpgradeRow = function UpgradeRow({ d, active, onPreview, focusKey }: { d: 
   );
 };
 
-function QueryHelp({ tab, onPick }: { tab: Tab; onPick(q: string): void }) {
+function FGroup({ label, opts, value = [], set, single, icons }: { label: string; opts: [string, string][]; value?: string[]; set(v: string[]): void; single?: boolean; icons?: boolean }) {
+  return (
+    <div className="fgroup">
+      <p>{label}</p>
+      <div>
+        {opts.map(([v, l]) => {
+          const on = value.includes(v);
+          return (
+            <button key={v} type="button" className={on ? 'is-on' : ''} aria-pressed={on} onClick={() => set(single ? (on ? [] : [v]) : on ? value.filter((x) => x !== v) : [...value, v])}>
+              {icons && <GameIcon type={v} color size={16} />}{l}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function QueryHelp({ tab, onPick }: { tab: Tab; onPick(q: string): void }) {
   return (
     <div className="qf-help">
       <p>Escreva palavras soltas para buscar no nome e no texto, ou combine filtros separados por espaço. Um <b>-</b> na frente exclui.</p>

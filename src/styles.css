@@ -1430,3 +1430,13 @@ a.trail-card:hover { transform: translateY(-3px); border-color: var(--seal); }
 .slot.is-focus { background: #f6e3df; border-radius: 8px; }
 .roster-card.is-focus { box-shadow: inset 0 0 0 2px var(--accent, #8c2b22); }
 @media (max-width: 900px) { .steps { grid-template-columns: 1fr; } }
+.fpanel { display: flex; flex-direction: column; gap: 12px; padding: 12px 0 4px; max-height: 46vh; overflow-y: auto; }
+.fgroup p { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
+.fgroup > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.fgroup button, .fchips button { display: inline-flex; align-items: center; gap: 5px; border: 0; border-radius: 999px; padding: 7px 12px; background: var(--raised, #f3eee6); font: inherit; font-size: 13px; color: inherit; cursor: pointer; transition: background .15s; }
+.fgroup button:hover { background: #e6dccc; }
+.fgroup button.is-on { background: var(--accent, #8c2b22); color: #fff; }
+.fpanel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fchips { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 8px; }
+.fchips button { background: #f6e3df; color: #8c2b22; font-weight: 600; }
+.fpanel-go { position: sticky; bottom: 0; align-self: stretch; }
